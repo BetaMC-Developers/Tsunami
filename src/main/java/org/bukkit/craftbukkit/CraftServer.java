@@ -57,13 +57,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class CraftServer implements Server {
-    private final String serverName = "Project Poseidon Craftbukkit";
+    private final String serverName = "Tsunami";
     //Poseidon Versions
     private final String serverEnvironment = "POSEIDON";
     private final String serverVersion = "1.1.10";
     private final String releaseType = "DEVELOPMENT";
     private final String protocolVersion = "1.7.3";
-    private final String GameVersion = "b1.7.3";
+    private final String gameVersion = "b1.7.3";
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final BukkitScheduler scheduler;
     private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
@@ -179,7 +179,7 @@ public final class CraftServer implements Server {
 
     @Override
     public String getGameVersion() {
-        return getGameVersion();
+        return gameVersion;
     }
 
     @Override

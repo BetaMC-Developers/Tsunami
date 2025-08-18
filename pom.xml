@@ -1,72 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.bukkit</groupId>
-    <artifactId>project-poseidon</artifactId>
-    <packaging>jar</packaging>
+
+    <groupId>org.betamc</groupId>
+    <artifactId>tsunami</artifactId>
     <version>1.1.10</version>
-    <name>Project Poseidon</name>
+    <packaging>jar</packaging>
+
     <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <api.version>unknown</api.version>
     </properties>
-    <scm>
-        <connection>scm:git:git://github.com/Bukkit/CraftBukkit.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/Bukkit/CraftBukkit.git</developerConnection>
-        <url>https://github.com/Bukkit/CraftBukkit</url>
-    </scm>
+
     <repositories>
-        <repository>
-            <id>bukkit-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
-        </repository>
-        <!--        <repository>-->
-        <!--            <id>chew-jenkins</id>-->
-        <!--            <url>https://jenkins.chew.pw/plugin/repository/everything</url>-->
-        <!--        </repository>-->
-        <repository>
-            <id>jline</id>
-            <name>JLine Project Repository</name>
-            <url>http://jline.sourceforge.net/m2repo</url>
-        </repository>
-        <!-- Repository for resolving release dependencies -->
         <repository>
             <id>johnymuffin-nexus-releases</id>
             <url>https://repository.johnymuffin.com/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <!-- Repository for resolving snapshot dependencies -->
-        <repository>
-            <id>johnymuffin-nexus-snapshots</id>
-            <url>https://repository.johnymuffin.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
+
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>org.bukkit</groupId>-->
-        <!--            <artifactId>bukkit</artifactId>-->
-        <!--            <version>0.0.1-SNAPSHOT</version>-->
-        <!--            <type>jar</type>-->
-        <!--            <scope>compile</scope>-->
-        <!--        </dependency>-->
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>0.0.1-POSEIDON</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
@@ -76,8 +30,6 @@
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
             <version>0.9.93</version>
-            <type>jar</type>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -93,76 +45,50 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>modloader</groupId>
-            <artifactId>ModLoaderMP-B1.7.3</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/ModLoaderMP.jar</systemPath>
-        </dependency>
-
-
         <dependency>
             <groupId>org.avaje</groupId>
             <artifactId>ebean</artifactId>
             <version>2.7.3</version>
-            <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.0</version>
-            <type>jar</type>
-            <scope>provided</scope>
+            <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava-collections</artifactId>
             <version>r03</version>
-            <type>jar</type>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>20.0.0</version>
         </dependency>
-
-        <!-- Bukkit Mods -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>32.0.0-jre</version>
-            <type>jar</type>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
-    <!-- This builds a completely 'ready to start' jar with all dependencies inside -->
+
     <build>
         <defaultGoal>clean install</defaultGoal>
-<!--        <sourceDirectory>src</sourceDirectory>-->
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src</directory>-->
-<!--                <excludes>-->
-<!--                    <exclude>**/*.java</exclude>-->
-<!--                </excludes>-->
-<!--            </resource>-->
-<!--        </resources>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -172,10 +98,9 @@
                     <archive>
                         <manifestEntries>
                             <Main-Class>org.bukkit.craftbukkit.Main</Main-Class>
-                            <Implementation-Title>Project-Posiden</Implementation-Title>
-                            <Implementation-Vendor>RhysB</Implementation-Vendor>
+                            <Implementation-Title>Tsunami</Implementation-Title>
                             <Specification-Title>Bukkit</Specification-Title>
-                            <Specification-Version>${api.version}</Specification-Version>
+                            <Specification-Version>unknown</Specification-Version>
                             <Specification-Vendor>Bukkit Team</Specification-Vendor>
                             <Sealed>true</Sealed>
                         </manifestEntries>

@@ -70,7 +70,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
     //Poseidon Start
 //    private WatchDogThread watchDogThread;
-    private boolean modLoaderSupport = false;
+//    private boolean modLoaderSupport = false;
 //    private PoseidonVersionChecker poseidonVersionChecker;
     //Poseidon End
 
@@ -105,17 +105,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
         if (options.has("debug-config")) {
             log.info("[Poseidon] Configuration debug mode has been enabled. This will cause the poseidon.yml to be reloaded every time the server starts.");
             PoseidonConfig.getInstance().resetConfig();
-        }
-
-        modLoaderSupport = PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false);
-
-        if (modLoaderSupport) {
-            log.info("EXPERIMENTAL MODLOADERMP SUPPORT ENABLED.");
-            if (!isModloaderPresent()) {
-                log.severe("ModLoaderMP support is enabled, however, it isn't present. Please install it before enabling this setting");
-                return false;
-            }
-            net.minecraft.server.ModLoader.Init(this);
         }
 
         log.info("Starting minecraft server version Beta 1.7.3");
@@ -199,15 +188,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.savePropertiesFile();
         }
         return true;
-    }
-
-    public boolean isModloaderPresent() {
-        try {
-            Class.forName("net.minecraft.server.ModLoader");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     private void a(Convertable convertable, String s, long i) {
@@ -462,10 +442,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
                 long i = System.currentTimeMillis();
 
                 for (long j = 0L; this.isRunning; Thread.sleep(1L)) {
-                    if (modLoaderSupport) {
-                        net.minecraft.server.ModLoader.OnTick(this);
-                    }
-
                     long k = System.currentTimeMillis();
                     long l = k - i;
 
