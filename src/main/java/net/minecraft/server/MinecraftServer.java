@@ -2,15 +2,11 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.util.ServerLogRotator;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
-import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
-import com.projectposeidon.johnymuffin.UUIDManager;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import jline.ConsoleReader;
 import joptsimple.OptionSet;
-import org.bukkit.Bukkit;
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.LoggerOutputStream;
@@ -89,6 +85,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
+        long startTimer = System.nanoTime(); // Tsunami - moved from below
+
         this.consoleCommandHandler = new ConsoleCommandHandler(this);
         ThreadCommandReader threadcommandreader = new ThreadCommandReader(this);
 
@@ -149,7 +147,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
         this.serverConfigurationManager = new ServerConfigurationManager(this);
         // CraftBukkit - removed trackers
-        long j = System.nanoTime();
+
         String s1 = this.propertyManager.getString("level-name", "world");
         String s2 = this.propertyManager.getString("level-seed", "");
         long k = (new Random()).nextLong();
@@ -169,11 +167,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
         Poseidon.getServer().initializeServer();
         //Project Poseidon End
 
-        // CraftBukkit start
-        long elapsed = System.nanoTime() - j;
-        String time = String.format("%.3fs", elapsed / 10000000000.0D);
-        log.info("Done (" + time + ")! For help, type \"help\" or \"?\"");
-
         // log rotator process start.
         if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.enabled") && (boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.latest-log.enabled")) {
             String latestLogFileName = "latest";
@@ -187,6 +180,13 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.properties.remove("spawn-protection");
             this.propertyManager.savePropertiesFile();
         }
+
+        // Tsunami start - moved from above
+        long elapsed = System.nanoTime() - startTimer;
+        String time = String.format("%.3fs", elapsed / 1000000000.0D);
+        log.info("Done (" + time + ")! For help, type \"help\" or \"?\"");
+        // Tsunami end
+
         return true;
     }
 
