@@ -172,7 +172,8 @@ public class NetLoginHandler extends NetHandler {
             netserverhandler.setRawConnectionType(rawConnectionType);
             netserverhandler.setReceivedKeepAlive(receivedKeepAlive);
             //Poseidon End
-            netserverhandler.sendPacket(new Packet1Login("", entityplayer.id, worldserver.getSeed(), (byte) worldserver.worldProvider.dimension));
+            // Tsunami - don't send seed in login packet
+            netserverhandler.sendPacket(new Packet1Login("", entityplayer.id, 0L, (byte) worldserver.worldProvider.dimension));
             netserverhandler.sendPacket(new Packet6SpawnPosition(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z));
             this.server.serverConfigurationManager.a(entityplayer, worldserver);
             // this.server.serverConfigurationManager.sendAll(new Packet3Chat("\u00A7e" + entityplayer.name + " joined the game."));  // CraftBukkit - message moved to join event
