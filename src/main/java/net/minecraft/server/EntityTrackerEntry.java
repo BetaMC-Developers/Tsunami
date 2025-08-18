@@ -215,14 +215,14 @@ public class EntityTrackerEntry {
         while (iterator.hasNext()) {
             EntityPlayer entityplayer = (EntityPlayer) iterator.next();
 
-            entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id));
+            entityplayer.removeQueue.add(this.tracker); // Tsunami
         }
         // Poseidon end
     }
 
     public void a(EntityPlayer entityplayer) {
         if (this.trackedPlayers.contains(entityplayer)) {
-            entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id)); // Poseidon
+            entityplayer.removeQueue.add(this.tracker); // Tsunami
             this.trackedPlayers.remove(entityplayer);
         }
     }
@@ -242,7 +242,7 @@ public class EntityTrackerEntry {
                         }
                     }
                     
-                    entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.id));
+                    entityplayer.removeQueue.remove(this.tracker); // Tsunami
                     // CraftBukkit end
                     
                     this.trackedPlayers.add(entityplayer);
@@ -289,7 +289,7 @@ public class EntityTrackerEntry {
                 }
             } else if (this.trackedPlayers.contains(entityplayer)) {
                 this.trackedPlayers.remove(entityplayer);
-                entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id)); // Poseidon
+                entityplayer.removeQueue.add(this.tracker); // Tsunami
                 //entityplayer.netServerHandler.sendPacket(new Packet29DestroyEntity(this.tracker.id));
             }
         }
@@ -398,7 +398,7 @@ public class EntityTrackerEntry {
     public void c(EntityPlayer entityplayer) {
         if (this.trackedPlayers.contains(entityplayer)) {
             this.trackedPlayers.remove(entityplayer);
-            entityplayer.removeQueue.add(Integer.valueOf(this.tracker.id)); // Poseidon
+            entityplayer.removeQueue.add(this.tracker); // Tsunami
             //entityplayer.netServerHandler.sendPacket(new Packet29DestroyEntity(this.tracker.id));
         }
     }

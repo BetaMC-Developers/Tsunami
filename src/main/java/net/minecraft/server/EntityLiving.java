@@ -43,6 +43,7 @@ public abstract class EntityLiving extends Entity {
     public int ae;
     public float af = 0.0F;
     public int deathTicks = 0;
+    public int deathAnimationTicks = 0; // Tsunami
     public int attackTicks = 0;
     public float ai;
     public float aj;
@@ -439,6 +440,8 @@ public abstract class EntityLiving extends Entity {
     }
 
     public void die(Entity entity) {
+        this.dead = true; // Tsunami
+
         if (this.W >= 0 && entity != null) {
             entity.c(this, this.W);
         }

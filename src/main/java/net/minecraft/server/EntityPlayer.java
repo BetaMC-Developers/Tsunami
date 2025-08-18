@@ -23,7 +23,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public double e;
     public List chunkCoordIntPairQueue = new LinkedList();
     public Set playerChunkCoordIntPairs = new HashSet();
-    public final List removeQueue = new LinkedList(); // poseidon
+    public final List<Entity> removeQueue = new LinkedList<>(); // Tsunami
     private int bL = -99999999;
     private int bM = 60;
     private ItemStack[] bN = new ItemStack[]{null, null, null, null, null};
@@ -70,6 +70,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         // CraftBukkit - world fallback code, either respawn location or global spawn
         if (world == null) {
             this.dead = false;
+            this.deathAnimationTicks = 0; // Tsunami
             ChunkCoordinates position = null;
             if (this.spawnWorld != null && !this.spawnWorld.equals("")) {
                 CraftWorld cworld = (CraftWorld) Bukkit.getServer().getWorld(this.spawnWorld);
@@ -171,6 +172,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
         this.y();
         // CraftBukkit end
+        this.world.a(this, (byte) 3); // Tsunami
     }
 
     public boolean damageEntity(Entity entity, int i) {
@@ -210,24 +212,32 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     
     public void a(boolean flag) {
         super.m_();
-        
-        // Poseidon start
-        while (!this.removeQueue.isEmpty()) {
-            int i = Math.min(this.removeQueue.size(), 127);
-            int[] aint = new int[i];
-            Iterator iterator = this.removeQueue.iterator();
-            int j = 0;
 
-            while (iterator.hasNext() && j < i) {
-                aint[j++] = ((Integer) iterator.next()).intValue();
+        // Tsunami start
+        List<Integer> toRemove = new ArrayList<>();
+        Iterator<Entity> iterator = this.removeQueue.iterator();
+        int k = 0;
+
+        while (iterator.hasNext() && k < 127) {
+            Entity entity = iterator.next();
+            if (!(entity instanceof EntityLiving)) {
+                toRemove.add(entity.id);
                 iterator.remove();
+            } else {
+                EntityLiving entityliving = (EntityLiving) entity;
+                if (!this.world.dyingEntities.contains(entityliving) || entityliving.deathAnimationTicks > 20) {
+                    toRemove.add(entityliving.id);
+                    iterator.remove();
+                }
             }
 
-            for (int k = 0; k < aint.length; k++) { // cant use array since not supported in b1.7.3
-                this.netServerHandler.sendPacket(new Packet29DestroyEntity(aint[k]));
-            }
+            k++;
         }
-        // poseidon end
+
+        for (int id : toRemove) {
+            this.netServerHandler.sendPacket(new Packet29DestroyEntity(id));
+        }
+        // Tsunami end
 
         for (int i = 0; i < this.inventory.getSize(); ++i) {
             ItemStack itemstack = this.inventory.getItem(i);

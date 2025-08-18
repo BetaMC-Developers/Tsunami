@@ -133,7 +133,11 @@ public class WorldServer extends World implements BlockChangeDelegate {
 
     public void a(Entity entity, byte b0) {
         Packet38EntityStatus packet38entitystatus = new Packet38EntityStatus(entity.id, b0);
-
+        // Tsunami start
+        if (entity instanceof EntityLiving && b0 == 3) {
+            dyingEntities.add((EntityLiving) entity);
+        }
+        // Tsunami end
         // CraftBukkit
         this.server.getTracker(this.dimension).sendPacketToEntity(entity, packet38entitystatus);
     }
