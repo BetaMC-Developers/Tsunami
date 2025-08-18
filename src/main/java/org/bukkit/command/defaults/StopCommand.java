@@ -1,9 +1,7 @@
 package org.bukkit.command.defaults;
 
-import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,8 +23,6 @@ public class StopCommand extends VanillaCommand {
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (!testPermission(sender)) return true;
 
-        Command.broadcastCommandMessage(sender, "Starting Server Shutdown, Saving Data.");
-
         ((CraftServer) Bukkit.getServer()).setShuttingdown(true);
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.saveData();
@@ -35,10 +31,9 @@ public class StopCommand extends VanillaCommand {
         for (World world : Bukkit.getWorlds()) {
             world.save();
         }
-        Bukkit.getScheduler().scheduleSyncDelayedTask(new PoseidonPlugin(), () -> {
-            Command.broadcastCommandMessage(sender, "Stopping the server..");
-            Bukkit.shutdown();
-        }, 100);
+
+        Command.broadcastCommandMessage(sender, "Stopping the server..");
+        Bukkit.shutdown();
 
         return true;
     }
