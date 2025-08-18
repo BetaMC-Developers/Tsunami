@@ -85,7 +85,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
-        long startTimer = System.nanoTime(); // Tsunami
+        long startTimer = System.nanoTime(); // Tsunami - moved from below
 
         this.consoleCommandHandler = new ConsoleCommandHandler(this);
         ThreadCommandReader threadcommandreader = new ThreadCommandReader(this);
@@ -181,10 +181,11 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.savePropertiesFile();
         }
 
-        // CraftBukkit start
+        // Tsunami start - moved from above
         long elapsed = System.nanoTime() - startTimer;
-        String time = String.format("%.3fs", elapsed / 1000000000.0D); // Tsunami
+        String time = String.format("%.3fs", elapsed / 1000000000.0D);
         log.info("Done (" + time + ")! For help, type \"help\" or \"?\"");
+        // Tsunami end
 
         return true;
     }
