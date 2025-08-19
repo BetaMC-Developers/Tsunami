@@ -1,11 +1,13 @@
 package org.bukkit.block;
 
+import org.bukkit.metadata.Metadatable;
+
 /**
  * Represents a furnace.
  *
  * @author sk89q
  */
-public interface Furnace extends BlockState, ContainerBlock {
+public interface Furnace extends BlockState, ContainerBlock, Metadatable { // Tsunami - extends Metadatable
 
     /**
      * Get burn time.

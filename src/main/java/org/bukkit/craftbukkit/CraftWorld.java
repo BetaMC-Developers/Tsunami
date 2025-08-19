@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit;
 
-import com.google.common.collect.MapMaker;
+import com.google.common.base.Preconditions;
 import net.minecraft.server.*;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -18,13 +18,14 @@ import org.bukkit.event.world.SpawnChangeEvent;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
 
 public class CraftWorld implements World {
     private final WorldServer world;
@@ -829,4 +830,40 @@ public class CraftWorld implements World {
             }
         }
     }
+
+    // Tsunami start
+    public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+        Preconditions.checkArgument(value != null, "value cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        getHandle().worldData.metadataStore.put(fullKey, value);
+    }
+
+    public void removeMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        getHandle().worldData.metadataStore.remove(fullKey);
+    }
+
+    public MetadataValue getMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        return getHandle().worldData.metadataStore.get(fullKey);
+    }
+
+    public boolean hasMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        return getHandle().worldData.metadataStore.containsKey(fullKey);
+    }
+    // Tsunami end
+
 }

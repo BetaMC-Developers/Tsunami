@@ -7,6 +7,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.util.UUID;
 /**
  * Represents a world, which may contain entities, chunks and blocks
  */
-public interface World {
+public interface World extends Metadatable { // Tsunami - extends Metadatable
 
     /**
      * Gets the {@link Block} at the given coordinates

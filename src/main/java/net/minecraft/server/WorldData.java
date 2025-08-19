@@ -1,6 +1,11 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
+import org.bukkit.metadata.MetadataValue;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WorldData {
 
@@ -21,6 +26,7 @@ public class WorldData {
     private int m;
     private boolean n;
     private int o;
+    public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public WorldData(NBTTagCompound nbttagcompound) {
         this.a = nbttagcompound.getLong("RandomSeed");
@@ -42,6 +48,10 @@ public class WorldData {
             this.h = nbttagcompound.k("Player");
             this.i = this.h.e("Dimension");
         }
+        // Tsunami start
+        NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
+        this.metadataStore.putAll(NBTMetadataConvert.compoundToMetadata(metadata));
+        // Tsunami end
     }
 
     public WorldData(long i, String s) {
@@ -113,6 +123,7 @@ public class WorldData {
         if (nbttagcompound1 != null) {
             nbttagcompound.a("Player", nbttagcompound1);
         }
+        nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore));
     }
 
     public long getSeed() {

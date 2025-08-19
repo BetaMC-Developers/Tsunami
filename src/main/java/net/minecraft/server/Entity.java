@@ -3,6 +3,7 @@ package net.minecraft.server;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -11,8 +12,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.metadata.MetadataValue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -100,6 +104,7 @@ public abstract class Entity {
     public boolean bK;
     public boolean airBorne;
     public UUID uniqueId = UUID.randomUUID(); // CraftBukkit
+    public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public Entity(World world) {
         this.id = entityCount++;
@@ -926,6 +931,7 @@ public abstract class Entity {
         nbttagcompound.setLong("UUIDMost", this.uniqueId.getMostSignificantBits());
         // CraftBukkit end
         this.b(nbttagcompound);
+        nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore)); // Tsunami
     }
 
     public void e(NBTTagCompound nbttagcompound) {
@@ -1011,6 +1017,11 @@ public abstract class Entity {
             this.spawnIn(bworld == null ? null : ((org.bukkit.craftbukkit.CraftWorld) bworld).getHandle());
         }
         // CraftBukkit end
+
+        // Tsunami start
+        NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
+        this.metadataStore.putAll(NBTMetadataConvert.compoundToMetadata(metadata));
+        // Tsunami end
     }
 
     protected final String ag() {

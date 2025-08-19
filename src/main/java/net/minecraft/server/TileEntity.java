@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
+import org.bukkit.metadata.MetadataValue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +15,7 @@ public class TileEntity {
     public int y;
     public int z;
     protected boolean h;
+    public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public TileEntity() {}
 
@@ -28,6 +32,10 @@ public class TileEntity {
         this.x = nbttagcompound.e("x");
         this.y = nbttagcompound.e("y");
         this.z = nbttagcompound.e("z");
+        // Tsunami start
+        NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
+        this.metadataStore.putAll(NBTMetadataConvert.compoundToMetadata(metadata));
+        // Tsunami end
     }
 
     public void b(NBTTagCompound nbttagcompound) {
@@ -40,6 +48,7 @@ public class TileEntity {
             nbttagcompound.a("x", this.x);
             nbttagcompound.a("y", this.y);
             nbttagcompound.a("z", this.z);
+            nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore)); // Tsunami
         }
     }
 

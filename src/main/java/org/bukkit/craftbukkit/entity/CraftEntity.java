@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import net.minecraft.server.*;
 import org.bukkit.Bukkit;
@@ -9,6 +10,8 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 import java.util.List;
@@ -278,4 +281,40 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
         return result;
     }
+
+    // Tsunami start
+    public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+        Preconditions.checkArgument(value != null, "value cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        getHandle().metadataStore.put(fullKey, value);
+    }
+
+    public void removeMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        getHandle().metadataStore.remove(fullKey);
+    }
+
+    public MetadataValue getMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        return getHandle().metadataStore.get(fullKey);
+    }
+
+    public boolean hasMetadata(Plugin owningPlugin, String key) {
+        Preconditions.checkArgument(owningPlugin != null, "owningPlugin cannot be null");
+        Preconditions.checkArgument(key != null, "key cannot be null");
+
+        String fullKey = owningPlugin.getDescription().getName().toLowerCase() + "." + key;
+        return getHandle().metadataStore.containsKey(fullKey);
+    }
+    // Tsunami end
+
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class NBTTagCompound extends NBTBase {
 
-    private Map a = new HashMap();
+    public Map a = new HashMap(); // Tsunami - private -> public
 
     public NBTTagCompound() {}
 

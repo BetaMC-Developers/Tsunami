@@ -2,11 +2,12 @@ package org.bukkit.block;
 
 import org.bukkit.Instrument;
 import org.bukkit.Note;
+import org.bukkit.metadata.Metadatable;
 
 /**
  * Represents a note.
  */
-public interface NoteBlock extends BlockState {
+public interface NoteBlock extends BlockState, Metadatable { // Tsunami - extends Metadatable
 
     /**
      * Gets the note.

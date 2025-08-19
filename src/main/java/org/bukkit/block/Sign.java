@@ -1,9 +1,11 @@
 package org.bukkit.block;
 
+import org.bukkit.metadata.Metadatable;
+
 /**
  * Represents either a SignPost or a WallSign
  */
-public interface Sign extends BlockState {
+public interface Sign extends BlockState, Metadatable { // Tsunami - extends Metadatable
 
     /**
      * Gets all the lines of text currently on this sign.
