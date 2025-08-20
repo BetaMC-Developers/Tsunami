@@ -18,11 +18,11 @@ public class ThreadCommandReader extends Thread {
             // CraftBukkit start - JLine disabling compatibility
             while (!this.server.isStopped && MinecraftServer.isRunning(this.server)) {
                 if (org.bukkit.craftbukkit.Main.useJline) {
-                    s = bufferedreader.readLine(">", null);
+                    s = bufferedreader.readLine("> ");
                 } else {
                     s = bufferedreader.readLine();
                 }
-                if (s != null) {
+                if (s != null && !s.isEmpty() && s.chars().anyMatch(i -> !Character.isWhitespace(i))) {
                     this.server.issueCommand(s, this.server);
                 }
                 // CraftBukkit end
