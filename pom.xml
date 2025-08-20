@@ -4,7 +4,7 @@
 
     <groupId>org.betamc</groupId>
     <artifactId>tsunami</artifactId>
-    <version>1.1.10</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -99,6 +99,7 @@
                         <manifestEntries>
                             <Main-Class>org.bukkit.craftbukkit.Main</Main-Class>
                             <Implementation-Title>Tsunami</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
                             <Specification-Title>Bukkit</Specification-Title>
                             <Specification-Version>unknown</Specification-Version>
                             <Specification-Vendor>Bukkit Team</Specification-Vendor>

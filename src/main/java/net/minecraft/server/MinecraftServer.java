@@ -7,6 +7,7 @@ import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import jline.ConsoleReader;
 import joptsimple.OptionSet;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.LoggerOutputStream;
@@ -166,6 +167,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         //Project Poseidon Start
         Poseidon.getServer().initializeServer();
         //Project Poseidon End
+
+        Tsunami.config(); // Tsunami
 
         // log rotator process start.
         if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.enabled") && (boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.latest-log.enabled")) {

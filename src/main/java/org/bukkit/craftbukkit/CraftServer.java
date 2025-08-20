@@ -5,10 +5,7 @@ import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebean.config.dbplatform.SQLitePlatform;
 import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.legacyminecraft.poseidon.Poseidon;
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.PoseidonServer;
-import com.legacyminecraft.poseidon.utility.PoseidonVersionChecker;
 import jline.ConsoleReader;
 import net.minecraft.server.*;
 import org.bukkit.Bukkit;
@@ -60,7 +57,7 @@ public final class CraftServer implements Server {
     private final String serverName = "Tsunami";
     //Poseidon Versions
     private final String serverEnvironment = "POSEIDON";
-    private final String serverVersion = "1.1.10";
+    private final String serverVersion;
     private final String releaseType = "DEVELOPMENT";
     private final String protocolVersion = "1.7.3";
     private final String gameVersion = "b1.7.3";
@@ -79,7 +76,7 @@ public final class CraftServer implements Server {
     public CraftServer(MinecraftServer console, ServerConfigurationManager server) {
         this.console = console;
         this.server = server;
-        //this.serverVersion = CraftServer.class.getPackage().getImplementationVersion(); //Poseidon Replace
+        this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
 
         Bukkit.setServer(this);
 
