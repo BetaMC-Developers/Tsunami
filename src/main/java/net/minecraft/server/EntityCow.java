@@ -1,11 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-// CraftBukkit end
 
 public class EntityCow extends EntityAnimal {
 

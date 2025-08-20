@@ -6,9 +6,6 @@ import org.bukkit.event.vehicle.*;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityBoat extends Entity {
 
     public int damage;

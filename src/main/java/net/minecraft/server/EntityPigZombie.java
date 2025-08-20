@@ -5,9 +5,6 @@ import org.bukkit.event.entity.EntityTargetEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityPigZombie extends EntityZombie {
 
     public int angerLevel = 0; // CraftBukkit - private -> public

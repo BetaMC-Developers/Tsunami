@@ -19,9 +19,6 @@ import org.bukkit.generator.ChunkGenerator;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class World implements IBlockAccess {
 
     public boolean a = false;

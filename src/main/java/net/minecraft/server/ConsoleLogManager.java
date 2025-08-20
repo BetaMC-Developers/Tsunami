@@ -9,9 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.*;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class ConsoleLogManager {
 
     public static Logger a = Logger.getLogger("Minecraft");

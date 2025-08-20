@@ -1,11 +1,9 @@
 package net.minecraft.server;
 
-import java.util.Random;
-
-// CraftBukkit start
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-//CraftBukkit end
+
+import java.util.Random;
 
 public class BlockGrass extends Block {
 

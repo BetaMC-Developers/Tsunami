@@ -14,9 +14,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class ServerConfigurationManager {
 
     public static Logger a = Logger.getLogger("Minecraft");

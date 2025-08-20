@@ -10,9 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class Explosion {
     public boolean setFire = false;
     private final Random random = new Random();

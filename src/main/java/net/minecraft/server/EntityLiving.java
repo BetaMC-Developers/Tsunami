@@ -11,9 +11,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public abstract class EntityLiving extends Entity {
 
     public int maxNoDamageTicks = 20;

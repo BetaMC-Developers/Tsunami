@@ -8,9 +8,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntitySnowball extends Entity {
 
     private int b = -1;

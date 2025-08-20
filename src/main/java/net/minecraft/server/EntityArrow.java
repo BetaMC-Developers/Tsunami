@@ -9,9 +9,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityArrow extends Entity {
 
     private int d = -1;

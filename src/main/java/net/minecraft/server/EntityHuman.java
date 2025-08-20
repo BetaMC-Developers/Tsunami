@@ -16,9 +16,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import java.util.Iterator;
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public abstract class EntityHuman extends EntityLiving {
 
     public InventoryPlayer inventory = new InventoryPlayer(this);

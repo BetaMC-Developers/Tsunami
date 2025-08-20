@@ -1,11 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.block.BlockPlaceEvent;
-// CraftBukkit end
 
 public class ItemBlock extends Item {
 

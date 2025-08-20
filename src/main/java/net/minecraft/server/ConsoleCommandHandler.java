@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class ConsoleCommandHandler {
 
     private static Logger a = Logger.getLogger("Minecraft");

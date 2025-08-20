@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public abstract class Entity {
 
     // Poseidon start - Backport of 0070-Use-a-Shared-Random-for-Entities.patch from PaperSpigot

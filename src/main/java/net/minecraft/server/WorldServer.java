@@ -9,10 +9,7 @@ import org.bukkit.generator.ChunkGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-// CraftBukkit start
-
 public class WorldServer extends World implements BlockChangeDelegate {
-    // CraftBukkit end
 
     public ChunkProviderServer chunkProviderServer;
     public boolean weirdIsOpCache = false;

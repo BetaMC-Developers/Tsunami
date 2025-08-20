@@ -7,9 +7,6 @@ import org.bukkit.craftbukkit.map.CraftMapView;
 
 import java.util.*;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class WorldMap extends WorldMapBase {
 
     public int b;

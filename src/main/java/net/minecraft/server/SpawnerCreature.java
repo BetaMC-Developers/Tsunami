@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-// CraftBukkit
-
 public final class SpawnerCreature {
 
     private static Set b = new HashSet();

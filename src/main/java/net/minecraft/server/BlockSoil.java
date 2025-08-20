@@ -5,9 +5,6 @@ import org.bukkit.event.entity.EntityInteractEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockSoil extends Block {
 
     protected BlockSoil(int i) {

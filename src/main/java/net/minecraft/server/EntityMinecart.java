@@ -6,9 +6,6 @@ import org.bukkit.event.vehicle.*;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityMinecart extends Entity implements IInventory {
 
     private ItemStack[] items;

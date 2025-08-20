@@ -11,9 +11,6 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityFireball extends Entity {
 
     private int f = -1;

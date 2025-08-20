@@ -6,9 +6,6 @@ import org.bukkit.event.painting.PaintingBreakByWorldEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityPainting extends Entity {
 
     private int f;

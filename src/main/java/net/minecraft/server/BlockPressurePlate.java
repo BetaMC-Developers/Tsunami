@@ -7,9 +7,6 @@ import org.bukkit.event.entity.EntityInteractEvent;
 import java.util.List;
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockPressurePlate extends Block {
 
     private EnumMobType a;

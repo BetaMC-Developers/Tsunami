@@ -1,11 +1,8 @@
 package net.minecraft.server;
 
-// CraftBukkit start
-
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.CreeperPowerEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
-// CraftBukkit end
 
 public class EntityCreeper extends EntityMonster {
 

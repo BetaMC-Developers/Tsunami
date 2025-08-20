@@ -6,9 +6,6 @@ import org.bukkit.craftbukkit.CraftServer;
 
 import java.net.InetSocketAddress;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class ThreadLoginVerifier extends Thread {
 
     final Packet1Login loginPacket;

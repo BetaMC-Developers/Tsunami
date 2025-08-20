@@ -5,9 +5,6 @@ import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockPortal extends BlockBreakable {
 
     public BlockPortal(int i, int j) {

@@ -30,10 +30,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// CraftBukkit start
-//import com.projectposeidon.johnymuffin.UUIDCacheFile;
-// CraftBukkit end
-
 public class MinecraftServer implements Runnable, ICommandListener {
 
     public static Logger log = Logger.getLogger("Minecraft");

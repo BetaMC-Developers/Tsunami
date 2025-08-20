@@ -6,9 +6,6 @@ import org.bukkit.event.block.BlockFromToEvent;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockFlowing extends BlockFluids {
 
     int a = 0;

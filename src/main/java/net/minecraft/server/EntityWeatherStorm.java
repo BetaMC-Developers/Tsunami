@@ -6,9 +6,6 @@ import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityWeatherStorm extends EntityWeather {
 
     private int lifeTicks;

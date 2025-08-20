@@ -7,9 +7,6 @@ import org.bukkit.event.player.PlayerFishEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityFish extends Entity {
 
     private int d = -1;

@@ -1,11 +1,9 @@
 package net.minecraft.server;
 
-// CraftBukkit start
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-// CraftBukkit end
 
 public class EntityMonster extends EntityCreature implements IMonster {
 

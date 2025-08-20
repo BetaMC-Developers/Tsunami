@@ -1,10 +1,8 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-// CraftBukkit start
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-// CraftBukkit end
 
 public class EntitySkeleton extends EntityMonster {
 

@@ -12,8 +12,6 @@ import org.bukkit.event.inventory.ChestOpenedEvent;
 
 import java.util.*;
 
-// CraftBukkit start
-
 public class EntityPlayer extends EntityHuman implements ICrafting {
 
     public NetServerHandler netServerHandler;

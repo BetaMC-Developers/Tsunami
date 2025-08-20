@@ -6,9 +6,6 @@ import org.bukkit.util.Vector;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockDispenser extends BlockContainer {
 
     private Random a = new Random();

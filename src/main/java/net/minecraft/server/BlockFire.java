@@ -8,9 +8,6 @@ import org.bukkit.material.MaterialData;
 
 import java.util.Random;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockFire extends Block {
 
     private int[] a = new int[256];

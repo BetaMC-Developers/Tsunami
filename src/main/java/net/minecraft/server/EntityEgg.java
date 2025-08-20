@@ -10,9 +10,6 @@ import org.bukkit.event.player.PlayerEggThrowEvent;
 
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityEgg extends Entity {
 
     private int b = -1;

@@ -6,9 +6,6 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 
 import java.util.ArrayList;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class BlockPiston extends Block {
 
     private boolean a;

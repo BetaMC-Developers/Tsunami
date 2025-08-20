@@ -10,9 +10,6 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import java.util.Iterator;
 import java.util.List;
 
-// CraftBukkit start
-// CraftBukkit end
-
 public class EntityWolf extends EntityAnimal {
 
     private boolean a = false;
