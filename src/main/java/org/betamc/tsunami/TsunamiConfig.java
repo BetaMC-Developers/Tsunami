@@ -27,6 +27,7 @@ public class TsunamiConfig extends Configuration {
     }
 
     private void writeDefaults() {
+        writeDefault("merge-dropped-items", false);
         writeDefault("mob-spawning.mob-caps.monsters", 70);
         writeDefault("mob-spawning.mob-caps.animals", 15);
         writeDefault("mob-spawning.mob-caps.water-mobs", 5);

@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
@@ -63,6 +64,22 @@ public class EntityItem extends Entity {
 
         this.g(this.locX, (this.boundingBox.b + this.boundingBox.e) / 2.0D, this.locZ);
         this.move(this.motX, this.motY, this.motZ);
+
+        // Tsunami start - add item merging
+        boolean itemMoved = MathHelper.floor(this.lastX) != MathHelper.floor(this.locX)
+                || MathHelper.floor(this.lastY) != MathHelper.floor(this.locY)
+                || MathHelper.floor(this.lastZ) != MathHelper.floor(this.locZ);
+
+        int rate = itemMoved ? 2 : 40;
+        if (this.ticksLived % rate == 0 && Tsunami.config().getBoolean("merge-dropped-items", false) && this.isMergable()) {
+            for (Object obj : this.world.a(EntityItem.class, this.boundingBox.b(0.5, 0.25, 0.5))) {
+                EntityItem entityitem = (EntityItem) obj;
+                tryMerge(entityitem);
+                if (!this.isMergable()) break;
+            }
+        }
+        // Tsunami end
+
         float f = 0.98F;
 
         if (this.onGround) {
@@ -165,4 +182,32 @@ public class EntityItem extends Entity {
             }
         }
     }
+
+    // Tsunami start
+    public boolean isMergable() {
+        return !this.dead && this.itemStack.count < this.itemStack.getMaxStackSize();
+    }
+
+    public void tryMerge(EntityItem entityitem) {
+        if (entityitem == this || !this.isMergable() || !entityitem.isMergable())
+            return;
+
+        ItemStack item = this.itemStack;
+        ItemStack itemOther = entityitem.itemStack;
+        if (item.doMaterialsMatch(itemOther) && item.count + itemOther.count <= item.getMaxStackSize()) {
+            if (item.count > itemOther.count) {
+                item.count += itemOther.count;
+                this.pickupDelay = Math.max(this.pickupDelay, entityitem.pickupDelay);
+                this.b = Math.min(this.b, entityitem.b);
+                entityitem.die();
+            } else {
+                itemOther.count += item.count;
+                entityitem.pickupDelay = Math.max(this.pickupDelay, entityitem.pickupDelay);
+                entityitem.b = Math.min(this.b, entityitem.b);
+                this.die();
+            }
+        }
+    }
+    // Tsunami end
+
 }
