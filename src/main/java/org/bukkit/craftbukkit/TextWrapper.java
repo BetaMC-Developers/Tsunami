@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit;
 
+import java.util.regex.Pattern;
+
 public class TextWrapper {
     private static final int[] characterWidths = new int[] {
         1, 9, 9, 8, 8, 8, 8, 7, 9, 8, 9, 9, 8, 9, 9, 9,
@@ -20,11 +22,13 @@ public class TextWrapper {
         7, 7, 7, 7, 9, 6, 7, 8, 7, 6, 6, 9, 7, 6, 7, 1
     };
     public static final char COLOR_CHAR = '\u00A7';
+    public static final Pattern COLOR_PATTERN = Pattern.compile(COLOR_CHAR + "[0-9a-fA-F]"); // Tsunami
     public static final int CHAT_WINDOW_WIDTH = 320;
     public static final int CHAT_STRING_LENGTH = 119;
     public static final String allowedChars = net.minecraft.server.FontAllowedCharacters.allowedCharacters;
 
-    public static String[] wrapText(final String text) {
+    public static String[] wrapText(final String input) {
+        final String text = sanitizeText(input); // Tsunami
         final StringBuilder out = new StringBuilder();
         char colorChar = 'f';
         int lineWidth = 0;
@@ -86,11 +90,75 @@ public class TextWrapper {
         return out.toString().split("\n");
     }
 
+    // Tsunami start
+    public static String sanitizeText(final String input) {
+        String text = trimTrailing(input);
+
+        // Remove all trailing whitespaces and color codes
+        while (endsWithColor(text)) {
+            text = trimTrailing(text.substring(0, text.length() - 2));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        char prevColor = 'f';
+        char currentColor = 'f';
+
+        // Filter out all redundant color codes
+        for (int i = 0; i < text.length(); i++) {
+            // If there are multiple color codes chained together, we will get the last one
+            while (colorAt(text, i)) {
+                currentColor = text.charAt(++i);
+                i++;
+            }
+
+            // If a new color was found, place it at the beginning of the next word
+            if (Character.toLowerCase(prevColor) != Character.toLowerCase(currentColor)
+                && !Character.isWhitespace(text.charAt(i))) {
+
+                sb.append(COLOR_CHAR).append(currentColor);
+                prevColor = currentColor;
+            }
+
+            sb.append(text.charAt(i));
+        }
+
+        text = sb.toString();
+        sb.setLength(0);
+
+        // Remove all illegal characters
+        for (int i = 0; i < text.length(); i ++) {
+            char ch = text.charAt(i);
+            if (allowedChars.indexOf(ch) != -1 || colorAt(text, i)) {
+                sb.append(ch);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static String trimTrailing(final String input) {
+        int length = input.length();
+        while (length > 0 && Character.isWhitespace(input.charAt(length - 1))) {
+            length--;
+        }
+        return input.substring(0, length);
+    }
+
+    private static boolean colorAt(final String input, int index) {
+        if (index < 0 || index > input.length() - 2) return false;
+        return COLOR_PATTERN.matcher(input.substring(index, index + 2)).matches();
+    }
+
+    private static boolean endsWithColor(final String input) {
+        return input.length() >= 2 && COLOR_PATTERN.matcher(input.substring(input.length() - 2)).matches();
+    }
+    // Tsunami end
+
     /**
      * Calculates the width of a string in pixels based on Minecraft's character widths.
      * The maximum width for chat is 320 pixels (Use CHAT_WINDOW_WIDTH).
      *
-     * @param string The input string.
+     * @param text The input string.
      * @return The width of the string in pixels.
      */
     public static int widthInPixels(final String text) {
