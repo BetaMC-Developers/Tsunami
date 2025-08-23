@@ -564,6 +564,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
             // if (j == 0 || this.propertyManager.getBoolean("allow-nether", true)) { // CraftBukkit
             WorldServer worldserver = this.worlds.get(j); // CraftBukkit
 
+            worldserver.chunkProviderServer.postLoadChunks(); // Tsunami
+
             if (this.ticks % 20 == 0) {
                 // CraftBukkit start - only send timeupdates to the people in that world
                 for (int i = 0; i < worldserver.players.size(); ++i) { // Project Poseidon: serverConfigurationManager -> worldserver.players

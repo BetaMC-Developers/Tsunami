@@ -4,7 +4,7 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
 import com.projectposeidon.api.PoseidonUUID;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.ChunkCompressionThread;
+import org.bukkit.craftbukkit.ChunkCompressionHandler;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -21,6 +21,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public double e;
     public List chunkCoordIntPairQueue = new LinkedList();
     public Set playerChunkCoordIntPairs = new HashSet();
+    public ChunkCompressionHandler chunkCompressionHandler; // Tsunami
     public final List<Entity> removeQueue = new LinkedList<>(); // Tsunami
     private int bL = -99999999;
     private int bM = 60;
@@ -293,7 +294,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 if (chunkcoordintpair != null) {
                     boolean flag1 = false;
     
-                    if (this.netServerHandler.b() + ChunkCompressionThread.getPlayerQueueSize(this) < 4) { // CraftBukkit - Add check against Chunk Packets in the ChunkCompressionThread.
+                    if (this.netServerHandler.b() + this.chunkCompressionHandler.getQueueSize() < 4) { // Tsunami - account for chunk packets in ChunkCompressionHandler
                         flag1 = true;
                     }
     

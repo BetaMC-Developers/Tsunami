@@ -27,6 +27,9 @@ public class TsunamiConfig extends Configuration {
     }
 
     private void writeDefaults() {
+        writeDefault("chunk-io.async-loading", false);
+        writeDefault("chunk-io.async-unloading", false);
+        writeDefault("chunk-io.region-file-compression", "deflate");
         writeDefault("merge-dropped-items", false);
         writeDefault("mob-spawning.mob-caps.monsters", 70);
         writeDefault("mob-spawning.mob-caps.animals", 15);

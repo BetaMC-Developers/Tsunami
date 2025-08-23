@@ -1,13 +1,20 @@
 package net.minecraft.server;
 
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
+import org.betamc.tsunami.Tsunami;
+import org.bukkit.craftbukkit.ChunkCompressionType;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class RegionFile {
 
+    private static ChunkCompressionType chunkCompressionType; // Tsunami
     private static final byte[] a = new byte[4096];
     private final File b;
     private RandomAccessFile c;
@@ -133,23 +140,21 @@ public class RegionFile {
                             return null;
                         } else {
                             byte b0 = this.c.readByte();
-                            byte[] abyte;
-                            DataInputStream datainputstream;
+                            byte[] abyte = new byte[j1 - 1];
+                            this.c.read(abyte);
 
-                            if (b0 == 1) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(abyte)));
-                                return datainputstream;
-                            } else if (b0 == 2) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte)));
-                                return datainputstream;
+                            // Tsunami start - add support for more compression types
+                            if (b0 == ChunkCompressionType.GZIP.getId()) {
+                                return new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(abyte))));
+                            } else if (b0 == ChunkCompressionType.DEFLATE.getId()) {
+                                return new DataInputStream(new BufferedInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte))));
+                            } else if (b0 == ChunkCompressionType.LZ4.getId()) {
+                                return new DataInputStream(new BufferedInputStream(new LZ4BlockInputStream(new ByteArrayInputStream(abyte))));
                             } else {
                                 this.b("READ", i, j, "unknown version " + b0);
                                 return null;
                             }
+                            // Tsunami end
                         }
                     }
                 }
@@ -161,7 +166,24 @@ public class RegionFile {
     }
 
     public DataOutputStream b(int i, int j) {
-        return this.d(i, j) ? null : new DataOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, i, j)));
+        if (this.d(i, j)) return null;
+
+        // Tsunami start - add support for more compression types
+        try {
+            switch (chunkCompressionType) {
+                case GZIP:
+                    return new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new ChunkBuffer(this, i, j))));
+                case DEFLATE:
+                    return new DataOutputStream(new BufferedOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, i, j))));
+                case LZ4:
+                    return new DataOutputStream(new BufferedOutputStream(new LZ4BlockOutputStream(new ChunkBuffer(this, i, j))));
+                default:
+                    return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        // Tsunami end
     }
 
     protected synchronized void a(int i, int j, byte[] abyte, int k) {
@@ -244,7 +266,7 @@ public class RegionFile {
         this.b(" " + i);
         this.c.seek((long) (i * 4096));
         this.c.writeInt(j + 1);
-        this.c.writeByte(2);
+        this.c.writeByte(chunkCompressionType.getId()); // Tsunami
         this.c.write(abyte, 0, j);
     }
 
@@ -275,4 +297,13 @@ public class RegionFile {
     public void b() throws IOException {
         this.c.close();
     }
+
+    // Tsunami start
+    static {
+        String compression = Tsunami.config().getString("chunk-io.region-file-compression", "deflate");
+        ChunkCompressionType type = ChunkCompressionType.fromName(compression);
+        chunkCompressionType = type != null ? type : ChunkCompressionType.DEFLATE;
+    }
+    // Tsunami end
+
 }
