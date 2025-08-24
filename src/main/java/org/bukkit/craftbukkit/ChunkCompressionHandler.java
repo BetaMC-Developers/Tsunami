@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit;
 
 import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.Packet;
 import net.minecraft.server.Packet51MapChunk;
 
 import java.util.Queue;
@@ -15,7 +16,7 @@ public class ChunkCompressionHandler implements Runnable {
     private static final int DEFLATE_LEVEL_PARTS = 1;
 
     private final EntityPlayer player;
-    private final Queue<Packet51MapChunk> packetQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Packet> packetQueue = new ConcurrentLinkedQueue<>();
 
     private final Deflater deflater = new Deflater();
     private byte[] deflateBuffer = new byte[CHUNK_SIZE + 100];
@@ -29,7 +30,7 @@ public class ChunkCompressionHandler implements Runnable {
     public void run() {
         while (!player.netServerHandler.disconnected) {
             try {
-                Packet51MapChunk packet = packetQueue.poll();
+                Packet packet = packetQueue.poll();
                 if (packet == null) continue;
                 handlePacket(packet);
             } catch (Exception e) {
@@ -38,36 +39,35 @@ public class ChunkCompressionHandler implements Runnable {
         }
     }
 
-    public void queuePacket(Packet51MapChunk packet) {
+    public void queuePacket(Packet packet) {
         packetQueue.offer(packet);
     }
 
-    private void handlePacket(Packet51MapChunk packet) {
-        if (packet.g == null) {
-            int dataSize = packet.rawData.length;
-            if (deflateBuffer.length < dataSize + 100) {
-                deflateBuffer = new byte[dataSize + 100];
-            }
+    private void handlePacket(Packet packet) {
+        if (packet instanceof Packet51MapChunk) {
+            Packet51MapChunk packet51mapchunk = (Packet51MapChunk) packet;
+            if (packet51mapchunk.g == null) {
+                int dataSize = packet51mapchunk.rawData.length;
+                if (deflateBuffer.length < dataSize + 100) {
+                    deflateBuffer = new byte[dataSize + 100];
+                }
 
-            deflater.reset();
-            deflater.setLevel(dataSize < REDUCED_DEFLATE_THRESHOLD ? DEFLATE_LEVEL_PARTS : DEFLATE_LEVEL_CHUNKS);
-            deflater.setInput(packet.rawData);
-            deflater.finish();
-            int size = deflater.deflate(deflateBuffer);
-            if (size == 0) {
-                size = deflater.deflate(deflateBuffer);
-            }
+                deflater.reset();
+                deflater.setLevel(dataSize < REDUCED_DEFLATE_THRESHOLD ? DEFLATE_LEVEL_PARTS : DEFLATE_LEVEL_CHUNKS);
+                deflater.setInput(packet51mapchunk.rawData);
+                deflater.finish();
+                int size = deflater.deflate(deflateBuffer);
+                if (size == 0) {
+                    size = deflater.deflate(deflateBuffer);
+                }
 
-            packet.g = new byte[size];
-            packet.h = size;
-            System.arraycopy(deflateBuffer, 0, packet.g, 0, size);
+                packet51mapchunk.g = new byte[size];
+                packet51mapchunk.h = size;
+                System.arraycopy(deflateBuffer, 0, packet51mapchunk.g, 0, size);
+            }
         }
 
         player.netServerHandler.networkManager.queue(packet);
-    }
-
-    public int getQueueSize() {
-        return packetQueue.size();
     }
 
 }

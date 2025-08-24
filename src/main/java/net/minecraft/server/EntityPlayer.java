@@ -254,12 +254,13 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             // Tsunami start - improve chunk sending
             WorldServer worldserver = this.getWorldServer();
             for (ChunkCoordIntPair chunkcoordintpair : this.chunkCoordIntPairQueue) {
-                this.netServerHandler.sendPacket(new Packet51MapChunk(chunkcoordintpair.x * 16, 0, chunkcoordintpair.z * 16, 16, 128, 16, worldserver));
+                Chunk chunk = worldserver.chunkProviderServer.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
 
-                List list = worldserver.getTileEntities(chunkcoordintpair.x * 16, 0, chunkcoordintpair.z * 16, chunkcoordintpair.x * 16 + 16, 128, chunkcoordintpair.z * 16 + 16);
+                this.netServerHandler.sendPacket(new Packet51MapChunk(chunk.x * 16, 0, chunk.z * 16, 16, 128, 16, worldserver));
+                worldserver.tracker.a(this, chunk);
 
-                for (int j = 0; j < list.size(); ++j) {
-                    this.a((TileEntity) list.get(j));
+                for (Object tileEntity : chunk.tileEntities.values()) {
+                    this.a((TileEntity) tileEntity);
                 }
             }
 

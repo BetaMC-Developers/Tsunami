@@ -758,9 +758,9 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 this.networkManager.queue(new Packet3Chat(line));
             }
             packet = null;
-        } else if (packet instanceof Packet51MapChunk) {
-            // Tsunami - handle map chunk packets in ChunkCompressionHandler
-            this.player.chunkCompressionHandler.queuePacket((Packet51MapChunk) packet);
+        } else if (packet.k) {
+            // Tsunami - redirect low priority packets to ChunkCompressionHandler
+            this.player.chunkCompressionHandler.queuePacket(packet);
             packet = null;
         }
         if (packet != null) this.networkManager.queue(packet);
