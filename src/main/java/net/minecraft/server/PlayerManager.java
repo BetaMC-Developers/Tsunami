@@ -154,19 +154,23 @@ public class PlayerManager {
                 entityplayer.d = entityplayer.locX;
                 entityplayer.e = entityplayer.locZ;
 
-                // CraftBukkit start - send nearest chunks first
+                // Tsunami start - send nearest chunks first
                 if (i1 > 1 || i1 < -1 || j1 > 1 || j1 < -1) {
-                    final int x = i;
-                    final int z = j;
-                    List<ChunkCoordIntPair> chunksToSend = entityplayer.chunkCoordIntPairQueue;
+                    final double x = entityplayer.locX;
+                    final double z = entityplayer.locZ;
 
-                    java.util.Collections.sort(chunksToSend, new java.util.Comparator<ChunkCoordIntPair>() {
-                        public int compare(ChunkCoordIntPair a, ChunkCoordIntPair b) {
-                            return Math.max(Math.abs(a.x - x), Math.abs(a.z - z)) - Math.max(Math.abs(b.x - x), Math.abs(b.z - z));
-                        }
+                    entityplayer.chunkCoordIntPairQueue.sort((a, b) -> {
+                        double ax = (a.x << 4) + 8;
+                        double az = (a.z << 4) + 8;
+                        double bx = (b.x << 4) + 8;
+                        double bz = (b.z << 4) + 8;
+
+                        double da = Math.pow(ax - x, 2) + Math.pow(az - z, 2);
+                        double db = Math.pow(bx - x, 2) + Math.pow(bz - z, 2);
+                        return Double.compare(da, db);
                     });
                 }
-                // CraftBukkit end
+                // Tsunami end
             }
         }
     }
