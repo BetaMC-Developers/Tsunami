@@ -69,9 +69,7 @@ public class NetworkManager {
         try {
             // CraftBukkit start - cant compile these outside the try
             socket.setSoTimeout(30000);
-            if (PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)) {
-                socket.setTcpNoDelay(true);
-            }
+            socket.setTcpNoDelay(true); // Tsunami
             this.input = new DataInputStream(socket.getInputStream());
             this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
         } catch (java.io.IOException socketexception) {
