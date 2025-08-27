@@ -1121,6 +1121,7 @@ public class World implements IBlockAccess {
             EntityLiving entityliving = iter.next();
             if (entityliving.deathAnimationTicks > 20) {
                 entityliving.deathAnimationTicks = 0;
+                entityliving.dead = true;
                 iter.remove();
                 continue;
             }

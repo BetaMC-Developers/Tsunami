@@ -9,6 +9,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class EntityLiving extends Entity {
@@ -437,8 +438,6 @@ public abstract class EntityLiving extends Entity {
     }
 
     public void die(Entity entity) {
-        this.dead = true; // Tsunami
-
         if (this.W >= 0 && entity != null) {
             entity.c(this, this.W);
         }
@@ -453,7 +452,23 @@ public abstract class EntityLiving extends Entity {
         }
 
         this.world.a(this, (byte) 3);
+        // Tsunami start
+        this.world.dyingEntities.add(this);
+        markForRemoval();
+        // Tsunami end
     }
+
+    // Tsunami start
+    public void markForRemoval() {
+        Iterator iterator = this.world.players.iterator();
+        while (iterator.hasNext()) {
+            EntityHuman entityhuman = (EntityHuman) iterator.next();
+            if (entityhuman instanceof EntityPlayer) {
+                ((EntityPlayer) entityhuman).removeQueue.add(this);
+            }
+        }
+    }
+    // Tsunami end
 
     protected void q() {
         int i = this.j();
