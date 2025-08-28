@@ -167,6 +167,7 @@ public class ItemInWorldManager {
             if (event.isCancelled()) {
                 // Poseidon - Inform the client if the event was cancelled
                 ((EntityPlayer) this.player).netServerHandler.sendPacket(new ArtificialPacket53BlockChange(i, j, k, l, i1));
+                this.player.syncHeldItem(); // Tsunami
                 return false;
             }
         }
@@ -190,6 +191,8 @@ public class ItemInWorldManager {
             if (itemstack.count == 0) {
                 itemstack.a(this.player);
                 this.player.H();
+            } else {
+                this.player.syncHeldItem(); // Tsunami
             }
         }
 
