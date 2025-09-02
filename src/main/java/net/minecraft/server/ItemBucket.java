@@ -135,7 +135,18 @@ public class ItemBucket extends Item {
                                 world.a("largesmoke", (double) i + Math.random(), (double) j + Math.random(), (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
                             }
                         } else {
-                            world.setTypeIdAndData(i, j, k, this.a, 0);
+                            // Tsunami start - correctly drop block when a source is placed on it
+                            if (this.l(world, i, j, k)) {
+                                int l1 = world.getTypeId(i, j, k);
+                                if (l1 > 0) {
+                                    if (this.a != Block.LAVA.id) {
+                                        Block.byId[l1].g(world, i, j, k, world.getData(i, j, k));
+                                    }
+                                }
+
+                                world.setTypeIdAndData(i, j, k, this.a, 0);
+                            }
+                            // Tsunami end
                         }
 
                         // CraftBukkit start
@@ -164,4 +175,24 @@ public class ItemBucket extends Item {
             return itemstack;
         }
     }
+
+    // Tsunami start - code copied from BlockFlowing.java
+    private boolean l(World world, int i, int j, int k) {
+        int material = world.getTypeId(i, j, k);
+
+        return material == this.a ? false : (material == Block.LAVA.id ? false : !this.k(world, i, j, k));
+    }
+
+    private boolean k(World world, int i, int j, int k) {
+        int l = world.getTypeId(i, j, k);
+        if (l == 0) {
+            return false;
+        } else {
+            Material material = Block.byId[l].material;
+
+            return material.isSolid();
+        }
+    }
+    // Tsunami end
+
 }

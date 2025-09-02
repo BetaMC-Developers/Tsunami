@@ -107,6 +107,17 @@ public class BlockFlowing extends BlockFluids {
             }
 
             if (!event.isCancelled()) {
+                // Tsunami start - correctly drop block when destroyed from above
+                int l1 = world.getTypeId(i, j - 1, k);
+                if (l1 > 0) {
+                    if (this.material == Material.LAVA) {
+                        this.h(world, i, j - 1, k);
+                    } else {
+                        Block.byId[l1].g(world, i, j - 1, k, world.getData(i, j - 1, k));
+                    }
+                }
+                // Tsunami end
+
                 if (l >= 8) {
                     world.setTypeIdAndData(i, j - 1, k, this.id, l);
                 } else {
