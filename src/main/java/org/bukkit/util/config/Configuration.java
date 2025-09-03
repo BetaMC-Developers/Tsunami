@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -51,7 +51,7 @@ public class Configuration extends ConfigurationNode {
     private String header = null;
 
     public Configuration(File file) {
-        super(new HashMap<String, Object>());
+        super(new LinkedHashMap<String, Object>());
 
         DumperOptions options = new DumperOptions();
 
@@ -73,9 +73,9 @@ public class Configuration extends ConfigurationNode {
             stream = new FileInputStream(file);
             read(yaml.load(new UnicodeReader(stream)));
         } catch (IOException e) {
-            root = new HashMap<String, Object>();
+            root = new LinkedHashMap<String, Object>();
         } catch (ConfigurationException e) {
-            root = new HashMap<String, Object>();
+            root = new LinkedHashMap<String, Object>();
         } finally {
             try {
                 if (stream != null) {
@@ -164,7 +164,7 @@ public class Configuration extends ConfigurationNode {
     private void read(Object input) throws ConfigurationException {
         try {
             if (null == input) {
-                root = new HashMap<String, Object>();
+                root = new LinkedHashMap<String, Object>();
             } else {
                 root = (Map<String, Object>) input;
             }
@@ -179,7 +179,7 @@ public class Configuration extends ConfigurationNode {
      * @return
      */
     public static ConfigurationNode getEmptyNode() {
-        return new ConfigurationNode(new HashMap<String, Object>());
+        return new ConfigurationNode(new LinkedHashMap<String, Object>());
     }
 }
 

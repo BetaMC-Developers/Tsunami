@@ -126,7 +126,7 @@ public class ConfigurationNode {
 
             if (o == null || !(o instanceof Map)) {
                 // This will override existing configuration data!
-                o = new HashMap<String, Object>();
+                o = new LinkedHashMap<String, Object>();
                 node.put(parts[i], o);
             }
 
@@ -473,7 +473,7 @@ public class ConfigurationNode {
         if (o == null) {
             return null;
         } else if (o instanceof Map) {
-            Map<String, ConfigurationNode> nodes = new HashMap<String, ConfigurationNode>();
+            Map<String, ConfigurationNode> nodes = new LinkedHashMap<String, ConfigurationNode>();
 
             for (Map.Entry<String, Object> entry : ((Map<String, Object>) o).entrySet()) {
                 if (entry.getValue() instanceof Map) {
