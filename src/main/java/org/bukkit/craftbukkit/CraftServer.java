@@ -93,7 +93,7 @@ public final class CraftServer implements Server {
         loadPlugins();
         enablePlugins(PluginLoadOrder.STARTUP);
 
-        //ChunkCompressionThread.startThread(); // Tsunami - replaced by ChunkCompressionHandler
+        //ChunkCompressionThread.startThread(); // Tsunami - handle chunk compression when writing packet data
     }
 
     private void loadConfig() {

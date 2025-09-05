@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandException;
-import org.bukkit.craftbukkit.ChunkCompressionHandler;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.TextWrapper;
 import org.bukkit.craftbukkit.block.CraftBlock;
@@ -65,7 +64,6 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         networkmanager.a((NetHandler) this);
         this.player = entityplayer;
         entityplayer.netServerHandler = this;
-        entityplayer.chunkCompressionHandler = new ChunkCompressionHandler(entityplayer); // Tsunami
 
         // CraftBukkit start
         this.server = minecraftserver.server;
@@ -757,10 +755,6 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             for (final String line : TextWrapper.wrapText(message)) {
                 this.networkManager.queue(new Packet3Chat(line));
             }
-            packet = null;
-        } else if (packet.k) {
-            // Tsunami - redirect low priority packets to ChunkCompressionHandler
-            this.player.chunkCompressionHandler.queuePacket(packet);
             packet = null;
         }
         if (packet != null) this.networkManager.queue(packet);

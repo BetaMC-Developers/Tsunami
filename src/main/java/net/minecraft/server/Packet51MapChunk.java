@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class Packet51MapChunk extends Packet {
@@ -17,6 +18,9 @@ public class Packet51MapChunk extends Packet {
     public byte[] g;
     public int h; // CraftBukkit - private -> public
     public byte[] rawData; // CraftBukkit
+
+    private static final ThreadLocal<Deflater> localDeflater =
+            ThreadLocal.withInitial(() -> new Deflater(Deflater.DEFAULT_COMPRESSION)); // Tsunami
 
     public Packet51MapChunk() {
         this.k = true;
@@ -36,20 +40,20 @@ public class Packet51MapChunk extends Packet {
         this.d = l;
         this.e = i1;
         this.f = j1;
-        /* CraftBukkit - Moved compression into its own method.
-        byte[] abyte = data; // CraftBukkit - uses data from above constructor
-        Deflater deflater = new Deflater(-1);
-
-        try {
-            deflater.setInput(abyte);
-            deflater.finish();
-            this.g = new byte[l * i1 * j1 * 5 / 2];
-            this.h = deflater.deflate(this.g);
-        } finally {
-            deflater.end();
-        }*/
         this.rawData = data; // CraftBukkit
     }
+
+    // Tsunami start - move compression into its own method
+    private void compress() {
+        if (this.g != null) return;
+        Deflater deflater = localDeflater.get();
+        deflater.reset();
+        deflater.setInput(this.rawData);
+        deflater.finish();
+        this.g = new byte[this.rawData.length + 100];
+        this.h = deflater.deflate(this.g);
+    }
+    // Tsunami end
 
     public void a(DataInputStream datainputstream) throws IOException { // CraftBukkit - throws IOEXception
         this.a = datainputstream.readInt();
@@ -77,6 +81,7 @@ public class Packet51MapChunk extends Packet {
     }
 
     public void a(DataOutputStream dataoutputstream) throws IOException { // CraftBukkit - throws IOException
+        compress(); // Tsunami
         dataoutputstream.writeInt(this.a);
         dataoutputstream.writeShort(this.b);
         dataoutputstream.writeInt(this.c);

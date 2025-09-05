@@ -4,7 +4,6 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
 import com.projectposeidon.api.PoseidonUUID;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.ChunkCompressionHandler;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -21,7 +20,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public double e;
     public List<ChunkCoordIntPair> chunkCoordIntPairQueue = new ArrayList<>(); // Tsunami - LinkedList -> ArrayList
     public Set playerChunkCoordIntPairs = new HashSet();
-    public ChunkCompressionHandler chunkCompressionHandler; // Tsunami
     public final List<Entity> removeQueue = new LinkedList<>(); // Tsunami
     private int bL = -99999999;
     private int bM = 60;
