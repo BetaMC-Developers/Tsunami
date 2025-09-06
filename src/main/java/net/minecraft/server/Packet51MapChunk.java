@@ -19,8 +19,7 @@ public class Packet51MapChunk extends Packet {
     public int h; // CraftBukkit - private -> public
     public byte[] rawData; // CraftBukkit
 
-    private static final ThreadLocal<Deflater> localDeflater =
-            ThreadLocal.withInitial(() -> new Deflater(Deflater.DEFAULT_COMPRESSION)); // Tsunami
+    private static final ThreadLocal<Deflater> localDeflater = ThreadLocal.withInitial(Deflater::new); // Tsunami
 
     public Packet51MapChunk() {
         this.k = true;
@@ -46,12 +45,22 @@ public class Packet51MapChunk extends Packet {
     // Tsunami start - move compression into its own method
     private void compress() {
         if (this.g != null) return;
+
+        byte[] deflateBuffer = new byte[this.rawData.length + 100];
         Deflater deflater = localDeflater.get();
         deflater.reset();
+        deflater.setLevel(this.rawData.length < 20480 ? 1 : 6);
         deflater.setInput(this.rawData);
         deflater.finish();
-        this.g = new byte[this.rawData.length + 100];
-        this.h = deflater.deflate(this.g);
+
+        int size = deflater.deflate(deflateBuffer);
+        if (size == 0) {
+            size = deflater.deflate(deflateBuffer);
+        }
+
+        this.g = new byte[size];
+        this.h = size;
+        System.arraycopy(deflateBuffer, 0, this.g, 0, size);
     }
     // Tsunami end
 

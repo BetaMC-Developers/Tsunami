@@ -18,7 +18,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public ItemInWorldManager itemInWorldManager;
     public double d;
     public double e;
-    public List<ChunkCoordIntPair> chunkCoordIntPairQueue = new ArrayList<>(); // Tsunami - LinkedList -> ArrayList
+    public LinkedList<ChunkCoordIntPair> chunkCoordIntPairQueue = new LinkedList<>();
     public Set playerChunkCoordIntPairs = new HashSet();
     public final List<Entity> removeQueue = new LinkedList<>(); // Tsunami
     private int bL = -99999999;
@@ -256,7 +256,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         if (flag && !this.chunkCoordIntPairQueue.isEmpty()) {
             // Tsunami start - improve chunk sending
             WorldServer worldserver = this.getWorldServer();
-            for (ChunkCoordIntPair chunkcoordintpair : this.chunkCoordIntPairQueue) {
+            ChunkCoordIntPair chunkcoordintpair;
+            while ((chunkcoordintpair = this.chunkCoordIntPairQueue.poll()) != null) {
                 Chunk chunk = worldserver.chunkProviderServer.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
 
                 this.netServerHandler.sendPacket(new Packet51MapChunk(chunk.x * 16, 0, chunk.z * 16, 16, 128, 16, worldserver));
@@ -266,8 +267,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                     this.a((TileEntity) tileEntity);
                 }
             }
-
-            this.chunkCoordIntPairQueue.clear();
             // Tsunami end
         }
 

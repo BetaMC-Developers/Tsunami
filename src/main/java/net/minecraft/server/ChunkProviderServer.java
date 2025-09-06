@@ -16,17 +16,16 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 public class ChunkProviderServer implements IChunkProvider {
 
     // Tsunami start
-    private static final ExecutorService executor = new ThreadPoolExecutor(
-            0, Runtime.getRuntime().availableProcessors(),
-            60L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>());
+    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), task -> {
+        Thread thread = new Thread(task);
+        thread.setName("Chunk I/O Worker (id:" + thread.getId() + ")");
+        return thread;
+    });
     private final LongHashtable<ChunkLoadTask> loadQueue = new LongHashtable<>();
     private final Queue<Runnable> postLoadQueue = new ConcurrentLinkedQueue<>();
     // Tsunami end
