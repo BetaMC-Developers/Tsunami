@@ -8,7 +8,13 @@ import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import jline.ConsoleReader;
 import joptsimple.OptionSet;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.rcon.RconCommandSender;
+import org.betamc.tsunami.rcon.RconConnection;
+import org.betamc.tsunami.rcon.RconListenThread;
+import org.betamc.tsunami.rcon.RemoteCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.World.Environment;
+import org.bukkit.command.CommandException;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.LoggerOutputStream;
 import org.bukkit.craftbukkit.command.ColouredConsoleSender;
@@ -27,6 +33,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,6 +53,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public int j;
     private List r = new ArrayList();
     private List s = Collections.synchronizedList(new ArrayList());
+    private final Queue<RemoteCommand> remoteCommands = new LinkedBlockingQueue<>(); // Tsunami
     // public EntityTracker[] tracker = new EntityTracker[2]; // CraftBukkit - removed!
     public boolean onlineMode;
     public boolean spawnAnimals;
@@ -179,6 +187,17 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.properties.remove("spawn-protection");
             this.propertyManager.savePropertiesFile();
         }
+
+        // Tsunami start - RCON
+        if (Tsunami.config().getBoolean("rcon.enabled", false)) {
+            try {
+                new RconListenThread(this);
+            } catch (IOException e) {
+                log.warning("[Tsunami] RCON failed to bind to port! Perhaps the port is already in use?");
+                log.warning(e.toString());
+            }
+        }
+        // Tsunami end
 
         // Tsunami start - moved from above
         long elapsed = System.nanoTime() - startTimer;
@@ -612,6 +631,12 @@ public class MinecraftServer implements Runnable, ICommandListener {
         this.s.add(new ServerCommand(s, icommandlistener));
     }
 
+    // Tsunami start
+    public void issueRemoteCommand(RconConnection connection, int requestId, String command) {
+        this.remoteCommands.offer(new RemoteCommand(connection, requestId, command));
+    }
+    // Tsunami end
+
     public void b() {
         while (this.s.size() > 0) {
             ServerCommand servercommand = (ServerCommand) this.s.remove(0);
@@ -625,7 +650,34 @@ public class MinecraftServer implements Runnable, ICommandListener {
             // this.consoleCommandHandler.handle(servercommand); // CraftBukkit - Removed its now called in server.dispatchCommand
             this.server.dispatchCommand(this.console, servercommand); // CraftBukkit
         }
+
+        // Tsunami start
+        int queueSize = this.remoteCommands.size();
+        RemoteCommand remoteCommand;
+        for (int i = 0; i < queueSize && (remoteCommand = remoteCommands.poll()) != null; i++) {
+            handleRemoteCommand(remoteCommand);
+        }
+        // Tsunami end
     }
+
+    // Tsunami start
+    private void handleRemoteCommand(RemoteCommand command) {
+        RconCommandSender sender = command.connection.getCommandSender();
+        sender.prepareForCommand();
+        try {
+            if (this.server.dispatchCommand(sender, command.command)) {
+                log.info(command.connection + " issued remote command: /" + command.command);
+            }
+        } catch (CommandException e) {
+            sender.sendMessage(ChatColor.RED + "An internal error occurred while attempting to perform this command");
+            e.printStackTrace();
+        }
+        try {
+            command.connection.sendCmdResponse(command.requestId, sender.getCommandResponse());
+        } catch (IOException e) {
+        }
+    }
+    // Tsunami end
 
     public void a(IUpdatePlayerListBox iupdateplayerlistbox) {
         this.r.add(iupdateplayerlistbox);

@@ -35,6 +35,9 @@ public class TsunamiConfig extends Configuration {
         writeDefault("mob-spawning.mob-caps.animals", 15);
         writeDefault("mob-spawning.mob-caps.water-mobs", 5);
         writeDefault("mob-spawning.per-player-mob-cap", false);
+        writeDefault("rcon.enabled", false);
+        writeDefault("rcon.port", 25575);
+        writeDefault("rcon.password", "");
     }
 
     private void writeDefault(String key, Object defaultValue) {
