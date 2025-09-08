@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit;
 
+import org.betamc.tsunami.Tsunami;
+
 import java.util.regex.Pattern;
 
 public class TextWrapper {
@@ -28,7 +30,17 @@ public class TextWrapper {
     public static final String allowedChars = net.minecraft.server.FontAllowedCharacters.allowedCharacters;
 
     public static String[] wrapText(final String input) {
-        final String text = sanitizeText(input); // Tsunami
+        // Tsunami start
+        final String text;
+
+        if (Tsunami.config().getBoolean("sanitize-text", false)) {
+            text = sanitizeText(input);
+        }
+        else {
+            text = input;
+        }
+        // Tsunami end
+
         final StringBuilder out = new StringBuilder();
         char colorChar = 'f';
         int lineWidth = 0;

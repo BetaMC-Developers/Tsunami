@@ -38,6 +38,7 @@ public class TsunamiConfig extends Configuration {
         writeDefault("rcon.enabled", false);
         writeDefault("rcon.port", 25575);
         writeDefault("rcon.password", "");
+        writeDefault("sanitize-text", false);
     }
 
     private void writeDefault(String key, Object defaultValue) {
