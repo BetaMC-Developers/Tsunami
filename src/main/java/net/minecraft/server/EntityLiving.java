@@ -9,7 +9,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class EntityLiving extends Entity {
@@ -41,7 +40,6 @@ public abstract class EntityLiving extends Entity {
     public int ae;
     public float af = 0.0F;
     public int deathTicks = 0;
-    public int deathAnimationTicks = 0; // Tsunami
     public int attackTicks = 0;
     public float ai;
     public float aj;
@@ -452,23 +450,7 @@ public abstract class EntityLiving extends Entity {
         }
 
         this.world.a(this, (byte) 3);
-        // Tsunami start
-        this.world.dyingEntities.add(this);
-        markForRemoval();
-        // Tsunami end
     }
-
-    // Tsunami start
-    public void markForRemoval() {
-        Iterator iterator = this.world.players.iterator();
-        while (iterator.hasNext()) {
-            EntityHuman entityhuman = (EntityHuman) iterator.next();
-            if (entityhuman instanceof EntityPlayer) {
-                ((EntityPlayer) entityhuman).removeQueue.add(this);
-            }
-        }
-    }
-    // Tsunami end
 
     protected void q() {
         int i = this.j();

@@ -25,7 +25,6 @@ public class World implements IBlockAccess {
     public boolean a = false;
     private List C = new ArrayList();
     public List entityList = new ArrayList();
-    public HashSet<EntityLiving> dyingEntities = new HashSet<>(); // Tsunami
     private List D = new ArrayList();
     private TreeSet E = new TreeSet();
     private Set F = new HashSet();
@@ -1114,21 +1113,6 @@ public class World implements IBlockAccess {
                 this.d(entity);
             }
         }
-
-        // Tsunami start
-        Iterator<EntityLiving> iter = dyingEntities.iterator();
-        while (iter.hasNext()) {
-            EntityLiving entityliving = iter.next();
-            if (entityliving.deathAnimationTicks > 20) {
-                entityliving.deathAnimationTicks = 0;
-                entityliving.dead = true;
-                iter.remove();
-                continue;
-            }
-
-            entityliving.deathAnimationTicks++;
-        }
-        // Tsunami end
 
         this.L = true;
         Iterator iterator = this.c.iterator();
