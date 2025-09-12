@@ -59,7 +59,7 @@ public final class CraftServer implements Server {
     private final String serverEnvironment = "POSEIDON";
     private final String serverVersion;
     private final String releaseType = "DEVELOPMENT";
-    private final String protocolVersion = "1.7.3";
+    private final String protocolVersion = "b1.7.3";
     private final String gameVersion = "b1.7.3";
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final BukkitScheduler scheduler;
