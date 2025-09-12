@@ -43,7 +43,7 @@ public class Packet51MapChunk extends Packet {
     }
 
     // Tsunami start - move compression into its own method
-    private void compress() {
+    private synchronized void compress() {
         if (this.g != null) return;
 
         byte[] deflateBuffer = new byte[this.rawData.length + 100];
