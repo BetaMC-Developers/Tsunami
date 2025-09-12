@@ -105,6 +105,28 @@ public class EntityTracker {
         }
     }
 
+    // Tsunami start
+    public synchronized void untrackEntityImmediately(Entity entity) {
+        if (entity instanceof EntityPlayer) {
+            EntityPlayer entityplayer = (EntityPlayer) entity;
+            Iterator iterator = this.a.iterator();
+
+            while (iterator.hasNext()) {
+                EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                entitytrackerentry.trackedPlayers.remove(entityplayer);
+            }
+        }
+
+        EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry) this.b.d(entity.id);
+
+        if (entitytrackerentry1 != null) {
+            this.a.remove(entitytrackerentry1);
+            entitytrackerentry1.destroyImmediately();
+        }
+    }
+    // Tsunami end
+
     // CraftBukkit - synchronized
     public synchronized void updatePlayers() {
         ArrayList arraylist = new ArrayList();

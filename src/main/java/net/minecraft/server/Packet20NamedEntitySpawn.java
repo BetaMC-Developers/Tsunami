@@ -19,7 +19,10 @@ public class Packet20NamedEntitySpawn extends Packet {
 
     public Packet20NamedEntitySpawn(EntityHuman entityhuman) {
         this.a = entityhuman.id;
-        this.b = entityhuman.name;
+        // Tsunami start
+        String nameTag = entityhuman instanceof EntityPlayer ? ((EntityPlayer) entityhuman).nameTag : entityhuman.name;
+        this.b = nameTag.length() <= 16 ? nameTag : nameTag.substring(0, 16);
+        // Tsunami end
         this.c = MathHelper.floor(entityhuman.locX * 32.0D);
         this.d = MathHelper.floor(entityhuman.locY * 32.0D);
         this.e = MathHelper.floor(entityhuman.locZ * 32.0D);

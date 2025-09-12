@@ -115,6 +115,17 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         getHandle().displayName = name;
     }
 
+    // Tsunami start
+    public String getNameTag() {
+        return getHandle().nameTag;
+    }
+
+    public void setNameTag(String nameTag) {
+        getHandle().nameTag = nameTag.length() <= 16 ? nameTag : nameTag.substring(0, 16);
+        getHandle().updateNameTag();
+    }
+    // Tsunami end
+
     @Override
     public String toString() {
         return "CraftPlayer{" + "name=" + getName() + '}';

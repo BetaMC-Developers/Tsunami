@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
 import com.projectposeidon.api.PoseidonUUID;
 import org.bukkit.Bukkit;
@@ -26,6 +27,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     private ItemStack[] bN = new ItemStack[]{null, null, null, null, null};
     private int bO = 0;
     public boolean h;
+    public String nameTag; // Tsunami
 
     public EntityPlayer(MinecraftServer minecraftserver, World world, String s, ItemInWorldManager iteminworldmanager) {
         super(world);
@@ -50,6 +52,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         this.b = minecraftserver;
         this.bs = 0.0F;
         this.name = s;
+        this.nameTag = s; // Tsunami
         this.height = 0.0F;
 
         // CraftBukkit start
@@ -538,4 +541,14 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         return super.toString() + "(" + this.name + " at " + this.locX + "," + this.locY + "," + this.locZ + ")";
     }
     // CraftBukkit end
+
+    // Tsunami start
+    public void updateNameTag() {
+        EntityTracker tracker = this.getWorldServer().tracker;
+        tracker.untrackEntityImmediately(this);
+        this.world.getServer().getScheduler().scheduleSyncDelayedTask(
+                new PoseidonPlugin(),
+                () -> tracker.track(this), 1);
+    }
+    // Tsunami end
 }

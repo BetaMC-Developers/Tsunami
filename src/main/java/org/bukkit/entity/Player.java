@@ -33,6 +33,23 @@ public interface Player extends HumanEntity, CommandSender, OfflinePlayer {
      */
     public void setDisplayName(String name);
 
+    // Tsunami start
+    /**
+     * Gets the player's name tag
+     *
+     * @return the player's name tag
+     */
+    public String getNameTag();
+
+    /**
+     * Sets the player's name tag which shows up above their player model.
+     * Clients with a skin fix mod will also see the skin of the respective player.
+     *
+     * @param nameTag the player's new name tag
+     */
+    public void setNameTag(String nameTag);
+    // Tsunami end
+
     /**
      * Set the target of the player's compass.
      *
