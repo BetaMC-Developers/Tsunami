@@ -100,15 +100,15 @@ public final class PoseidonServer {
         }
 
         poseidonVersionChecker = new PoseidonVersionChecker(craftServer, releaseVersion);
-        long checkIntervalTicks = PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks");  // Tsunami
+        long checkIntervalTicks = PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks"); // Tsunami
 
-        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every " + checkIntervalTicks + " ticks.");  // Tsunami
+        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every " + checkIntervalTicks + " ticks."); // Tsunami
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(new PoseidonPlugin(), new Runnable() {
             @Override
             public void run() {
                 poseidonVersionChecker.fetchLatestVersion();
             }
-        }, 0, checkIntervalTicks);  // Tsunami
+        }, 0, checkIntervalTicks); // Tsunami
     }
 
     public void shutdownServer() {
