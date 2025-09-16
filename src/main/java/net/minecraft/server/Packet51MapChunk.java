@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.betamc.tsunami.Tsunami;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,7 +21,7 @@ public class Packet51MapChunk extends Packet {
     public int h; // CraftBukkit - private -> public
     public byte[] rawData; // CraftBukkit
 
-    private static final ThreadLocal<Deflater> localDeflater = ThreadLocal.withInitial(Deflater::new); // Tsunami
+    private static final ThreadLocal<Deflater> localDeflater; // Tsunami
 
     public Packet51MapChunk() {
         this.k = true;
@@ -49,7 +51,6 @@ public class Packet51MapChunk extends Packet {
         byte[] deflateBuffer = new byte[this.rawData.length + 100];
         Deflater deflater = localDeflater.get();
         deflater.reset();
-        deflater.setLevel(this.rawData.length < 20480 ? 1 : 6);
         deflater.setInput(this.rawData);
         deflater.finish();
 
@@ -108,4 +109,13 @@ public class Packet51MapChunk extends Packet {
     public int a() {
         return 17 + this.h;
     }
+
+    // Tsunami start
+    static {
+        int level = Tsunami.config().getInt("chunk-io.chunk-packet-compression-level", 6);
+        final int fLevel = Math.min(Math.max(level, -1), 9);
+        localDeflater = ThreadLocal.withInitial(() -> new Deflater(fLevel));
+    }
+    // Tsunami end
+
 }
