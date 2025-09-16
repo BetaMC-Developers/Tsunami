@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public final class PoseidonServer {
     private final MinecraftServer server;
@@ -101,15 +100,15 @@ public final class PoseidonServer {
         }
 
         poseidonVersionChecker = new PoseidonVersionChecker(craftServer, releaseVersion);
+        long checkIntervalTicks = PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks");
 
-        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every hour.");
-        // Run the version checker in a separate thread every hour
+        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every " + checkIntervalTicks + " ticks.");
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(new PoseidonPlugin(), new Runnable() {
             @Override
             public void run() {
                 poseidonVersionChecker.fetchLatestVersion();
             }
-        }, 0, PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks"));
+        }, 0, checkIntervalTicks);
     }
 
     public void shutdownServer() {
