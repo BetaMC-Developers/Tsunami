@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +16,7 @@ public class NetworkListenThread {
     private Thread e;
     public volatile boolean b = false;
     private int f = 0;
-    private ArrayList g = new ArrayList();
+    private List g = Collections.synchronizedList(new ArrayList()); // Tsunami - synchronized list
     private ArrayList h = new ArrayList();
     public MinecraftServer c;
 
@@ -26,6 +28,12 @@ public class NetworkListenThread {
         this.e = new NetworkAcceptThread(this, "Listen thread", minecraftserver);
         this.e.start();
     }
+
+    // Tsunami start
+    public void b(NetLoginHandler netloginhandler) {
+        this.g.remove(netloginhandler);
+    }
+    // Tsunami end
 
     public void a(NetServerHandler netserverhandler) {
         this.h.add(netserverhandler);
@@ -42,27 +50,29 @@ public class NetworkListenThread {
     public void a() {
         int i;
 
-        for (i = 0; i < this.g.size(); ++i) {
-            NetLoginHandler netloginhandler = (NetLoginHandler) this.g.get(i);
+        synchronized (this.g) { // Tsunami - wrap in synchronized block
+            for (i = 0; i < this.g.size(); ++i) {
+                NetLoginHandler netloginhandler = (NetLoginHandler) this.g.get(i);
 
-            try {
-                netloginhandler.a();
-            } catch (Exception exception) {
-                if (netloginhandler == null) {
-                    a.log(Level.WARNING, "Looks like someone tried to crash the server, stopped their attempt.");
-                    this.g.remove(i);
-                    return;
-                } else {
-                    netloginhandler.disconnect("Internal server error");
-                    a.log(Level.WARNING, "Failed to handle packet: " + exception, exception);
+                try {
+                    netloginhandler.a();
+                } catch (Exception exception) {
+                    if (netloginhandler == null) {
+                        a.log(Level.WARNING, "Looks like someone tried to crash the server, stopped their attempt.");
+                        this.g.remove(i);
+                        return;
+                    } else {
+                        netloginhandler.disconnect("Internal server error");
+                        a.log(Level.WARNING, "Failed to handle packet: " + exception, exception);
+                    }
                 }
-            }
 
-            if (netloginhandler.c) {
-                this.g.remove(i--);
-            }
+                if (netloginhandler.c) {
+                    this.g.remove(i--);
+                }
 
-            netloginhandler.networkManager.a();
+                netloginhandler.networkManager.a();
+            }
         }
 
         for (i = 0; i < this.h.size(); ++i) {

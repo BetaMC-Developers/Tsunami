@@ -1,14 +1,23 @@
 package net.minecraft.server;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.projectposeidon.ConnectionType;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.entity.Player;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -32,6 +41,11 @@ public class NetLoginHandler extends NetHandler {
     private boolean receivedKeepAlive = false;
     
     private final String msgKickShutdown;
+
+    // Tsunami start
+    public boolean requestedStatus = false;
+    private int requestVersion = 14;
+    // Tsunami end
 
     public NetLoginHandler(MinecraftServer minecraftserver, Socket socket, String s) {
         this.server = minecraftserver;
@@ -154,6 +168,87 @@ public class NetLoginHandler extends NetHandler {
 //            }
         }
     }
+
+    // Tsunami start - server list ping
+    public void handleStatusRequest(byte firstByte, DataInputStream input) {
+        try {
+            int length = Packet.readVarInt(firstByte, input);
+            int id = Packet.readVarInt(input);
+            if (id == 0) {
+                if (length != 1) {
+                    requestVersion = Packet.readVarInt(input);
+                    Packet.readUTF8(input);
+                    input.readUnsignedShort();
+                    Packet.readVarInt(input);
+                    requestedStatus = true;
+                } else {
+                    doStatusResponse();
+                }
+            } else if (id == 1) {
+                long time = input.readLong();
+                doPongResponse(time);
+            }
+        } catch (IOException e) {
+        }
+    }
+
+    private void doStatusResponse() throws IOException {
+        JsonObject root = new JsonObject();
+
+        JsonObject version = new JsonObject();
+        version.addProperty("name", "b1.7.3");
+        version.addProperty("protocol", requestVersion);
+        root.add("version", version);
+
+        JsonObject players = new JsonObject();
+        players.addProperty("max", Bukkit.getMaxPlayers());
+        players.addProperty("online", Bukkit.getOnlinePlayers().length);
+
+        if (Tsunami.config().getBoolean("server-list-ping.show-player-names", true)) {
+            JsonArray samples = new JsonArray();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                JsonObject sample = new JsonObject();
+                sample.addProperty("name", player.getName());
+                sample.addProperty("id", player.getUniqueId().toString());
+                samples.add(sample);
+            }
+            players.add("sample", samples);
+        }
+
+        root.add("players", players);
+
+        JsonObject description = new JsonObject();
+        description.addProperty("text", Tsunami.config().getString("server-list-ping.motd", "A Minecraft Server"));
+        root.add("description", description);
+
+        if (server.serverIcon != null) {
+            root.addProperty("favicon", "data:image/png;base64," + new String(server.serverIcon, StandardCharsets.ISO_8859_1));
+        }
+
+        ByteArrayOutputStream status = new ByteArrayOutputStream();
+        String response = root.toString();
+        Packet.writeVarInt(0, status);
+        Packet.writeUTF8(response, status);
+        Packet.writeVarInt(status.size(), this.networkManager.output);
+        status.writeTo(this.networkManager.output);
+        this.networkManager.output.flush();
+    }
+
+    private void doPongResponse(long time) throws IOException {
+        ByteArrayOutputStream pong = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(pong);
+        Packet.writeVarInt(1, data);
+        data.writeLong(time);
+        Packet.writeVarInt(pong.size(), this.networkManager.output);
+        pong.writeTo(this.networkManager.output);
+        this.networkManager.output.flush();
+
+        this.networkManager.d();
+        this.networkManager.socket.close();
+        this.server.networkListenThread.b(this);
+        this.c = true;
+    }
+    // Tsunami end
 
     public void b(Packet1Login packet1login) {
         EntityPlayer entityplayer = this.server.serverConfigurationManager.a(this, packet1login.name);

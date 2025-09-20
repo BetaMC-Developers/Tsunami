@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -21,8 +22,8 @@ public class NetworkManager {
     private Object g = new Object();
     public Socket socket; // CraftBukkit - private -> public
     private SocketAddress i; //Project Poseidon - remove final statement
-    private DataInputStream input;
-    private DataOutputStream output;
+    public DataInputStream input; // Tsunami - private -> public
+    public DataOutputStream output; // Tsunami - private -> public
     private boolean l = true;
     private List m = Collections.synchronizedList(new ArrayList());
     private List highPriorityQueue = Collections.synchronizedList(new ArrayList());
@@ -175,7 +176,19 @@ public class NetworkManager {
         boolean flag = false;
 
         try {
-            Packet packet = Packet.a(this.input, this.p.c());
+            // Tsunami start - check for server list ping packets
+            int id = this.input.read();
+
+            NetHandler nethandler = this.p;
+            if (nethandler instanceof NetLoginHandler && (id > 2 || ((NetLoginHandler) nethandler).requestedStatus)) {
+                if (Tsunami.config().getBoolean("server-list-ping.enabled", false)) {
+                    ((NetLoginHandler) nethandler).handleStatusRequest((byte) id, this.input);
+                    return false;
+                }
+            }
+            // Tsunami end
+
+            Packet packet = Packet.a(id, this.input, this.p.c());
 
             if (packet != null) {
                 int[] aint = d;

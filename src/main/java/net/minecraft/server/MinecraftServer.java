@@ -27,6 +27,9 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginLoadOrder;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -59,6 +62,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public boolean spawnAnimals;
     public boolean pvpMode;
     public boolean allowFlight;
+    public byte[] serverIcon; // Tsunami
 
     // CraftBukkit start
     public List<WorldServer> worlds = new ArrayList<WorldServer>();
@@ -188,6 +192,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.savePropertiesFile();
         }
 
+        loadServerIcon(); // Tsunami
+
         // Tsunami start - RCON
         if (Tsunami.config().getBoolean("rcon.enabled", false)) {
             try {
@@ -207,6 +213,27 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
         return true;
     }
+
+    // Tsunami start
+    private void loadServerIcon() {
+        try {
+            File file = new File("server-icon.png");
+            if (!file.exists()) return;
+            BufferedImage image = ImageIO.read(file);
+            if (image.getWidth() != 64 || image.getHeight() != 64) {
+                log.severe("[Tsunami] server-icon.png has invalid dimensions: expected 64x64, got " + image.getWidth() + "x" + image.getHeight());
+                return;
+            }
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", output);
+            serverIcon = Base64.getEncoder().encode(output.toByteArray());
+            log.info("[Tsunami] Loaded server-icon.png");
+        } catch (Exception e) {
+            log.severe("[Tsunami] An error occured while trying to load server-icon.png");
+        }
+    }
+    // Tsunami end
 
     private void a(Convertable convertable, String s, long i) {
         if (convertable.isConvertable(s)) {

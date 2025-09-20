@@ -7,6 +7,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -84,14 +87,15 @@ public abstract class Packet {
     }
 
     // CraftBukkit - throws IOException
-    public static Packet a(DataInputStream datainputstream, boolean flag) throws IOException {
+    // Tsunami - changed signature
+    public static Packet a(int id, DataInputStream datainputstream, boolean flag) throws IOException {
         boolean flag1 = false;
         Packet packet = null;
 
         int i;
 
         try {
-            i = datainputstream.read();
+            i = id;
             if (i == -1) {
                 return null;
             }
@@ -175,6 +179,61 @@ public abstract class Packet {
             return stringbuilder.toString();
         }
     }
+
+    // Tsunami start
+    public static int readVarInt(byte firstByte, InputStream input) throws IOException {
+        int value = 0;
+        int i = 0;
+        int b = firstByte;
+        while ((b & 0x80) != 0) {
+            value |= (b & 0x7F) << i;
+            i += 7;
+            if (i > 35) {
+                throw new IOException("VarInt bigger than maximum allowed 5 bytes");
+            }
+            b = input.read();
+        }
+        return value | (b << i);
+    }
+
+    public static int readVarInt(InputStream input) throws IOException {
+        int value = 0;
+        int i = 0;
+        int b;
+        while (((b = input.read()) & 0x80) != 0) {
+            value |= (b & 0x7F) << i;
+            i += 7;
+            if (i > 35) {
+                throw new IOException("VarInt bigger than maximum allowed 5 bytes");
+            }
+        }
+        return value | (b << i);
+    }
+
+    public static String readUTF8(InputStream input) throws IOException {
+        int length = readVarInt(input);
+        byte[] bytes = new byte[length];
+        input.read(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public static void writeVarInt(int value, OutputStream output) throws IOException {
+        while ((value & 0xFFFFFF80) != 0L) {
+            output.write((value & 0x7F) | 0x80);
+            value >>>= 7;
+        }
+        output.write(value & 0x7F);
+    }
+
+    public static void writeUTF8(String value, OutputStream output) throws IOException {
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length >= Short.MAX_VALUE) {
+            throw new IOException("String length longer than maximum allowed 32767");
+        }
+        writeVarInt(bytes.length, output);
+        output.write(bytes);
+    }
+    // Tsunami end
 
     public abstract void a(DataInputStream datainputstream) throws IOException; // CraftBukkit
 

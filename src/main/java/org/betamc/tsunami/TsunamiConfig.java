@@ -39,6 +39,9 @@ public class TsunamiConfig extends Configuration {
         writeDefault("rcon.enabled", false);
         writeDefault("rcon.port", 25575);
         writeDefault("rcon.password", "");
+        writeDefault("server-list-ping.enabled", false);
+        writeDefault("server-list-ping.motd", "A Minecraft Server");
+        writeDefault("server-list-ping.show-player-names", true);
     }
 
     private void writeDefault(String key, Object defaultValue) {
