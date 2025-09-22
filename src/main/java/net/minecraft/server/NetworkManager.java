@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -176,8 +177,19 @@ public class NetworkManager {
         boolean flag = false;
 
         try {
-            // Tsunami start - check for server list ping packets
-            int id = this.input.read();
+            // Tsunami start - read packet id first, then check for a server list ping packet
+            int id = -1;
+            try {
+                id = this.input.read();
+            } catch (EOFException e) {
+                System.out.println("Reached end of stream");
+            } catch (SocketTimeoutException e) {
+                System.out.println("Read timed out");
+            } catch (SocketException e) {
+                if (!(boolean) PoseidonConfig.getInstance().getConfigOption("settings.remove-join-leave-debug", true)) {
+                    System.out.println("Connection reset");
+                }
+            }
 
             NetHandler nethandler = this.p;
             if (nethandler instanceof NetLoginHandler && (id > 2 || ((NetLoginHandler) nethandler).requestedStatus)) {
