@@ -61,27 +61,29 @@ public final class SpawnerCreature {
             return 0;
         } else {
             int ret = 0;
-            EnumCreatureType[] aenumcreaturetype = EnumCreatureType.values();
+            for (EnumCreatureType enumcreaturetype : EnumCreatureType.values()) {
+                b.clear();
 
-            for (int i = 0; i < world.players.size(); ++i) {
-                EntityHuman entityhuman = (EntityHuman) world.players.get(i);
-                Set set = new HashSet();
+                for (int i = 0; i < world.players.size(); i++) {
+                    EntityHuman entityhuman = (EntityHuman) world.players.get(i);
+                    if (!(entityhuman instanceof EntityPlayer))
+                        continue;
+                    if (world.getPlayerMobCount(enumcreaturetype.a(), entityhuman) > enumcreaturetype.b())
+                        continue;
 
-                int x = MathHelper.floor(entityhuman.locX / 16.0);
-                int z = MathHelper.floor(entityhuman.locZ / 16.0);
-                byte b0 = 8;
+                    int x = MathHelper.floor(entityhuman.locX / 16.0);
+                    int z = MathHelper.floor(entityhuman.locZ / 16.0);
+                    byte b0 = 8;
 
-                for (int l = -b0; l <= b0; ++l) {
-                    for (int i1 = -b0; i1 <= b0; ++i1) {
-                        set.add(new ChunkCoordIntPair(l + x, i1 + z));
+                    for (int l = -b0; l <= b0; ++l) {
+                        for (int i1 = -b0; i1 <= b0; ++i1) {
+                            b.add(new ChunkCoordIntPair(l + x, i1 + z));
+                        }
                     }
                 }
 
-                for (int j1 = 0; j1 < aenumcreaturetype.length; ++j1) {
-                    EnumCreatureType enumcreaturetype = aenumcreaturetype[j1];
-                    if ((!enumcreaturetype.d() || flag1) && (enumcreaturetype.d() || flag) && world.getPlayerMobCount(enumcreaturetype.a(), entityhuman) <= enumcreaturetype.b()) {
-                        ret += spawnCreatureType(world, enumcreaturetype, set);
-                    }
+                if ((!enumcreaturetype.d() || flag1) && (enumcreaturetype.d() || flag)) {
+                    ret += spawnCreatureType(world, enumcreaturetype, b);
                 }
             }
 
