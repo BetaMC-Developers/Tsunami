@@ -8,6 +8,7 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonServer;
 import jline.ConsoleReader;
 import net.minecraft.server.*;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -372,6 +373,10 @@ public final class CraftServer implements Server {
 
         if (sender instanceof Player) {
             sender.sendMessage("Unknown command. Type \"/help\" for help.");
+
+            if (Tsunami.config().getBoolean("log-unknown-command-sends", false)) {
+                Logger.getLogger("Minecraft").info(sender.getName() + " attempted to issue unknown server command: /" + commandLine);
+            }
         } else {
             sender.sendMessage("Unknown command. Type \"help\" for help.");
         }
