@@ -371,6 +371,7 @@ public final class CraftServer implements Server {
             return true;
         }
 
+        // Tsunami start
         if (sender instanceof Player) {
             sender.sendMessage("Unknown command. Type \"/help\" for help.");
 
@@ -380,6 +381,7 @@ public final class CraftServer implements Server {
         } else {
             sender.sendMessage("Unknown command. Type \"help\" for help.");
         }
+        // Tsunami end
 
         return false;
     }
