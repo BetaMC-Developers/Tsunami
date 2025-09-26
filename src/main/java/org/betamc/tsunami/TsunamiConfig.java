@@ -31,6 +31,7 @@ public class TsunamiConfig extends Configuration {
         writeDefault("chunk-io.async-unloading", false);
         writeDefault("chunk-io.region-file-compression", "deflate");
         writeDefault("chunk-io.chunk-packet-compression-level", 6);
+        writeDefault("logging.log-unknown-commands", false);
         writeDefault("merge-dropped-items", false);
         writeDefault("mob-spawning.mob-caps.monsters", 70);
         writeDefault("mob-spawning.mob-caps.animals", 15);
