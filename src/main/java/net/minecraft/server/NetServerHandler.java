@@ -4,6 +4,7 @@ import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
 import com.projectposeidon.ConnectionType;
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -863,12 +864,16 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 }
 
                 //Project Poseidon End
-                return;
+            } else {
+                // Tsunami start
+                if (Tsunami.config().getBoolean("logging.log-unknown-commands", false)) {
+                    a.info(player.getName() + " attempted to issue unknown server command: " + s);
+                }
+                // Tsunami end
             }
         } catch (CommandException ex) {
             player.sendMessage(ChatColor.RED + "An internal error occurred while attempting to perform this command");
             Logger.getLogger(NetServerHandler.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            return;
         }
         // CraftBukkit end
 
