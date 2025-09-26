@@ -8,6 +8,7 @@ import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.*;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -181,9 +182,9 @@ public class CraftWorld implements World {
         }
 
 //        preserveChunk((CraftChunk) chunk.bukkitChunk);
-        world.chunkProviderServer.unloadQueue.remove(x, z);
-        world.chunkProviderServer.chunks.remove(x, z);
-        world.chunkProviderServer.chunkList.remove(chunk);
+        world.chunkProviderServer.unloadQueue.remove(LongHash.toLong(x, z)); // Tsunami - toLong
+        world.chunkProviderServer.chunks.remove(LongHash.toLong(x, z)); // Tsunami - toLong
+        //world.chunkProviderServer.chunkList.remove(chunk); // Tsunami
 
         return true;
     }
@@ -191,7 +192,7 @@ public class CraftWorld implements World {
     public boolean regenerateChunk(int x, int z) {
         unloadChunk(x, z, false, false);
 
-        world.chunkProviderServer.unloadQueue.remove(x, z);
+        world.chunkProviderServer.unloadQueue.remove(LongHash.toLong(x, z)); // Tsunami - toLong
 
         net.minecraft.server.Chunk chunk = null;
 
@@ -255,8 +256,8 @@ public class CraftWorld implements World {
             return world.chunkProviderServer.getChunkAt(x, z) != null;
         }
 
-        world.chunkProviderServer.unloadQueue.remove(x, z);
-        net.minecraft.server.Chunk chunk = (net.minecraft.server.Chunk) world.chunkProviderServer.chunks.get(x, z);
+        world.chunkProviderServer.unloadQueue.remove(LongHash.toLong(x, z)); // Tsunami - toLong
+        net.minecraft.server.Chunk chunk = world.chunkProviderServer.chunks.get(LongHash.toLong(x, z)); // Tsunami - toLong
 
         if (chunk == null) {
             chunk = world.chunkProviderServer.loadChunk(x, z);
@@ -269,8 +270,8 @@ public class CraftWorld implements World {
     @SuppressWarnings("unchecked")
     private void chunkLoadPostProcess(net.minecraft.server.Chunk chunk, int x, int z) {
         if (chunk != null) {
-            world.chunkProviderServer.chunks.put(x, z, chunk);
-            world.chunkProviderServer.chunkList.add(chunk);
+            world.chunkProviderServer.chunks.put(LongHash.toLong(x, z), chunk); // Tsunami - toLong
+            //world.chunkProviderServer.chunkList.add(chunk); // Tsunami
 
             chunk.loadNOP();
             chunk.addEntities();

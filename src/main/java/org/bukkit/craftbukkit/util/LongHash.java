@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.bukkit.craftbukkit.util;
 
 /**
@@ -10,7 +5,8 @@ package org.bukkit.craftbukkit.util;
  * @author Nathan
  */
 public abstract class LongHash {
-    static long toLong(int msw, int lsw) {
+    // Tsunami - package-private -> public
+    public static long toLong(int msw, int lsw) {
         return ((long) msw << 32) + lsw - Integer.MIN_VALUE;
     }
 
