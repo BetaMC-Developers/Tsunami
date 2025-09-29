@@ -30,6 +30,7 @@ public class BiomeBase {
     private boolean v;
     private boolean w;
     private static BiomeBase[] x = new BiomeBase[4096];
+    private final WorldGenTrees GEN_TREES = new WorldGenTrees(); // Tsunami
 
     protected BiomeBase() {
         this.p = (byte) Block.GRASS.id;
@@ -68,7 +69,7 @@ public class BiomeBase {
     }
 
     public WorldGenerator a(Random random) {
-        return (WorldGenerator) (random.nextInt(10) == 0 ? new WorldGenBigTree() : new WorldGenTrees());
+        return (WorldGenerator) (random.nextInt(10) == 0 ? new WorldGenBigTree() : GEN_TREES); // Tsunami
     }
 
     protected BiomeBase b() {
