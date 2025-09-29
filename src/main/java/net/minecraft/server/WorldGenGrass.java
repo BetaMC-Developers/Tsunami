@@ -12,6 +12,12 @@ public class WorldGenGrass extends WorldGenerator {
         this.b = j;
     }
 
+    // Tsunami start
+    public void setType(int type) {
+        this.b = type;
+    }
+    // Tsunami end
+
     public boolean a(World world, Random random, int i, int j, int k) {
         int l;
 

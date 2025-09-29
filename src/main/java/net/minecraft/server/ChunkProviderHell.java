@@ -24,6 +24,15 @@ public class ChunkProviderHell implements IChunkProvider {
     double[] f;
     double[] g;
 
+    // Tsunami start
+    private final WorldGenHellLava GEN_LAVA = new WorldGenHellLava(Block.LAVA.id);
+    private final WorldGenFire GEN_FIRE = new WorldGenFire();
+    private final WorldGenLightStone2 GEN_GLOWSTONE_2 = new WorldGenLightStone2();
+    private final WorldGenLightStone1 GEN_GLOWSTONE_1 = new WorldGenLightStone1();
+    private final WorldGenFlowers GEN_BROWN_MUSHROOM = new WorldGenFlowers(Block.BROWN_MUSHROOM.id);
+    private final WorldGenFlowers GEN_RED_MUSHROOM = new WorldGenFlowers(Block.RED_MUSHROOM.id);
+    // Tsunami end
+
     public ChunkProviderHell(World world, long i) {
         this.n = world;
         this.h = new Random(i);
@@ -326,7 +335,7 @@ public class ChunkProviderHell implements IChunkProvider {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(120) + 4;
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenHellLava(Block.LAVA.id)).a(this.n, this.h, j1, k1, l1);
+            GEN_LAVA.a(this.n, this.h, j1, k1, l1); // Tsunami
         }
 
         i1 = this.h.nextInt(this.h.nextInt(10) + 1) + 1;
@@ -337,7 +346,7 @@ public class ChunkProviderHell implements IChunkProvider {
             k1 = k + this.h.nextInt(16) + 8;
             l1 = this.h.nextInt(120) + 4;
             i2 = l + this.h.nextInt(16) + 8;
-            (new WorldGenFire()).a(this.n, this.h, k1, l1, i2);
+            GEN_FIRE.a(this.n, this.h, k1, l1, i2); // Tsunami
         }
 
         i1 = this.h.nextInt(this.h.nextInt(10) + 1);
@@ -346,28 +355,28 @@ public class ChunkProviderHell implements IChunkProvider {
             k1 = k + this.h.nextInt(16) + 8;
             l1 = this.h.nextInt(120) + 4;
             i2 = l + this.h.nextInt(16) + 8;
-            (new WorldGenLightStone2()).a(this.n, this.h, k1, l1, i2);
+            GEN_GLOWSTONE_2.a(this.n, this.h, k1, l1, i2); // Tsunami
         }
 
         for (j1 = 0; j1 < 10; ++j1) {
             k1 = k + this.h.nextInt(16) + 8;
             l1 = this.h.nextInt(128);
             i2 = l + this.h.nextInt(16) + 8;
-            (new WorldGenLightStone1()).a(this.n, this.h, k1, l1, i2);
+            GEN_GLOWSTONE_1.a(this.n, this.h, k1, l1, i2); // Tsunami
         }
 
         if (this.h.nextInt(1) == 0) {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(128);
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.BROWN_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
+            GEN_BROWN_MUSHROOM.a(this.n, this.h, j1, k1, l1); // Tsunami
         }
 
         if (this.h.nextInt(1) == 0) {
             j1 = k + this.h.nextInt(16) + 8;
             k1 = this.h.nextInt(128);
             l1 = l + this.h.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
+            GEN_RED_MUSHROOM.a(this.n, this.h, j1, k1, l1); // Tsunami
         }
 
         BlockSand.instaFall = false;

@@ -28,6 +28,32 @@ public class ChunkProviderGenerate implements IChunkProvider {
     int[][] i = new int[32][32];
     private double[] w;
 
+    // Tsunami start
+    private final WorldGenLakes GEN_STATIONARY_WATER = new WorldGenLakes(Block.STATIONARY_WATER.id);
+    private final WorldGenLakes GEN_STATIONARY_LAVA = new WorldGenLakes(Block.STATIONARY_LAVA.id);
+    private final WorldGenDungeons GEN_DUNGEONS = new WorldGenDungeons();
+    private final WorldGenClay GEN_CLAY = new WorldGenClay(32);
+    private final WorldGenMinable GEN_DIRT = new WorldGenMinable(Block.DIRT.id, 32);
+    private final WorldGenMinable GEN_GRAVEL = new WorldGenMinable(Block.GRAVEL.id, 32);
+    private final WorldGenMinable GEN_COAL = new WorldGenMinable(Block.COAL_ORE.id, 16);
+    private final WorldGenMinable GEN_IRON = new WorldGenMinable(Block.IRON_ORE.id, 8);
+    private final WorldGenMinable GEN_GOLD = new WorldGenMinable(Block.GOLD_ORE.id, 8);
+    private final WorldGenMinable GEN_REDSTONE = new WorldGenMinable(Block.REDSTONE_ORE.id, 7);
+    private final WorldGenMinable GEN_DIAMOND = new WorldGenMinable(Block.DIAMOND_ORE.id, 7);
+    private final WorldGenMinable GEN_LAPIS = new WorldGenMinable(Block.LAPIS_ORE.id, 6);
+    private final WorldGenFlowers GEN_YELLOW_FLOWER = new WorldGenFlowers(Block.YELLOW_FLOWER.id);
+    private final WorldGenGrass GEN_LONG_GRASS = new WorldGenGrass(Block.LONG_GRASS.id, 1);
+    private final WorldGenDeadBush GEN_DEAD_BUSH = new WorldGenDeadBush(Block.DEAD_BUSH.id);
+    private final WorldGenFlowers GEN_RED_ROSE = new WorldGenFlowers(Block.RED_ROSE.id);
+    private final WorldGenFlowers GEN_BROWN_MUSHROOM = new WorldGenFlowers(Block.BROWN_MUSHROOM.id);
+    private final WorldGenFlowers GEN_RED_MUSHROOM = new WorldGenFlowers(Block.RED_MUSHROOM.id);
+    private final WorldGenReed GEN_REED = new WorldGenReed();
+    private final WorldGenPumpkin GEN_PUMPKIN = new WorldGenPumpkin();
+    private final WorldGenCactus GEN_CACTUS = new WorldGenCactus();
+    private final WorldGenLiquids GEN_WATER = new WorldGenLiquids(Block.WATER.id);
+    private final WorldGenLiquids GEN_LAVA = new WorldGenLiquids(Block.LAVA.id);
+    // Tsunami end
+
     public ChunkProviderGenerate(World world, long i) {
         this.p = world;
         this.j = new Random(i);
@@ -341,7 +367,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
             k1 = k + this.j.nextInt(16) + 8;
             l1 = this.j.nextInt(128);
             i2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLakes(Block.STATIONARY_WATER.id)).a(this.p, this.j, k1, l1, i2);
+            GEN_STATIONARY_WATER.a(this.p, this.j, k1, l1, i2); // Tsunami
         }
 
         if (this.j.nextInt(8) == 0) {
@@ -349,7 +375,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
             l1 = this.j.nextInt(this.j.nextInt(120) + 8);
             i2 = l + this.j.nextInt(16) + 8;
             if (l1 < 64 || this.j.nextInt(10) == 0) {
-                (new WorldGenLakes(Block.STATIONARY_LAVA.id)).a(this.p, this.j, k1, l1, i2);
+                GEN_STATIONARY_LAVA.a(this.p, this.j, k1, l1, i2); // Tsunami
             }
         }
 
@@ -359,70 +385,70 @@ public class ChunkProviderGenerate implements IChunkProvider {
             l1 = k + this.j.nextInt(16) + 8;
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenDungeons()).a(this.p, this.j, l1, i2, j2);
+            GEN_DUNGEONS.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 10; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenClay(32)).a(this.p, this.j, l1, i2, j2);
+            GEN_CLAY.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 20; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.DIRT.id, 32)).a(this.p, this.j, l1, i2, j2);
+            GEN_DIRT.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 10; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.GRAVEL.id, 32)).a(this.p, this.j, l1, i2, j2);
+            GEN_GRAVEL.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 20; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(128);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.COAL_ORE.id, 16)).a(this.p, this.j, l1, i2, j2);
+            GEN_COAL.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 20; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(64);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.IRON_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
+            GEN_IRON.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 2; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(32);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.GOLD_ORE.id, 8)).a(this.p, this.j, l1, i2, j2);
+            GEN_GOLD.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 8; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.REDSTONE_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
+            GEN_REDSTONE.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 1; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.DIAMOND_ORE.id, 7)).a(this.p, this.j, l1, i2, j2);
+            GEN_DIAMOND.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         for (k1 = 0; k1 < 1; ++k1) {
             l1 = k + this.j.nextInt(16);
             i2 = this.j.nextInt(16) + this.j.nextInt(16);
             j2 = l + this.j.nextInt(16);
-            (new WorldGenMinable(Block.LAPIS_ORE.id, 6)).a(this.p, this.j, l1, i2, j2);
+            GEN_LAPIS.a(this.p, this.j, l1, i2, j2); // Tsunami
         }
 
         d0 = 0.5D;
@@ -496,7 +522,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
             k2 = k + this.j.nextInt(16) + 8;
             i3 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.YELLOW_FLOWER.id)).a(this.p, this.j, k2, i3, l2);
+            GEN_YELLOW_FLOWER.a(this.p, this.j, k2, i3, l2); // Tsunami
         }
 
         byte b1 = 0;
@@ -534,7 +560,8 @@ public class ChunkProviderGenerate implements IChunkProvider {
             l2 = k + this.j.nextInt(16) + 8;
             k3 = this.j.nextInt(128);
             j3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenGrass(Block.LONG_GRASS.id, b2)).a(this.p, this.j, l2, k3, j3);
+            GEN_LONG_GRASS.setType(b2);
+            GEN_LONG_GRASS.a(this.p, this.j, l2, k3, j3); // Tsunami
         }
 
         b1 = 0;
@@ -546,42 +573,42 @@ public class ChunkProviderGenerate implements IChunkProvider {
             i3 = k + this.j.nextInt(16) + 8;
             l2 = this.j.nextInt(128);
             k3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenDeadBush(Block.DEAD_BUSH.id)).a(this.p, this.j, i3, l2, k3);
+            GEN_DEAD_BUSH.a(this.p, this.j, i3, l2, k3); // Tsunami
         }
 
         if (this.j.nextInt(2) == 0) {
             k2 = k + this.j.nextInt(16) + 8;
             i3 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_ROSE.id)).a(this.p, this.j, k2, i3, l2);
+            GEN_RED_ROSE.a(this.p, this.j, k2, i3, l2); // Tsunami
         }
 
         if (this.j.nextInt(4) == 0) {
             k2 = k + this.j.nextInt(16) + 8;
             i3 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.BROWN_MUSHROOM.id)).a(this.p, this.j, k2, i3, l2);
+            GEN_BROWN_MUSHROOM.a(this.p, this.j, k2, i3, l2); // Tsunami
         }
 
         if (this.j.nextInt(8) == 0) {
             k2 = k + this.j.nextInt(16) + 8;
             i3 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenFlowers(Block.RED_MUSHROOM.id)).a(this.p, this.j, k2, i3, l2);
+            GEN_RED_MUSHROOM.a(this.p, this.j, k2, i3, l2); // Tsunami
         }
 
         for (k2 = 0; k2 < 10; ++k2) {
             i3 = k + this.j.nextInt(16) + 8;
             l2 = this.j.nextInt(128);
             k3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenReed()).a(this.p, this.j, i3, l2, k3);
+            GEN_REED.a(this.p, this.j, i3, l2, k3); // Tsunami
         }
 
         if (this.j.nextInt(32) == 0) {
             k2 = k + this.j.nextInt(16) + 8;
             i3 = this.j.nextInt(128);
             l2 = l + this.j.nextInt(16) + 8;
-            (new WorldGenPumpkin()).a(this.p, this.j, k2, i3, l2);
+            GEN_PUMPKIN.a(this.p, this.j, k2, i3, l2); // Tsunami
         }
 
         k2 = 0;
@@ -593,21 +620,21 @@ public class ChunkProviderGenerate implements IChunkProvider {
             l2 = k + this.j.nextInt(16) + 8;
             k3 = this.j.nextInt(128);
             j3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenCactus()).a(this.p, this.j, l2, k3, j3);
+            GEN_CACTUS.a(this.p, this.j, l2, k3, j3); // Tsunami
         }
 
         for (i3 = 0; i3 < 50; ++i3) {
             l2 = k + this.j.nextInt(16) + 8;
             k3 = this.j.nextInt(this.j.nextInt(120) + 8);
             j3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLiquids(Block.WATER.id)).a(this.p, this.j, l2, k3, j3);
+            GEN_WATER.a(this.p, this.j, l2, k3, j3); // Tsunami
         }
 
         for (i3 = 0; i3 < 20; ++i3) {
             l2 = k + this.j.nextInt(16) + 8;
             k3 = this.j.nextInt(this.j.nextInt(this.j.nextInt(112) + 8) + 8);
             j3 = l + this.j.nextInt(16) + 8;
-            (new WorldGenLiquids(Block.LAVA.id)).a(this.p, this.j, l2, k3, j3);
+            GEN_LAVA.a(this.p, this.j, l2, k3, j3); // Tsunami
         }
 
         this.w = this.p.getWorldChunkManager().a(this.w, k + 8, l + 8, 16, 16);
