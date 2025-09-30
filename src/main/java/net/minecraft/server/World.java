@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -7,6 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -53,6 +56,7 @@ public class World implements IBlockAccess {
     public IChunkProvider chunkProvider; // CraftBukkit - protected -> public
     protected final IDataManager w;
     public WorldData worldData; // CraftBukkit - protected -> public
+    private final ChunkCoordinates spawn; // Tsunami
     public boolean isLoading;
     private boolean J;
     public WorldMapCollection worldMaps;
@@ -62,7 +66,7 @@ public class World implements IBlockAccess {
     public boolean allowMonsters = true; // CraftBukkit - private -> public
     public boolean allowAnimals = true; // CraftBukkit - private -> public
     static int A = 0;
-    private Set P = new HashSet();
+    private LongOpenHashSet P = new LongOpenHashSet(); // Tsunami - HashSet -> LongOpenHashSet
     private int Q;
     private List R;
     public boolean isStatic;
@@ -134,6 +138,7 @@ public class World implements IBlockAccess {
             this.worldData.a(s);
         }
 
+        this.spawn = new ChunkCoordinates(this.worldData.c(), this.worldData.d(), this.worldData.e()); // Tsunami
         this.worldProvider.a(this);
         this.chunkProvider = this.b();
         if (flag) {
@@ -1887,7 +1892,7 @@ public class World implements IBlockAccess {
 
             for (k = -b0; k <= b0; ++k) {
                 for (l = -b0; l <= b0; ++l) {
-                    this.P.add(new ChunkCoordIntPair(k + i, l + j));
+                    this.P.add(LongHash.toLong(k + i, l + j)); // Tsunami
                 }
             }
         }
@@ -1896,14 +1901,14 @@ public class World implements IBlockAccess {
             --this.Q;
         }
 
-        Iterator iterator = this.P.iterator();
+        LongIterator iterator = this.P.iterator(); // Tsunami - LongIterator
 
         while (iterator.hasNext()) {
-            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator.next();
+            long coordPair = iterator.nextLong(); // Tsunami - ChunkCoordIntPair -> long
 
-            i = chunkcoordintpair.x * 16;
-            j = chunkcoordintpair.z * 16;
-            Chunk chunk = this.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+            i = LongHash.msw(coordPair) * 16;
+            j = LongHash.lsw(coordPair) * 16;
+            Chunk chunk = this.getChunkAt(LongHash.msw(coordPair), LongHash.lsw(coordPair));
             int j1;
             int k1;
             int l1;
@@ -2325,7 +2330,12 @@ public class World implements IBlockAccess {
     }
 
     public ChunkCoordinates getSpawn() {
-        return new ChunkCoordinates(this.worldData.c(), this.worldData.d(), this.worldData.e());
+        // Tsunami start
+        this.spawn.x = this.worldData.c();
+        this.spawn.y = this.worldData.d();
+        this.spawn.z = this.worldData.e();
+        return this.spawn;
+        // Tsunami end
     }
 
     public boolean a(EntityHuman entityhuman, int i, int j, int k) {

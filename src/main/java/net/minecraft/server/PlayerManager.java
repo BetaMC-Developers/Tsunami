@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.util.LongHash;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,10 +162,10 @@ public class PlayerManager {
                     final double z = entityplayer.locZ;
 
                     entityplayer.chunkCoordIntPairQueue.sort((a, b) -> {
-                        double ax = (a.x << 4) + 8;
-                        double az = (a.z << 4) + 8;
-                        double bx = (b.x << 4) + 8;
-                        double bz = (b.z << 4) + 8;
+                        double ax = (LongHash.msw(a) << 4) + 8;
+                        double az = (LongHash.lsw(a) << 4) + 8;
+                        double bx = (LongHash.msw(b) << 4) + 8;
+                        double bz = (LongHash.lsw(b) << 4) + 8;
 
                         double da = Math.pow(ax - x, 2) + Math.pow(az - z, 2);
                         double db = Math.pow(bx - x, 2) + Math.pow(bz - z, 2);

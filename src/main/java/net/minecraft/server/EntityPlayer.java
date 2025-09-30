@@ -4,9 +4,12 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
 import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
 import com.projectposeidon.api.PoseidonUUID;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.inventory.ChestOpenedEvent;
 
@@ -19,8 +22,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public ItemInWorldManager itemInWorldManager;
     public double d;
     public double e;
-    public LinkedList<ChunkCoordIntPair> chunkCoordIntPairQueue = new LinkedList<>();
-    public Set playerChunkCoordIntPairs = new HashSet();
+    public LongArrayList chunkCoordIntPairQueue = new LongArrayList(); // Tsunami - LinkedList -> LongArrayList
+    public LongOpenHashSet playerChunkCoordIntPairs = new LongOpenHashSet(); // Tsunami - HashSet -> LongOpenHashSet
     public final List removeQueue = new LinkedList(); // poseidon
     private int bL = -99999999;
     private int bM = 60;
@@ -244,9 +247,9 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         if (flag && !this.chunkCoordIntPairQueue.isEmpty()) {
             // Tsunami start - improve chunk sending
             WorldServer worldserver = this.getWorldServer();
-            ChunkCoordIntPair chunkcoordintpair;
-            while ((chunkcoordintpair = this.chunkCoordIntPairQueue.poll()) != null) {
-                Chunk chunk = worldserver.chunkProviderServer.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+            while (!this.chunkCoordIntPairQueue.isEmpty()) {
+                long coordPair = this.chunkCoordIntPairQueue.removeLong(0);
+                Chunk chunk = worldserver.chunkProviderServer.getChunkAt(LongHash.msw(coordPair), LongHash.lsw(coordPair));
 
                 this.netServerHandler.sendPacket(new Packet51MapChunk(chunk.x * 16, 0, chunk.z * 16, 16, 128, 16, worldserver));
                 worldserver.tracker.a(this, chunk);

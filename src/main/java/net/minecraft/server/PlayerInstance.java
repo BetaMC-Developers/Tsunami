@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.betamc.tsunami.Tsunami;
+import org.bukkit.craftbukkit.util.LongHash;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ class PlayerInstance {
     private List b;
     private int chunkX;
     private int chunkZ;
-    private ChunkCoordIntPair location;
+    private long location; // Tsunami - ChunkCoordIntPair -> long
     private short[] dirtyBlocks;
     private int dirtyCount;
     private int h;
@@ -35,7 +36,7 @@ class PlayerInstance {
         this.dirtyCount = 0;
         this.chunkX = i;
         this.chunkZ = j;
-        this.location = new ChunkCoordIntPair(i, j);
+        this.location = LongHash.toLong(i, j); // Tsunami
 
         // Tsunami start
         if (asyncLoading) {
@@ -53,7 +54,7 @@ class PlayerInstance {
             } else {
                 // CraftBukkit start
                 if (entityplayer.playerChunkCoordIntPairs.add(this.location)) {
-                    entityplayer.netServerHandler.sendPacket(new Packet50PreChunk(this.location.x, this.location.z, true));
+                    entityplayer.netServerHandler.sendPacket(new Packet50PreChunk(this.chunkX, this.chunkZ, true));
                 }
                 // CraftBukkit end
 
@@ -221,10 +222,11 @@ class PlayerInstance {
         }
     }
 
-    // Poseidon
-    static ChunkCoordIntPair a(PlayerInstance playerchunk) {
+    // Tsunami start
+    static long a(PlayerInstance playerchunk) {
         return playerchunk.location;
     }
+    // Tsunami end
 
     static List b(PlayerInstance playerchunk) {
         return playerchunk.b;

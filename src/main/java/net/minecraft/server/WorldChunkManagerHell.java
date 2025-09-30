@@ -18,6 +18,12 @@ public class WorldChunkManagerHell extends WorldChunkManager {
         return this.e;
     }
 
+    // Tsunami start
+    public BiomeBase a(long coordPair) {
+        return this.e;
+    }
+    // Tsunami end
+
     public BiomeBase getBiome(int i, int j) {
         return this.e;
     }

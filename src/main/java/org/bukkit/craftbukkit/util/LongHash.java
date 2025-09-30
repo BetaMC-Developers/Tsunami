@@ -10,11 +10,13 @@ public abstract class LongHash {
         return ((long) msw << 32) + lsw - Integer.MIN_VALUE;
     }
 
-    static int msw(long l) {
+    // Tsunami - package-private -> public
+    public static int msw(long l) {
         return (int) (l >> 32);
     }
 
-    static int lsw(long l) {
+    // Tsunami - package-private -> public
+    public static int lsw(long l) {
         return (int) (l & 0xFFFFFFFF) + Integer.MIN_VALUE;
     }
 

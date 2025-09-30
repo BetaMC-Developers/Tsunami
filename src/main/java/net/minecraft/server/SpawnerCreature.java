@@ -1,15 +1,17 @@
 package net.minecraft.server;
 
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public final class SpawnerCreature {
 
-    private static Set b = new HashSet();
+    private static LongOpenHashSet b = new LongOpenHashSet(); // Tsunami - HashSet -> LongOpenHashSet
     protected static final Class[] a = new Class[] { EntitySpider.class, EntityZombie.class, EntitySkeleton.class};
 
     public SpawnerCreature() {}
@@ -36,7 +38,7 @@ public final class SpawnerCreature {
 
                 for (int l = -b0; l <= b0; ++l) {
                     for (int i1 = -b0; i1 <= b0; ++i1) {
-                        b.add(new ChunkCoordIntPair(l + x, i1 + z));
+                        b.add(LongHash.toLong(l + x, i1 + z)); // Tsunami
                     }
                 }
             }
@@ -77,7 +79,7 @@ public final class SpawnerCreature {
 
                     for (int l = -b0; l <= b0; ++l) {
                         for (int i1 = -b0; i1 <= b0; ++i1) {
-                            b.add(new ChunkCoordIntPair(l + x, i1 + z));
+                            b.add(LongHash.toLong(l + x, i1 + z)); // Tsunami
                         }
                     }
                 }
@@ -93,14 +95,14 @@ public final class SpawnerCreature {
     // Tsunami end
 
     // Tsunami start - code moved from spawnEntities
-    private static int spawnCreatureType(World world, EnumCreatureType enumcreaturetype, Set set) {
+    private static int spawnCreatureType(World world, EnumCreatureType enumcreaturetype, LongSet set) {
         int ret = 0;
-        Iterator iterator = set.iterator();
+        LongIterator iterator = set.iterator(); // Tsunami - LongIterator
 
         label113:
         while (iterator.hasNext()) {
-            ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator.next();
-            BiomeBase biomebase = world.getWorldChunkManager().a(chunkcoordintpair);
+            long coordPair = iterator.nextLong(); // Tsunami - ChunkCoordIntPair -> long
+            BiomeBase biomebase = world.getWorldChunkManager().a(coordPair);
             List list = biomebase.a(enumcreaturetype);
 
             if (list != null && !list.isEmpty()) {
@@ -127,10 +129,11 @@ public final class SpawnerCreature {
                     }
                 }
 
-                ChunkPosition chunkposition = a(world, chunkcoordintpair.x * 16, chunkcoordintpair.z * 16);
-                int i2 = chunkposition.x;
-                int j2 = chunkposition.y;
-                int k2 = chunkposition.z;
+                // Tsunami start
+                int i2 = LongHash.msw(coordPair) * 16 + world.random.nextInt(16);
+                int j2 = world.random.nextInt(128);
+                int k2 = LongHash.lsw(coordPair) * 16 + world.random.nextInt(16);
+                // Tsunami end
 
                 if (!world.e(i2, j2, k2) && world.getMaterial(i2, j2, k2) == enumcreaturetype.c()) {
                     int l2 = 0;

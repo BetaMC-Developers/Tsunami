@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.util.LongHash;
+
 import java.util.Random;
 
 public class WorldChunkManager {
@@ -23,6 +25,12 @@ public class WorldChunkManager {
     public BiomeBase a(ChunkCoordIntPair chunkcoordintpair) {
         return this.getBiome(chunkcoordintpair.x << 4, chunkcoordintpair.z << 4);
     }
+
+    // Tsunami start
+    public BiomeBase a(long coordPair) {
+        return this.getBiome(LongHash.msw(coordPair) << 4, LongHash.lsw(coordPair) << 4);
+    }
+    // Tsunami end
 
     public BiomeBase getBiome(int i, int j) {
         return this.getBiomeData(i, j, 1, 1)[0];
