@@ -1,7 +1,11 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -20,9 +24,11 @@ public class Explosion {
     public Entity source;
     public EntityDamageEvent.DamageCause customDamageCause = null; // Poseidon
     public float size;
-    public Set<ChunkPosition> blocks = new HashSet<>(); // UberBukkit: Set -> Set<ChunkPosition>
+    public LongOpenHashSet blocks = new LongOpenHashSet(); // Tsunami - Set -> LongOpenHashSet
 
     public boolean wasCanceled = false; // CraftBukkit
+
+    private static final double[] CACHED_RAYS; // Tsunami
 
     public Explosion(World world, Entity entity, double d0, double d1, double d2, float f) {
         this.world = world;
@@ -35,60 +41,40 @@ public class Explosion {
 
     public void a() {
         float f = this.size;
-        byte b0 = 16;
 
-        int i;
-        int j;
-        int k;
-        double d0;
-        double d1;
-        double d2;
+        // Tsunami start - optimize explosions
+        for (int i = 0; i < CACHED_RAYS.length; i += 3) {
+            float f1 = this.size * (0.7F + this.world.random.nextFloat() * 0.6F);
 
-        for (i = 0; i < b0; ++i) {
-            for (j = 0; j < b0; ++j) {
-                for (k = 0; k < b0; ++k) {
-                    if (i == 0 || i == b0 - 1 || j == 0 || j == b0 - 1 || k == 0 || k == b0 - 1) {
-                        double d3 = ((float) i / ((float) b0 - 1.0F) * 2.0F - 1.0F);
-                        double d4 = ((float) j / ((float) b0 - 1.0F) * 2.0F - 1.0F);
-                        double d5 = ((float) k / ((float) b0 - 1.0F) * 2.0F - 1.0F);
-                        double d6 = Math.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+            double d0 = this.posX;
+            double d1 = this.posY;
+            double d2 = this.posZ;
 
-                        d3 /= d6;
-                        d4 /= d6;
-                        d5 /= d6;
-                        float f1 = this.size * (0.7F + this.world.random.nextFloat() * 0.6F);
+            for (float f2 = 0.3F; f1 > 0.0F; f1 -= f2 * 0.75F) {
+                int l = MathHelper.floor(d0);
+                int i1 = MathHelper.floor(d1);
+                int j1 = MathHelper.floor(d2);
+                int k1 = this.world.getTypeId(l, i1, j1);
 
-                        d0 = this.posX;
-                        d1 = this.posY;
-                        d2 = this.posZ;
-
-                        for (float f2 = 0.3F; f1 > 0.0F; f1 -= f2 * 0.75F) {
-                            int l = MathHelper.floor(d0);
-                            int i1 = MathHelper.floor(d1);
-                            int j1 = MathHelper.floor(d2);
-                            int k1 = this.world.getTypeId(l, i1, j1);
-
-                            if (k1 > 0) {
-                                f1 -= (Block.byId[k1].a(this.source) + 0.3F) * f2;
-                            }
-
-                            if (f1 > 0.0F) {
-                                this.blocks.add(new ChunkPosition(l, i1, j1));
-                            }
-
-                            d0 += d3 * (double) f2;
-                            d1 += d4 * (double) f2;
-                            d2 += d5 * (double) f2;
-                        }
-                    }
+                if (k1 > 0) {
+                    f1 -= (Block.byId[k1].a(this.source) + 0.3F) * f2;
                 }
+
+                if (f1 > 0.0F) {
+                    this.blocks.add(LongHash.toLong(l, i1, j1));
+                }
+
+                d0 += CACHED_RAYS[i] * (double) f2;
+                d1 += CACHED_RAYS[i + 1] * (double) f2;
+                d2 += CACHED_RAYS[i + 2] * (double) f2;
             }
         }
+        // Tsunami end
 
         this.size *= 2.0F;
-        i = MathHelper.floor(this.posX - (double) this.size - 1.0D);
-        j = MathHelper.floor(this.posX + (double) this.size + 1.0D);
-        k = MathHelper.floor(this.posY - (double) this.size - 1.0D);
+        int i = MathHelper.floor(this.posX - (double) this.size - 1.0D);
+        int j = MathHelper.floor(this.posX + (double) this.size + 1.0D);
+        int k = MathHelper.floor(this.posY - (double) this.size - 1.0D);
         int l1 = MathHelper.floor(this.posY + (double) this.size + 1.0D);
         int i2 = MathHelper.floor(this.posZ - (double) this.size - 1.0D);
         int j2 = MathHelper.floor(this.posZ + (double) this.size + 1.0D);
@@ -109,9 +95,9 @@ public class Explosion {
             double d7 = entity.f(this.posX, this.posY, this.posZ) / (double) this.size;
 
             if (d7 <= 1.0D) {
-                d0 = entity.locX - this.posX;
-                d1 = entity.locY - this.posY;
-                d2 = entity.locZ - this.posZ;
+                double d0 = entity.locX - this.posX;
+                double d1 = entity.locY - this.posY;
+                double d2 = entity.locZ - this.posZ;
                 double d8 = MathHelper.a(d0 * d0 + d1 * d1 + d2 * d2);
 
                 d0 /= d8;
@@ -166,15 +152,14 @@ public class Explosion {
 
         this.size = f;
 
-        ArrayList<ChunkPosition> arraylist = new ArrayList<>();
-        arraylist.addAll(this.blocks);
-
         if (this.setFire) {
-            for (int l2 = arraylist.size() - 1; l2 >= 0; --l2) {
-                ChunkPosition chunkposition = arraylist.get(l2);
-                int i3 = chunkposition.x;
-                int j3 = chunkposition.y;
-                int k3 = chunkposition.z;
+            // Tsunami - ChunkPosition -> long
+            LongIterator iterator = this.blocks.iterator();
+            while (iterator.hasNext()) {
+                long chunkPos = iterator.nextLong();
+                int i3 = LongHash.high(chunkPos);
+                int j3 = LongHash.mid(chunkPos);
+                int k3 = LongHash.low(chunkPos);
                 int l3 = this.world.getTypeId(i3, j3, k3);
                 int i4 = this.world.getTypeId(i3, j3 - 1, k3);
 
@@ -201,23 +186,21 @@ public class Explosion {
     public void a(boolean flag) {
         this.world.makeSound(this.posX, this.posY, this.posZ, "random.explode", 4.0F, (1.0F + (this.world.random.nextFloat() - this.world.random.nextFloat()) * 0.2F) * 0.7F);
 
-        ArrayList<ChunkPosition> blocksCopy = new ArrayList<>(this.blocks);
-
         // CraftBukkit start
         org.bukkit.World bworld = this.world.getWorld();
         org.bukkit.entity.Entity explode = this.source == null ? null : this.source.getBukkitEntity();
         Location location = new Location(bworld, this.posX, this.posY, this.posZ);
 
         List<org.bukkit.block.Block> blockList = new ArrayList<>();
-        for (int j = blocksCopy.size() - 1; j >= 0; j--) {
-            ChunkPosition cpos = blocksCopy.get(j);
+        // Tsunami - ChunkPosition -> long
+        LongIterator iterator = this.blocks.iterator();
+        while (iterator.hasNext()) {
+            long chunkPos = iterator.nextLong();
             // UberBukkit - No need to handle blocks that aren't in the world's boundaries
-            if (cpos.y > 127 || cpos.y < 0) {
-                blocksCopy.remove(j);
+            if (LongHash.mid(chunkPos) > 127 || LongHash.mid(chunkPos) < 0)
                 continue;
-            }
 
-            org.bukkit.block.Block block = bworld.getBlockAt(cpos.x, cpos.y, cpos.z);
+            org.bukkit.block.Block block = bworld.getBlockAt(LongHash.high(chunkPos), LongHash.mid(chunkPos), LongHash.low(chunkPos));
             if (block.getType() != org.bukkit.Material.AIR) {
                 blockList.add(block);
             }
@@ -233,21 +216,22 @@ public class Explosion {
 
         // Project Poseidon Start
         // Backport from newer CraftBukkit
-        blocksCopy.clear();
         this.blocks.clear();
         for (final org.bukkit.block.Block block2 : event.blockList()) {
-            final ChunkPosition coords = new ChunkPosition(block2.getX(), block2.getY(), block2.getZ());
-            blocksCopy.add(coords);
-            this.blocks.add(coords);
+            // Tsunami - ChunkPosition -> long
+            long chunkPos = LongHash.toLong(block2.getX(), block2.getY(), block2.getZ());
+            this.blocks.add(chunkPos);
         }
         // Project Poseidon End
         // CraftBukkit end
 
-        for (int i = blocksCopy.size() - 1; i >= 0; --i) {
-            ChunkPosition chunkposition = blocksCopy.get(i);
-            int j = chunkposition.x;
-            int k = chunkposition.y;
-            int l = chunkposition.z;
+        // Tsunami - ChunkPosition -> long
+        LongIterator iterator1 = this.blocks.iterator();
+        while (iterator1.hasNext()) {
+            long chunkPos = iterator1.nextLong();
+            int j = LongHash.high(chunkPos);
+            int k = LongHash.mid(chunkPos);
+            int l = LongHash.low(chunkPos);
             int i1 = this.world.getTypeId(j, k, l);
 
             if (flag) {
@@ -359,4 +343,30 @@ public class Explosion {
         }
     }
     // Paper end
+
+    // Tsunami start
+    static {
+        DoubleArrayList rayCoords = new DoubleArrayList();
+
+        byte b0 = 16;
+        for (int i = 0; i < b0; ++i) {
+            for (int j = 0; j < b0; ++j) {
+                for (int k = 0; k < b0; ++k) {
+                    if (i == 0 || i == b0 - 1 || j == 0 || j == b0 - 1 || k == 0 || k == b0 - 1) {
+                        double d3 = ((float) i / ((float) b0 - 1.0F) * 2.0F - 1.0F);
+                        double d4 = ((float) j / ((float) b0 - 1.0F) * 2.0F - 1.0F);
+                        double d5 = ((float) k / ((float) b0 - 1.0F) * 2.0F - 1.0F);
+                        double d6 = Math.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+
+                        rayCoords.add(d3 / d6);
+                        rayCoords.add(d4 / d6);
+                        rayCoords.add(d5 / d6);
+                    }
+                }
+            }
+        }
+
+        CACHED_RAYS = rayCoords.toDoubleArray();
+    }
+    // Tsunami end
 }
