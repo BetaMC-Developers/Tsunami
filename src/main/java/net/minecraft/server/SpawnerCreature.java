@@ -68,7 +68,7 @@ public final class SpawnerCreature {
 
                 for (int i = 0; i < world.players.size(); i++) {
                     EntityHuman entityhuman = (EntityHuman) world.players.get(i);
-                    if (!(entityhuman instanceof EntityPlayer))
+                    if (entityhuman.dead || !(entityhuman instanceof EntityPlayer))
                         continue;
                     if (world.getPlayerMobCount(enumcreaturetype.a(), entityhuman) > enumcreaturetype.b())
                         continue;
