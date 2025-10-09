@@ -643,6 +643,14 @@ public class MinecraftServer implements Runnable, ICommandListener {
         }
         // CraftBukkit end
 
+        // Tsunami start
+        if (Tsunami.config().getBoolean("saving.periodic-player-saving", false)) {
+            if (this.ticks % Tsunami.config().getInt("saving.player-save-interval", 40) == 0) {
+                this.serverConfigurationManager.savePlayers();
+            }
+        }
+        // Tsunami end
+
         for (j = 0; j < this.r.size(); ++j) {
             ((IUpdatePlayerListBox) this.r.get(j)).a();
         }

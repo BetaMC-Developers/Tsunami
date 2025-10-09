@@ -1756,7 +1756,8 @@ public class World implements IBlockAccess {
         }
 
         i = this.worldData.f() + 1L;
-        if (i % (long) this.p == 0L) {
+        // Tsunami - make world saving interval configurable
+        if (i % (long) Tsunami.config().getInt("saving.world-save-interval", 40) == 0L) {
             this.save(false, (IProgressUpdate) null);
         }
 
