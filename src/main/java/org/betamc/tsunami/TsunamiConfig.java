@@ -29,7 +29,6 @@ public class TsunamiConfig extends Configuration {
     private void writeDefaults() {
         writeDefault("chunk-io.async-loading", false);
         writeDefault("chunk-io.async-unloading", false);
-        writeDefault("chunk-io.region-file-compression", "deflate");
         writeDefault("chunk-io.chunk-packet-compression-level", 6);
         writeDefault("logging.log-unknown-commands", false);
         writeDefault("merge-dropped-items", false);
