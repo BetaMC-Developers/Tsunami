@@ -11,9 +11,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NetworkManager {
 
@@ -26,9 +26,9 @@ public class NetworkManager {
     public DataInputStream input; // Tsunami - private -> public
     public DataOutputStream output; // Tsunami - private -> public
     private boolean l = true;
-    private List m = Collections.synchronizedList(new ArrayList());
-    private List highPriorityQueue = Collections.synchronizedList(new ArrayList());
-    private List lowPriorityQueue = Collections.synchronizedList(new ArrayList());
+    private Queue<Packet> m = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
+    private Queue<Packet> highPriorityQueue = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
+    private Queue<Packet> lowPriorityQueue = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
     private NetHandler p;
     private boolean q = false;
     private Thread r;
@@ -37,7 +37,7 @@ public class NetworkManager {
     private String u = "";
     private Object[] v;
     private int w = 0;
-    private int x = 0;
+    private AtomicInteger x = new AtomicInteger(0); // Tsunami - int -> AtomicInteger
     public static int[] d = new int[256];
     public static int[] e = new int[256];
     public int f = 0;
@@ -106,15 +106,11 @@ public class NetworkManager {
 
     public void queue(Packet packet) {
         if (!this.q) {
-            Object object = this.g;
-
-            synchronized (this.g) {
-                this.x += packet.a() + 1;
-                if (packet.k) {
-                    this.lowPriorityQueue.add(packet);
-                } else {
-                    this.highPriorityQueue.add(packet);
-                }
+            this.x.addAndGet(packet.a() + 1); // Tsunami - non-blocking
+            if (packet.k) {
+                this.lowPriorityQueue.add(packet);
+            } else {
+                this.highPriorityQueue.add(packet);
             }
         }
     }
@@ -123,37 +119,36 @@ public class NetworkManager {
         boolean flag = false;
 
         try {
-            Object object;
-            Packet packet;
+            Packet highPriorityPacket = this.highPriorityQueue.peek(); // Tsunami
             int i;
             int[] aint;
 
-            if (!this.highPriorityQueue.isEmpty() && (this.f == 0 || System.currentTimeMillis() - ((Packet) this.highPriorityQueue.get(0)).timestamp >= (long) this.f)) {
-                object = this.g;
-                synchronized (this.g) {
-                    packet = (Packet) this.highPriorityQueue.remove(0);
-                    this.x -= packet.a() + 1;
-                }
+            // Tsunami start - non-blocking logic
+            if (highPriorityPacket != null && (this.f == 0 || System.currentTimeMillis() - highPriorityPacket.timestamp >= (long) this.f)) {
+                this.highPriorityQueue.poll();
+                this.x.addAndGet(-(highPriorityPacket.a() + 1));
+                // Tsunami end
 
-                Packet.a(packet, this.output);
+                Packet.a(highPriorityPacket, this.output);
                 aint = e;
-                i = packet.b();
-                aint[i] += packet.a() + 1;
+                i = highPriorityPacket.b();
+                aint[i] += highPriorityPacket.a() + 1;
                 flag = true;
             }
 
-            // CraftBukkit - don't allow low priority packet to be sent unless it was placed in the queue before the first packet on the high priority queue
-            if ((flag || this.lowPriorityQueueDelay-- <= 0) && !this.lowPriorityQueue.isEmpty() && (this.highPriorityQueue.isEmpty() || ((Packet) this.highPriorityQueue.get(0)).timestamp > ((Packet) this.lowPriorityQueue.get(0)).timestamp)) {
-                object = this.g;
-                synchronized (this.g) {
-                    packet = (Packet) this.lowPriorityQueue.remove(0);
-                    this.x -= packet.a() + 1;
-                }
+            Packet lowPriorityPacket = this.lowPriorityQueue.peek(); // Tsunami
 
-                Packet.a(packet, this.output);
+            // CraftBukkit - don't allow low priority packet to be sent unless it was placed in the queue before the first packet on the high priority queue
+            // Tsunami start - non-blocking logic
+            if ((flag || this.lowPriorityQueueDelay-- <= 0) && lowPriorityPacket != null && (highPriorityPacket == null || highPriorityPacket.timestamp > lowPriorityPacket.timestamp)) {
+                this.lowPriorityQueue.poll();
+                this.x.addAndGet(-(lowPriorityPacket.a() + 1));
+                // Tsunami end
+
+                Packet.a(lowPriorityPacket, this.output);
                 aint = e;
-                i = packet.b();
-                aint[i] += packet.a() + 1;
+                i = lowPriorityPacket.b();
+                aint[i] += lowPriorityPacket.a() + 1;
                 this.lowPriorityQueueDelay = 0;
                 flag = true;
             }
@@ -261,7 +256,7 @@ public class NetworkManager {
 
     public void b() {
         boolean fast = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true);
-        if (this.x > (fast ? 2097152 : 1048576)) {
+        if (this.x.get() > (fast ? 2097152 : 1048576)) {
             this.a("disconnect.overflow", new Object[0]);
         }
 
@@ -296,10 +291,8 @@ public class NetworkManager {
 //            }
 //        }
 
-
-        while (!this.m.isEmpty() && i-- >= 0) {
-            Packet packet = (Packet) this.m.remove(0);
-
+        Packet packet;
+        while ((packet = this.m.poll()) != null && i-- >= 0) { // Tsunami - poll
             //Poseidon Start - Packet Receive Event
             if (firePacketEvents && this.p instanceof NetServerHandler) {
                 PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) this.p).player.name, packet);
