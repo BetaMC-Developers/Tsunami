@@ -51,6 +51,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public ConsoleCommandHandler consoleCommandHandler; // CraftBukkit - made public
     private boolean isRunning = true;
     public boolean isStopped = false;
+    private final Thread shutdownHook = new ServerShutdownThread(this); // Tsunami
     int ticks = 0;
     public String i;
     public int j;
@@ -89,7 +90,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
         } catch (IOException ex) {
             Logger.getLogger(MinecraftServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Runtime.getRuntime().addShutdownHook(new ServerShutdownThread(this));
+        Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         // CraftBukkit end
     }
 
@@ -542,6 +543,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
             try {
                 this.stop();
                 this.isStopped = true;
+                Runtime.getRuntime().removeShutdownHook(this.shutdownHook); // Tsunami
             } catch (Throwable throwable1) {
                 throwable1.printStackTrace();
             } finally {
