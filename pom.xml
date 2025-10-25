@@ -4,7 +4,7 @@
 
     <groupId>org.betamc</groupId>
     <artifactId>tsunami</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -12,13 +12,6 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>johnymuffin-nexus-releases</id>
-            <url>https://repository.johnymuffin.com/repository/maven-public/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
