@@ -320,6 +320,15 @@ public interface Player extends HumanEntity, CommandSender, OfflinePlayer {
      */
     public boolean isPlayerTimeRelative();
 
+    // Tsunami start
+    /**
+     * Gets the player's estimated ping in milliseconds.
+     *
+     * @return the player's ping
+     */
+    public int getPing();
+    // Tsunami end
+
     /**
      * Returns connection type which allows for a plugin to know if a user is using a proxy, and if IP Forwarding is enabled.
      *

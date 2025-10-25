@@ -51,6 +51,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     
     private final String msgPlayerLeave;
 
+    // Tsunami start
+    public int ping;
+    private int ticks;
+    private long pingTimestamp = -1;
+    // Tsunami end
+
     public boolean isReceivedKeepAlive() {
         return receivedKeepAlive;
     }
@@ -131,6 +137,14 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         if (this.f - this.g > 20) {
             this.sendPacket(new Packet0KeepAlive());
         }
+
+        // Tsunami start - ping every 2 seconds
+        if (this.ticks % 40 == 0 && this.pingTimestamp == -1) {
+            this.pingTimestamp = System.nanoTime() / 1_000_000;
+            this.sendPacket(new Packet106Transaction(0, (short) -1, false));
+        }
+        this.ticks++;
+        // Tsunami end
     }
 
     public void disconnect(String s) {
@@ -1112,6 +1126,15 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet106Transaction packet106transaction) {
+        // Tsunami start - ping calculation
+        if (packet106transaction.b == -1) {
+            int time = (int) (System.nanoTime() / 1_000_000 - this.pingTimestamp);
+            this.ping = (this.ping * 3 + time) / 4;
+            this.pingTimestamp = -1;
+            return;
+        }
+        // Tsunami end
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet106transaction);
         server.getPluginManager().callEvent(event);

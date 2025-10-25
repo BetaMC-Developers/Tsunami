@@ -372,6 +372,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return getHandle().relativeTime;
     }
 
+    // Tsunami start
+    public int getPing() {
+        return getHandle().netServerHandler.ping;
+    }
+    // Tsunami end
+
     public ConnectionType getConnectionType() {
         return getHandle().netServerHandler.getConnectionType();
     }
