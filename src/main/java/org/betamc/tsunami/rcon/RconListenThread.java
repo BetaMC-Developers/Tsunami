@@ -13,12 +13,12 @@ public class RconListenThread implements Runnable {
     private ServerSocket serverSocket;
 
     public RconListenThread(MinecraftServer mcServer) throws IOException {
-        String password = Tsunami.config().getString("rcon.password", "");
+        String password = Tsunami.config().rcon().password();
         if (password.isEmpty()) {
             MinecraftServer.log.warning("[Tsunami] Empty RCON password! Disabling RCON");
         } else {
             this.mcServer = mcServer;
-            int port = Tsunami.config().getInt("rcon.port", 25575);
+            int port = Tsunami.config().rcon().port();
             serverSocket = new ServerSocket(port);
             new Thread(this).start();
             MinecraftServer.log.info("[Tsunami] RCON running on port " + port);

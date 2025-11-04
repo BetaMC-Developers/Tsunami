@@ -188,7 +188,7 @@ public class NetworkManager {
 
             NetHandler nethandler = this.p;
             if (nethandler instanceof NetLoginHandler && (id > 2 || ((NetLoginHandler) nethandler).requestedStatus)) {
-                if (Tsunami.config().getBoolean("server-list-ping.enabled", false)) {
+                if (Tsunami.config().serverListPing().enabled()) {
                     ((NetLoginHandler) nethandler).handleStatusRequest((byte) id, this.input);
                     return false;
                 }

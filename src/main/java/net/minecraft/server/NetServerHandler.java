@@ -880,7 +880,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                 //Project Poseidon End
             } else {
                 // Tsunami start
-                if (Tsunami.config().getBoolean("logging.log-unknown-commands", false)) {
+                if (Tsunami.config().logging().logUnknownCommands()) {
                     a.info(player.getName() + " attempted to issue unknown server command: " + s);
                 }
                 // Tsunami end

@@ -56,7 +56,7 @@ public class RconConnection implements Runnable {
                         break;
                     case 3:
                         String string = RconUtil.stringFromByteArray(buffer, cursor, i);
-                        String password = Tsunami.config().getString("rcon.password", "");
+                        String password = Tsunami.config().rcon().password();
                         if (!string.isEmpty() && string.equals(password)) {
                             authenticated = true;
                             send(requestId, 2, "");

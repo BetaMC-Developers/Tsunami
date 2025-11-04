@@ -196,7 +196,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
         loadServerIcon(); // Tsunami
 
         // Tsunami start - RCON
-        if (Tsunami.config().getBoolean("rcon.enabled", false)) {
+        if (Tsunami.config().rcon().enabled()) {
             try {
                 new RconListenThread(this);
             } catch (IOException e) {
@@ -646,8 +646,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         // CraftBukkit end
 
         // Tsunami start
-        if (Tsunami.config().getBoolean("saving.periodic-player-saving", false)) {
-            if (this.ticks % Tsunami.config().getInt("saving.player-save-interval", 40) == 0) {
+        if (Tsunami.config().saving().periodicPlayerSaving()) {
+            if (this.ticks % Tsunami.config().saving().playerSaveInterval() == 0) {
                 this.serverConfigurationManager.savePlayers();
             }
         }

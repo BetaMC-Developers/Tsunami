@@ -5,9 +5,9 @@ import org.betamc.tsunami.Tsunami;
 public enum EnumCreatureType {
 
     // Tsunami - make mob caps configurable
-    MONSTER("monster", 0, IMonster.class, Tsunami.config().getInt("mob-spawning.mob-caps.monsters", 70), Material.AIR, false),
-    CREATURE("creature", 1, EntityAnimal.class, Tsunami.config().getInt("mob-spawning.mob-caps.animals", 15), Material.AIR, true),
-    WATER_CREATURE("waterCreature", 2, EntityWaterAnimal.class, Tsunami.config().getInt("mob-spawning.mob-caps.water-mobs", 5), Material.WATER, true);
+    MONSTER("monster", 0, IMonster.class, Tsunami.config().mobSpawning().mobCaps().monsters(), Material.AIR, false),
+    CREATURE("creature", 1, EntityAnimal.class, Tsunami.config().mobSpawning().mobCaps().animals(), Material.AIR, true),
+    WATER_CREATURE("waterCreature", 2, EntityWaterAnimal.class, Tsunami.config().mobSpawning().mobCaps().waterMobs(), Material.WATER, true);
 
     private final Class d;
     private final int e;

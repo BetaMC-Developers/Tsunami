@@ -24,10 +24,7 @@ class PlayerInstance {
 
     final PlayerManager playerManager;
 
-    // Tsunami start
-    private CompletableFuture<Chunk> chunk;
-    private static boolean asyncLoading = Tsunami.config().getBoolean("chunk-io.async-loading", false);
-    // Tsunami end
+    private CompletableFuture<Chunk> chunk; // Tsunami
 
     public PlayerInstance(PlayerManager playermanager, int i, int j) {
         this.playerManager = playermanager;
@@ -39,7 +36,7 @@ class PlayerInstance {
         this.location = LongHash.toLong(i, j); // Tsunami
 
         // Tsunami start
-        if (asyncLoading) {
+        if (Tsunami.config().chunkIo().asyncLoading()) {
             this.chunk = playermanager.a().chunkProviderServer.getChunkAtAsync(i, j);
         } else {
             this.chunk = CompletableFuture.completedFuture(playermanager.a().chunkProviderServer.getChunkAt(i, j));

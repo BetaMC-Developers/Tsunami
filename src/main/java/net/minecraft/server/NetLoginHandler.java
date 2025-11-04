@@ -204,7 +204,7 @@ public class NetLoginHandler extends NetHandler {
         players.addProperty("max", Bukkit.getMaxPlayers());
         players.addProperty("online", Bukkit.getOnlinePlayers().length);
 
-        if (Tsunami.config().getBoolean("server-list-ping.show-player-names", true)) {
+        if (Tsunami.config().serverListPing().showPlayerNames()) {
             JsonArray samples = new JsonArray();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 JsonObject sample = new JsonObject();
@@ -218,7 +218,7 @@ public class NetLoginHandler extends NetHandler {
         root.add("players", players);
 
         JsonObject description = new JsonObject();
-        description.addProperty("text", Tsunami.config().getString("server-list-ping.motd", "A Minecraft Server"));
+        description.addProperty("text", Tsunami.config().serverListPing().motd());
         root.add("description", description);
 
         if (server.serverIcon != null) {

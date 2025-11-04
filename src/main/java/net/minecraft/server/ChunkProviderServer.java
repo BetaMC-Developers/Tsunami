@@ -334,7 +334,7 @@ public class ChunkProviderServer implements IChunkProvider {
                     //this.chunkList.remove(chunk); // Tsunami
 
                     // Tsunami start
-                    if (Tsunami.config().getBoolean("chunk-io.async-unloading", false)) {
+                    if (Tsunami.config().chunkIo().asyncUnloading()) {
                         this.saveChunkAsync(chunk);
                     } else {
                         this.saveChunk(chunk);

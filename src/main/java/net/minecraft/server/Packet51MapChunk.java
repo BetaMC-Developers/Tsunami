@@ -112,9 +112,8 @@ public class Packet51MapChunk extends Packet {
 
     // Tsunami start
     static {
-        int level = Tsunami.config().getInt("chunk-io.chunk-packet-compression-level", 6);
-        final int fLevel = Math.min(Math.max(level, -1), 9);
-        localDeflater = ThreadLocal.withInitial(() -> new Deflater(fLevel));
+        int level = Tsunami.config().chunkIo().chunkPacketCompressionLevel();
+        localDeflater = ThreadLocal.withInitial(() -> new Deflater(level));
     }
     // Tsunami end
 
