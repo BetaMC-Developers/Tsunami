@@ -3,7 +3,6 @@ package net.minecraft.server;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
-import org.betamc.tsunami.Tsunami;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
@@ -20,11 +19,8 @@ import java.util.concurrent.Executors;
 public class ChunkProviderServer implements IChunkProvider {
 
     // Tsunami start
-    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), task -> {
-        Thread thread = new Thread(task);
-        thread.setName("Chunk I/O Worker (id:" + thread.getId() + ")");
-        return thread;
-    });
+    public final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
+    public final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
     private final Long2ObjectOpenHashMap<ChunkLoadTask> loadQueue = new Long2ObjectOpenHashMap<>(1500);
     private final Queue<Runnable> postLoadQueue = new ConcurrentLinkedQueue<>();
     // Tsunami end
@@ -219,7 +215,7 @@ public class ChunkProviderServer implements IChunkProvider {
         if (task == null) {
             task = new ChunkLoadTask(i, j);
             this.loadQueue.put(LongHash.toLong(i, j), task);
-            executor.execute(task);
+            this.loadExecutor.execute(task);
         }
 
         return task.future;
@@ -246,12 +242,6 @@ public class ChunkProviderServer implements IChunkProvider {
             }
         }
     }
-
-    // Tsunami start
-    private void saveChunkAsync(Chunk chunk) {
-        executor.execute(() -> saveChunk(chunk));
-    }
-    // Tsunami end
 
     public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
         Chunk chunk = this.getOrCreateChunk(i, j);
@@ -329,19 +319,10 @@ public class ChunkProviderServer implements IChunkProvider {
 //                    this.world.getWorld().preserveChunk((CraftChunk) chunk.bukkitChunk);
 
                     chunk.removeEntities();
-                    // Tsunami - moved from below
+                    this.saveChunk(chunk);
+                    this.saveChunkNOP(chunk);
                     this.chunks.remove(chunkcoordinates); // CraftBukkit
                     //this.chunkList.remove(chunk); // Tsunami
-
-                    // Tsunami start
-                    if (Tsunami.config().chunkIo().asyncUnloading()) {
-                        this.saveChunkAsync(chunk);
-                    } else {
-                        this.saveChunk(chunk);
-                    }
-                    // Tsunami end
-
-                    this.saveChunkNOP(chunk);
                 }
             }
             // CraftBukkit end

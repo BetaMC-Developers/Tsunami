@@ -79,15 +79,15 @@ public class TsunamiConfig {
     @ConfigSerializable
     public static class ChunkIo {
         private boolean asyncLoading = false;
-        private boolean asyncUnloading = false;
+        private boolean asyncSaving = false;
         private int chunkPacketCompressionLevel = 6;
 
         public boolean asyncLoading() {
             return asyncLoading;
         }
 
-        public boolean asyncUnloading() {
-            return asyncUnloading;
+        public boolean asyncSaving() {
+            return asyncSaving;
         }
 
         public int chunkPacketCompressionLevel() {

@@ -62,6 +62,30 @@ public class RegionFileCache {
         a.clear();
     }
 
+    // Tsunami start
+    static void clearFinalReferences() {
+        Iterator iterator = a.values().iterator();
+
+        while (iterator.hasNext()) {
+            Reference reference = (Reference) iterator.next();
+
+            try {
+                RegionFile regionfile = (RegionFile) reference.get();
+
+                if (regionfile != null) {
+                    long time = System.currentTimeMillis() + 5000;
+                    while (regionfile.executingWrites.get() > 0 && System.currentTimeMillis() < time);
+                    regionfile.b();
+                }
+            } catch (IOException ioexception) {
+                ioexception.printStackTrace();
+            }
+        }
+
+        a.clear();
+    }
+    // Tsunami end
+
     public static int b(File file1, int i, int j) {
         RegionFile regionfile = a(file1, i, j);
 

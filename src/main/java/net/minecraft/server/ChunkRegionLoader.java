@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.betamc.tsunami.Tsunami;
+
 import java.io.*;
 
 public class ChunkRegionLoader implements IChunkLoader {
@@ -44,17 +46,35 @@ public class ChunkRegionLoader implements IChunkLoader {
         world.k();
 
         try {
-            DataOutputStream dataoutputstream = RegionFileCache.d(this.a, chunk.x, chunk.z);
+            RegionFile regionfile = RegionFileCache.a(this.a, chunk.x, chunk.z); // Tsunami
+            DataOutputStream dataoutputstream = regionfile.b(chunk.x & 31, chunk.z & 31);
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
             nbttagcompound.a("Level", (NBTBase) nbttagcompound1);
             ChunkLoader.a(chunk, world, nbttagcompound1);
-            CompressedStreamTools.a(nbttagcompound, (DataOutput) dataoutputstream);
-            dataoutputstream.close();
-            WorldData worlddata = world.q();
 
-            worlddata.b(worlddata.g() + (long) RegionFileCache.b(this.a, chunk.x, chunk.z));
+            // Tsunami start
+            regionfile.executingWrites.incrementAndGet();
+            Runnable saveTask = () -> {
+                try {
+                    CompressedStreamTools.a(nbttagcompound, (DataOutput) dataoutputstream);
+                    dataoutputstream.close();
+                    WorldData worlddata = world.q();
+                    worlddata.b(worlddata.g() + (long) RegionFileCache.b(this.a, chunk.x, chunk.z));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    regionfile.executingWrites.decrementAndGet();
+                }
+            };
+
+            if (Tsunami.config().chunkIo().asyncSaving()) {
+                ((WorldServer) world).chunkProviderServer.saveExecutor.execute(saveTask);
+            } else {
+                saveTask.run();
+            }
+            // Tsunami end
         } catch (Exception exception) {
             exception.printStackTrace();
         }
