@@ -81,10 +81,6 @@ public class World implements IBlockAccess {
     public boolean pvpMode;
     public boolean keepSpawnInMemory = true;
     public ChunkGenerator generator;
-    Chunk lastChunkAccessed;
-    int lastXAccessed = Integer.MIN_VALUE;
-    int lastZAccessed = Integer.MIN_VALUE;
-    final Object chunkLock = new Object();
     private List<TileEntity> tileEntitiesToUnload;
 
     private boolean canSpawn(int x, int z) {
@@ -283,16 +279,7 @@ public class World implements IBlockAccess {
 
     // CraftBukkit start
     public Chunk getChunkAt(int i, int j) {
-        Chunk result = null;
-        synchronized (this.chunkLock) {
-            if (this.lastChunkAccessed == null || this.lastXAccessed != i || this.lastZAccessed != j) {
-                this.lastXAccessed = i;
-                this.lastZAccessed = j;
-                this.lastChunkAccessed = this.chunkProvider.getOrCreateChunk(i, j);
-            }
-            result = this.lastChunkAccessed;
-        }
-        return result;
+        return this.chunkProvider.getOrCreateChunk(i, j); // Tsunami
     }
     // CraftBukkit end
 
