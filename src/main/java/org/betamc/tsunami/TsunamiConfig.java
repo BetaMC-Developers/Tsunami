@@ -124,15 +124,15 @@ public class TsunamiConfig {
             private int waterMobs = 5;
 
             public int monsters() {
-                return monsters;
+                return Math.max(monsters, 0);
             }
 
             public int animals() {
-                return animals;
+                return Math.max(animals, 0);
             }
 
             public int waterMobs() {
-                return waterMobs;
+                return Math.max(waterMobs, 0);
             }
         }
     }
@@ -148,7 +148,7 @@ public class TsunamiConfig {
         }
 
         public int port() {
-            return port;
+            return Math.max(port, 0);
         }
 
         public String password() {
@@ -163,7 +163,7 @@ public class TsunamiConfig {
         private int playerSaveInterval = 40;
 
         public int worldSaveInterval() {
-            return worldSaveInterval;
+            return Math.max(worldSaveInterval, 1);
         }
 
         public boolean periodicPlayerSaving() {
@@ -171,7 +171,7 @@ public class TsunamiConfig {
         }
 
         public int playerSaveInterval() {
-            return playerSaveInterval;
+            return Math.max(playerSaveInterval, 1);
         }
     }
 
