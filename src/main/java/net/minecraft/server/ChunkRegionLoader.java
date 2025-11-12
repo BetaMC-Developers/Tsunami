@@ -46,8 +46,6 @@ public class ChunkRegionLoader implements IChunkLoader {
         world.k();
 
         try {
-            RegionFile regionfile = RegionFileCache.a(this.a, chunk.x, chunk.z); // Tsunami
-            DataOutputStream dataoutputstream = regionfile.b(chunk.x & 31, chunk.z & 31);
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
@@ -55,17 +53,15 @@ public class ChunkRegionLoader implements IChunkLoader {
             ChunkLoader.a(chunk, world, nbttagcompound1);
 
             // Tsunami start
-            regionfile.executingWrites.incrementAndGet();
             Runnable saveTask = () -> {
                 try {
+                    DataOutputStream dataoutputstream = RegionFileCache.d(this.a, chunk.x, chunk.z);
                     CompressedStreamTools.a(nbttagcompound, (DataOutput) dataoutputstream);
                     dataoutputstream.close();
                     WorldData worlddata = world.q();
                     worlddata.b(worlddata.g() + (long) RegionFileCache.b(this.a, chunk.x, chunk.z));
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    regionfile.executingWrites.decrementAndGet();
                 }
             };
 

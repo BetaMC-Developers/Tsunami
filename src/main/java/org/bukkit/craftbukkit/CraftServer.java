@@ -50,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -608,6 +609,14 @@ public final class CraftServer implements Server {
             WorldSaveEvent event = new WorldSaveEvent(handle.getWorld());
             getPluginManager().callEvent(event);
         }
+
+        // Tsunami start
+        handle.chunkProviderServer.saveExecutor.shutdown();
+        try {
+            handle.chunkProviderServer.saveExecutor.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+        }
+        // Tsunami end
 
         worlds.remove(world.getName().toLowerCase());
         console.worlds.remove(console.worlds.indexOf(handle));

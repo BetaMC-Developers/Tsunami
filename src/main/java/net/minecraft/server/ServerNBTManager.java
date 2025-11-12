@@ -28,6 +28,6 @@ public class ServerNBTManager extends PlayerNBTManager {
     }
 
     public void e() {
-        RegionFileCache.clearFinalReferences(); // Tsunami - clearFinalReferences
+        RegionFileCache.a();
     }
 }

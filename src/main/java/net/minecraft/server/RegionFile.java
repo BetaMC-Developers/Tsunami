@@ -2,7 +2,6 @@ package net.minecraft.server;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
@@ -17,7 +16,6 @@ public class RegionFile {
     private ArrayList f;
     private int g;
     private long h = 0L;
-    final AtomicInteger executingWrites = new AtomicInteger(0); // Tsunami
 
     public RegionFile(File file1) {
         this.b = file1;

@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -379,6 +380,21 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.serverConfigurationManager.savePlayers();
         }
         // CraftBukkit end
+
+        // Tsunami start
+        for (WorldServer worldserver : this.worlds) {
+            worldserver.chunkProviderServer.saveExecutor.shutdown();
+        }
+
+        for (WorldServer worldserver : this.worlds) {
+            try {
+                worldserver.chunkProviderServer.saveExecutor.awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        RegionFileCache.closeRegionFiles();
+        // Tsunami end
     }
 
     public void stop() { // CraftBukkit - private -> public

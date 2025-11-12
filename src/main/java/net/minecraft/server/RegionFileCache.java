@@ -4,84 +4,45 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class RegionFileCache {
 
-    private static final Map a = new HashMap();
+    private static final Map<File, RegionFile> a = new HashMap<>(); // Tsunami - keep RegionFile references
 
     private RegionFileCache() {}
 
     public static synchronized RegionFile a(File file1, int i, int j) {
         File file2 = new File(file1, "region");
         File file3 = new File(file2, "r." + (i >> 5) + "." + (j >> 5) + ".mcr");
-        Reference reference = (Reference) a.get(file3);
-        RegionFile regionfile;
 
-        if (reference != null) {
-            regionfile = (RegionFile) reference.get();
-            if (regionfile != null) {
-                return regionfile;
-            }
-        }
+        // Tsunami - keep RegionFile references
+        RegionFile regionfile = a.get(file3);
+        if (regionfile != null) return regionfile;
 
         if (!file2.exists()) {
             file2.mkdirs();
         }
 
-        if (a.size() >= 256) {
-            a();
-        }
-
         regionfile = new RegionFile(file3);
-        a.put(file3, new SoftReference(regionfile));
+        a.put(file3, regionfile);
         return regionfile;
     }
 
     public static synchronized void a() {
-        Iterator iterator = a.values().iterator();
-
-        while (iterator.hasNext()) {
-            Reference reference = (Reference) iterator.next();
-
-            try {
-                RegionFile regionfile = (RegionFile) reference.get();
-
-                if (regionfile != null) {
-                    regionfile.b();
-                }
-            } catch (IOException ioexception) {
-                ioexception.printStackTrace();
-            }
-        }
-
-        a.clear();
+        // Tsunami - no-op
     }
 
     // Tsunami start
-    static void clearFinalReferences() {
-        Iterator iterator = a.values().iterator();
-
-        while (iterator.hasNext()) {
-            Reference reference = (Reference) iterator.next();
-
+    static synchronized void closeRegionFiles() {
+        for (RegionFile regionfile : a.values()) {
             try {
-                RegionFile regionfile = (RegionFile) reference.get();
-
-                if (regionfile != null) {
-                    long time = System.currentTimeMillis() + 5000;
-                    while (regionfile.executingWrites.get() > 0 && System.currentTimeMillis() < time);
-                    regionfile.b();
-                }
-            } catch (IOException ioexception) {
-                ioexception.printStackTrace();
+                regionfile.b();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-
         a.clear();
     }
     // Tsunami end
