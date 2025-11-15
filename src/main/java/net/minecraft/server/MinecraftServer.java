@@ -38,12 +38,14 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MinecraftServer implements Runnable, ICommandListener {
 
     public static Logger log = Logger.getLogger("Minecraft");
+    private static final long NANOS_PER_TICK = 50_000_000; // Tsunami
     public static HashMap trackerList = new HashMap();
     public NetworkListenThread networkListenThread;
     public PropertyManager propertyManager;
@@ -501,15 +503,16 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public void run() {
         try {
             if (this.init()) {
-                long i = System.currentTimeMillis();
+                long i = System.nanoTime(); // Tsunami - System.nanoTime()
 
-                for (long j = 0L; this.isRunning; Thread.sleep(1L)) {
-                    long k = System.currentTimeMillis();
+                for (long j = 0L; this.isRunning;) {
+                    long k = System.nanoTime(); // Tsunami - System.nanoTime()
                     long l = k - i;
 
-                    if (l > 2000L) {
-                        log.warning("Can\'t keep up! Did the system time change, or is the server overloaded?");
-                        l = 2000L;
+                    if (l > NANOS_PER_TICK * 40L) {
+                        // Tsunami - improve message
+                        log.warning("Can't keep up! Did the system time change, or is the server overloaded? Running " + l / 1_000_000 + "ms behind, skipping " + l / NANOS_PER_TICK + " tick(s)");
+                        l = NANOS_PER_TICK * 40L;
                     }
 
                     if (l < 0L) {
@@ -523,13 +526,15 @@ public class MinecraftServer implements Runnable, ICommandListener {
                         this.h();
                         j = 0L;
                     } else {
-                        while (j > 50L) {
+                        while (j > NANOS_PER_TICK) { // Tsunami
                             MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
                             getWatchdog().tickUpdate(); // Project Poseidon
-                            j -= 50L;
+                            j -= NANOS_PER_TICK; // Tsunami
                             this.h();
                         }
                     }
+
+                    LockSupport.parkNanos(NANOS_PER_TICK - j); // Tsunami - use LockSupport.parkNanos() instead of Thread.sleep()
                 }
             } else {
                 while (this.isRunning) {
