@@ -1885,10 +1885,6 @@ public class World implements IBlockAccess {
             }
         }
 
-        if (this.Q > 0) {
-            --this.Q;
-        }
-
         LongIterator iterator = this.P.iterator(); // Tsunami - LongIterator
 
         while (iterator.hasNext()) {
@@ -1901,24 +1897,7 @@ public class World implements IBlockAccess {
             int k1;
             int l1;
 
-            if (this.Q == 0) {
-                this.g = this.g * 3 + 1013904223;
-                k = this.g >> 2;
-                l = k & 15;
-                j1 = k >> 8 & 15;
-                k1 = k >> 16 & 127;
-                l1 = chunk.getTypeId(l, k1, j1);
-                l += i;
-                j1 += j;
-                if (l1 == 0 && this.k(l, k1, j1) <= this.random.nextInt(8) && this.a(EnumSkyBlock.SKY, l, k1, j1) <= 0) {
-                    EntityHuman entityhuman1 = this.a((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, 8.0D);
-
-                    if (entityhuman1 != null && entityhuman1.e((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D) > 4.0D) {
-                        this.makeSound((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, "ambient.cave.cave", 0.7F, 0.8F + this.random.nextFloat() * 0.2F);
-                        this.Q = this.random.nextInt(12000) + 6000;
-                    }
-                }
-            }
+            // Tsunami - remove unnecessary cave sound logic, sounds cannot be sent to clients
 
             if (this.random.nextInt(100000) == 0 && this.v() && this.u()) {
                 this.g = this.g * 3 + 1013904223;
@@ -1940,7 +1919,8 @@ public class World implements IBlockAccess {
                 l = k & 15;
                 j1 = k >> 8 & 15;
                 k1 = this.e(l + i, j1 + j);
-                if (this.getWorldChunkManager().getBiome(l + i, j1 + j).c() && k1 >= 0 && k1 < 128 && chunk.a(EnumSkyBlock.BLOCK, l, k1, j1) < 10) {
+                // Tsunami - get biome directly from chunk
+                if (k1 >= 0 && k1 < 128 && chunk.getBiome(l, j1).c() && chunk.a(EnumSkyBlock.BLOCK, l, k1, j1) < 10) {
                     l1 = chunk.getTypeId(l, k1 - 1, j1);
                     i2 = chunk.getTypeId(l, k1, j1);
                     if (this.v() && i2 == 0 && Block.SNOW.canPlace(this, l + i, k1, j1 + j) && l1 != 0 && l1 != Block.ICE.id && Block.byId[l1].material.isSolid()) {
@@ -1957,15 +1937,15 @@ public class World implements IBlockAccess {
                     }
 
                     // CraftBukkit start
-                        if (l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
-                            BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
-                            blockState.setTypeId(Block.ICE.id);
+                    if (l1 == Block.STATIONARY_WATER.id && chunk.getData(l, k1 - 1, j1) == 0) {
+                        BlockState blockState = this.getWorld().getBlockAt(l + i, k1 - 1, j1 + j).getState();
+                        blockState.setTypeId(Block.ICE.id);
 
-                            BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
-                            this.getServer().getPluginManager().callEvent(iceBlockForm);
-                            if (!iceBlockForm.isCancelled()) {
-                                blockState.update(true);
-                            }
+                        BlockFormEvent iceBlockForm = new BlockFormEvent(blockState.getBlock(), blockState);
+                        this.getServer().getPluginManager().callEvent(iceBlockForm);
+                        if (!iceBlockForm.isCancelled()) {
+                            blockState.update(true);
+                        }
                     }
                     // CraftBukkit end
                 }
