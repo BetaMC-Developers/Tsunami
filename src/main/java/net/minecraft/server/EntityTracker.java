@@ -1,13 +1,12 @@
 package net.minecraft.server;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 public class EntityTracker {
 
-    private Set a = new HashSet();
+    private List<EntityTrackerEntry> a = new ArrayList<>(); // Tsunami - HashSet -> ArrayList
     public EntityList b = new EntityList(); //Project Poseidon: private -> public
     private MinecraftServer c;
     private int d;
@@ -19,8 +18,7 @@ public class EntityTracker {
         this.d = minecraftserver.serverConfigurationManager.a();
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void track(Entity entity) {
+    public void track(Entity entity) {
         if (entity instanceof EntityPlayer) {
             this.a(entity, 512, 2);
             EntityPlayer entityplayer = (EntityPlayer) entity;
@@ -66,8 +64,7 @@ public class EntityTracker {
         this.a(entity, i, j, false);
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void a(Entity entity, int i, int j, boolean flag) {
+    public void a(Entity entity, int i, int j, boolean flag) {
         if (i > this.d) {
             i = this.d;
         }
@@ -84,8 +81,7 @@ public class EntityTracker {
         }
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void untrackEntity(Entity entity) {
+    public void untrackEntity(Entity entity) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer) entity;
             Iterator iterator = this.a.iterator();
@@ -106,7 +102,7 @@ public class EntityTracker {
     }
 
     // Tsunami start
-    public synchronized void untrackEntityImmediately(Entity entity) {
+    public void untrackEntityImmediately(Entity entity) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer) entity;
             Iterator iterator = this.a.iterator();
@@ -127,8 +123,7 @@ public class EntityTracker {
     }
     // Tsunami end
 
-    // CraftBukkit - synchronized
-    public synchronized void updatePlayers() {
+    public void updatePlayers() {
         ArrayList arraylist = new ArrayList();
         Iterator iterator = this.a.iterator();
 
@@ -155,8 +150,7 @@ public class EntityTracker {
         }
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void a(Entity entity, Packet packet) {
+    public void a(Entity entity, Packet packet) {
         EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) this.b.a(entity.id);
 
         if (entitytrackerentry != null) {
@@ -164,8 +158,7 @@ public class EntityTracker {
         }
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void sendPacketToEntity(Entity entity, Packet packet) {
+    public void sendPacketToEntity(Entity entity, Packet packet) {
         EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) this.b.a(entity.id);
 
         if (entitytrackerentry != null) {
@@ -173,8 +166,7 @@ public class EntityTracker {
         }
     }
 
-    // CraftBukkit - synchronized
-    public synchronized void untrackPlayer(EntityPlayer entityplayer) {
+    public void untrackPlayer(EntityPlayer entityplayer) {
         Iterator iterator = this.a.iterator();
 
         while (iterator.hasNext()) {
@@ -185,8 +177,7 @@ public class EntityTracker {
     }
     
     // Poseidon
-    // CraftBukkit - synchronized
-    public synchronized void a(EntityPlayer entityplayer, Chunk chunk) {
+    public void a(EntityPlayer entityplayer, Chunk chunk) {
         Iterator iterator = this.a.iterator();
 
         while (iterator.hasNext()) {

@@ -1,8 +1,8 @@
 package net.minecraft.server;
 
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +28,7 @@ public class EntityTrackerEntry {
     private boolean isMoving;
     private int t = 0;
     public boolean m = false;
-    public Set trackedPlayers = new HashSet();
+    public Set<EntityPlayer> trackedPlayers = new ObjectArraySet<>(); // Tsunami - HashSet -> ObjectArraySet
 
     public EntityTrackerEntry(Entity entity, int i, int j, boolean flag) {
         this.tracker = entity;
