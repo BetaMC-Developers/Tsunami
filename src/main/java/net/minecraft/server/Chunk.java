@@ -24,7 +24,6 @@ public class Chunk {
     public boolean p;
     public boolean q;
     public long r;
-    private BiomeBase[] biomes; // Tsunami - cache biomes
 
     public Chunk(World world, int i, int j) {
         this.tileEntities = new HashMap();
@@ -223,15 +222,6 @@ public class Chunk {
     public int getTypeId(int i, int j, int k) {
         return this.b[i << 11 | k << 7 | j] & 255;
     }
-
-    // Tsunami start
-    public BiomeBase getBiome(int i, int j) {
-        if (this.biomes == null) {
-            this.biomes = this.world.getWorldChunkManager().a(this.biomes, i * 16, j * 16, 16, 16);
-        }
-        return this.biomes[i << 4 | j];
-    }
-    // Tsunami end
 
     public boolean a(int i, int j, int k, int l, int i1) {
         byte b0 = (byte) l;
