@@ -4,6 +4,7 @@ on:
       - '**'
     paths:
       - 'src/**'
+      - 'pom.xml'
 
 permissions:
   contents: write
