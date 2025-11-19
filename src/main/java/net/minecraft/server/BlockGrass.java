@@ -15,7 +15,8 @@ public class BlockGrass extends Block {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (!world.isStatic) {
-            if (world.getLightLevel(i, j + 1, k) < 4 && Block.q[world.getTypeId(i, j + 1, k)] > 2) {
+            int lightAbove = world.getLightLevel(i, j + 1, k); // Tsunami
+            if (lightAbove < 4 && Block.q[world.getTypeId(i, j + 1, k)] > 2) { // Tsunami
                 if (random.nextInt(4) != 0) {
                     return;
                 }
@@ -32,7 +33,7 @@ public class BlockGrass extends Block {
                     blockState.update(true);
                 }
                 // CraftBukkit end
-            } else if (world.getLightLevel(i, j + 1, k) >= 9) {
+            } else if (lightAbove >= 9) { // Tsunami
                 int l = i + random.nextInt(3) - 1;
                 int i1 = j + random.nextInt(5) - 3;
                 int j1 = k + random.nextInt(3) - 1;
