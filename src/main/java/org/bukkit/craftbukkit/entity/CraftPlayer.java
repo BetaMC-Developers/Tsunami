@@ -265,6 +265,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (event.isCancelled() == true) {
             return false;
         }
+        // Tsunami start - wake up the player if they are sleeping in a bed
+        if (getHandle().isSleeping()) {
+            getHandle().a(true, false, false);
+        }
+        // Tsunami end
         // Update the From Location
         from = event.getFrom();
         // Grab the new To Location dependent on whether the event was cancelled.
