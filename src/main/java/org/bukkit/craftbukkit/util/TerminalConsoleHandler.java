@@ -1,39 +1,38 @@
 package org.bukkit.craftbukkit.util;
 
-import jline.ConsoleReader;
 import org.bukkit.craftbukkit.Main;
+import org.jline.reader.LineReader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TerminalConsoleHandler extends ConsoleHandler {
-    private final ConsoleReader reader;
 
-    public TerminalConsoleHandler(ConsoleReader reader) {
+    private final LineReader reader; // Tsunami - ConsoleReader -> LineReader
+
+    public TerminalConsoleHandler(LineReader reader) { // Tsunami - ConsoleReader -> LineReader
         super();
+        // Tsunami start
+        if (Main.useJline) {
+            setOutputStream(new JLineOutputStream());
+        }
+        // Tsunami end
         this.reader = reader;
     }
 
-    @Override
-    public synchronized void flush() {
-        try {
-            if (Main.useJline) {
-                reader.printString(ConsoleReader.RESET_LINE + "");
-                reader.flushConsole();
-                super.flush();
-                try {
-                    reader.drawLine();
-                } catch (Throwable ex) {
-                    reader.getCursorBuffer().clearBuffer();
-                }
-                reader.flushConsole();
-            } else {
-                super.flush();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(TerminalConsoleHandler.class.getName()).log(Level.SEVERE, null, ex);
+    // Tsunami start
+    private class JLineOutputStream extends ByteArrayOutputStream {
+        private JLineOutputStream() {
+            super(1024);
+        }
+
+        @Override
+        public synchronized void flush() throws IOException {
+            reader.printAbove(JLineOutputStream.this.toString("UTF-8"));
+            this.count = 0;
         }
     }
+    // Tsunami end
+
 }

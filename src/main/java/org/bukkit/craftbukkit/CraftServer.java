@@ -6,7 +6,6 @@ import com.avaje.ebean.config.dbplatform.SQLitePlatform;
 import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.legacyminecraft.poseidon.PoseidonServer;
-import jline.ConsoleReader;
 import net.minecraft.server.*;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -41,6 +40,7 @@ import org.bukkit.scheduler.BukkitWorker;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
 import org.bukkit.util.permissions.DefaultPermissions;
+import org.jline.reader.LineReader;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
@@ -654,7 +654,7 @@ public final class CraftServer implements Server {
         return MinecraftServer.log;
     }
 
-    public ConsoleReader getReader() {
+    public LineReader getReader() { // Tsunami - ConsoleReader -> LineReader
         return console.reader;
     }
 

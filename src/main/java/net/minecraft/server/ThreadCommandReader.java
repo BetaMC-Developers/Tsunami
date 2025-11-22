@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import java.io.IOException;
+import org.jline.reader.LineReader;
 
 public class ThreadCommandReader extends Thread {
 
@@ -11,25 +11,21 @@ public class ThreadCommandReader extends Thread {
     }
 
     public void run() {
-        jline.ConsoleReader bufferedreader = this.server.reader; // CraftBukkit
-        String s = null;
+        LineReader bufferedreader = this.server.reader; // Tsunami - ConsoleReader -> LineReader
+        String s;
 
-        try {
-            // CraftBukkit start - JLine disabling compatibility
-            while (!this.server.isStopped && MinecraftServer.isRunning(this.server)) {
-                if (org.bukkit.craftbukkit.Main.useJline) {
-                    s = bufferedreader.readLine("> ");
-                } else {
-                    s = bufferedreader.readLine();
-                }
-                if (s != null && !s.isEmpty() && s.chars().anyMatch(i -> !Character.isWhitespace(i))) {
-                    this.server.issueCommand(s, this.server);
-                }
-                // CraftBukkit end
+        // CraftBukkit start - JLine disabling compatibility
+        while (!this.server.isStopped && MinecraftServer.isRunning(this.server)) {
+            if (org.bukkit.craftbukkit.Main.useJline) {
+                s = bufferedreader.readLine("> ");
+            } else {
+                s = bufferedreader.readLine();
             }
-        } catch (IOException ioexception) {
-            // CraftBukkit
-            java.util.logging.Logger.getLogger(ThreadCommandReader.class.getName()).log(java.util.logging.Level.SEVERE, null, ioexception);
+            if (s != null && !s.isEmpty() && s.chars().anyMatch(i -> !Character.isWhitespace(i))) {
+                this.server.issueCommand(s, this.server);
+            }
+            // CraftBukkit end
         }
+        // Tsunami - delete catch
     }
 }

@@ -1,5 +1,8 @@
 package org.bukkit;
 
+import net.kyori.ansi.ANSIComponentRenderer;
+import net.kyori.ansi.StyleOps;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,12 +121,6 @@ public enum ChatColor {
         return input.replaceAll("(?i)\u00A7[0-F]", "");
     }
 
-    static {
-        for (ChatColor color : ChatColor.values()) {
-            colors.put(color.getCode(), color);
-        }
-    }
-
     /**
      * Translates alternate color codes in the given text to Minecraft color codes.
      *
@@ -141,4 +138,103 @@ public enum ChatColor {
         }
         return new String(charArray);
     }
+
+    // Tsunami start
+    /**
+     * Converts all color codes in the given text to their respective ANSI codes.
+     *
+     * @param text the text to convert
+     * @return the text with all color codes converted to ANSI codes
+     */
+    public static String convertToAnsi(String text) {
+        ANSIComponentRenderer.ToString<ChatColor> renderer = ANSIComponentRenderer.toString(AnsiStyle.instance);
+        ChatColor lastColor = ChatColor.WHITE;
+        renderer.pushStyle(lastColor);
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            if (ch == '\u00A7' && i < text.length() - 1) {
+                ChatColor color = null;
+                try {
+                    color = ChatColor.getByCode(Integer.parseInt(String.valueOf(text.charAt(i + 1)), 16));
+                } catch (NumberFormatException e) {
+                }
+                if (color != null) {
+                    renderer.popStyle(lastColor);
+                    lastColor = color;
+                    renderer.pushStyle(lastColor);
+                    i++;
+                    continue;
+                }
+            }
+            renderer.text(String.valueOf(ch));
+        }
+        renderer.popStyle(lastColor);
+        renderer.complete();
+        return renderer.asString();
+    }
+
+    private static class AnsiStyle implements StyleOps<ChatColor> {
+        private static final AnsiStyle instance = new AnsiStyle();
+
+        @Override
+        public int color(ChatColor color) {
+            switch (color) {
+                case BLACK: return 0x000000;
+                case DARK_BLUE: return 0x0000AA;
+                case DARK_GREEN: return 0x00AA00;
+                case DARK_AQUA: return 0x00AAAA;
+                case DARK_RED: return 0xAA0000;
+                case DARK_PURPLE: return 0xAA00AA;
+                case GOLD: return 0xFFAA00;
+                case GRAY: return 0xAAAAAA;
+                case DARK_GRAY: return 0x555555;
+                case BLUE: return 0x5555FF;
+                case GREEN: return 0x55FF55;
+                case AQUA: return 0x55FFFF;
+                case RED: return 0xFF5555;
+                case LIGHT_PURPLE: return 0xFF55FF;
+                case YELLOW: return 0xFFFF55;
+                default: return 0xFFFFFF;
+            }
+        }
+
+        @Override
+        public State bold(ChatColor color) {
+            return State.FALSE;
+        }
+
+        @Override
+        public State italics(ChatColor color) {
+            return State.FALSE;
+        }
+
+        @Override
+        public State underlined(ChatColor color) {
+            return State.FALSE;
+        }
+
+        @Override
+        public State strikethrough(ChatColor color) {
+            return State.FALSE;
+        }
+
+        @Override
+        public State obfuscated(ChatColor color) {
+            return State.FALSE;
+        }
+
+        @Override
+        public String font(ChatColor color) {
+            return null;
+        }
+
+    }
+    // Tsunami end
+
+    static {
+        for (ChatColor color : ChatColor.values()) {
+            colors.put(color.getCode(), color);
+        }
+    }
+
 }

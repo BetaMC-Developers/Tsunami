@@ -5,7 +5,6 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.util.ServerLogRotator;
 import com.legacyminecraft.poseidon.utility.PerformanceStatistic;
 import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
-import jline.ConsoleReader;
 import joptsimple.OptionSet;
 import org.betamc.tsunami.Tsunami;
 import org.betamc.tsunami.rcon.RconCommandSender;
@@ -26,6 +25,8 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginLoadOrder;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -73,7 +74,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public CraftServer server;
     public OptionSet options;
     public ColouredConsoleSender console;
-    public ConsoleReader reader;
+    public LineReader reader; // Tsunami - ConsoleReader -> LineReader
     public static int currentTick;
     // CraftBukkit end
 
@@ -88,11 +89,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
         // CraftBukkit start
         this.options = options;
-        try {
-            this.reader = new ConsoleReader();
-        } catch (IOException ex) {
-            Logger.getLogger(MinecraftServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        this.reader = LineReaderBuilder.builder().appName("Tsunami").build(); // Tsunami
         Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         // CraftBukkit end
     }
