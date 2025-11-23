@@ -15,6 +15,7 @@ public class TsunamiConfig {
 
     private static TsunamiConfig instance;
 
+    private Console console;
     private ChunkIo chunkIo;
     private Logging logging;
     private boolean mergeDroppedItems = false;
@@ -48,6 +49,10 @@ public class TsunamiConfig {
     private TsunamiConfig() {
     }
 
+    public Console console() {
+        return console;
+    }
+
     public ChunkIo chunkIo() {
         return chunkIo;
     }
@@ -74,6 +79,15 @@ public class TsunamiConfig {
 
     public ServerListPing serverListPing() {
         return serverListPing;
+    }
+
+    @ConfigSerializable
+    public static class Console {
+        private String prompt = "> ";
+
+        public String prompt() {
+            return prompt;
+        }
     }
 
     @ConfigSerializable
