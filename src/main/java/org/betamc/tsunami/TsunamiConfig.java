@@ -3,6 +3,7 @@ package org.betamc.tsunami;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.yaml.NodeStyle;
@@ -12,6 +13,12 @@ import java.nio.file.Paths;
 
 @ConfigSerializable
 public class TsunamiConfig {
+
+    private static final String HEADER =
+            "Tsunami configuration file\n\n" +
+            "Notice:\n" +
+            "- You must use spaces for indentation, NOT tabs.\n" +
+            "- Durations are measured in game ticks.";
 
     private static TsunamiConfig instance;
 
@@ -37,7 +44,7 @@ public class TsunamiConfig {
             ConfigurationNode node = loader.load();
             ObjectMapper<TsunamiConfig> mapper = ObjectMapper.factory().get(TsunamiConfig.class);
             instance = mapper.load(node);
-            ConfigurationNode dump = CommentedConfigurationNode.root();
+            ConfigurationNode dump = CommentedConfigurationNode.root(ConfigurationOptions.defaults().header(HEADER));
             mapper.save(instance, dump);
             loader.save(dump);
             return instance;
