@@ -6,6 +6,7 @@ public class ThreadSleepForever extends Thread {
 
     public ThreadSleepForever(MinecraftServer minecraftserver) {
         this.a = minecraftserver;
+        this.setName("Timer hack thread"); // Tsunami
         this.setDaemon(true);
         this.start();
     }

@@ -14,6 +14,7 @@ public class ThreadCommandReader extends Thread {
     public ThreadCommandReader(MinecraftServer minecraftserver) {
         this.server = minecraftserver;
         this.prompt = ChatColor.convertToAnsi(Tsunami.config().console().prompt()); // Tsunami - configurable prompt
+        setName("Server console handler"); // Tsunami
     }
 
     public void run() {
