@@ -3,11 +3,14 @@ package org.bukkit.craftbukkit.util;
 import joptsimple.OptionException;
 import joptsimple.OptionSet;
 import net.minecraft.server.MinecraftServer;
+import org.betamc.tsunami.Tsunami;
+import org.bukkit.ChatColor;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class ShortConsoleLogFormatter extends Formatter {
@@ -56,6 +59,13 @@ public class ShortConsoleLogFormatter extends Formatter {
             builder.append(writer);
         }
 
+        // Tsunami start
+        if (record.getLevel().equals(Level.WARNING) && Tsunami.config().console().highlightWarnings()) {
+            return ChatColor.convertToAnsi(ChatColor.YELLOW + builder.toString());
+        } else if (record.getLevel().equals(Level.SEVERE) && Tsunami.config().console().highlightErrors()) {
+            return ChatColor.convertToAnsi(ChatColor.RED + builder.toString());
+        }
+        // Tsunami end
         return builder.toString();
     }
 

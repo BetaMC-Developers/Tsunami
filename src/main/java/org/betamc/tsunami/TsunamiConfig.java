@@ -84,9 +84,19 @@ public class TsunamiConfig {
     @ConfigSerializable
     public static class Console {
         private String prompt = "> ";
+        private boolean highlightWarnings = true;
+        private boolean highlightErrors = true;
 
         public String prompt() {
             return prompt;
+        }
+
+        public boolean highlightWarnings() {
+            return highlightWarnings;
+        }
+
+        public boolean highlightErrors() {
+            return highlightErrors;
         }
     }
 
