@@ -89,13 +89,17 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
         // CraftBukkit start
         this.options = options;
-        this.reader = LineReaderBuilder.builder().appName("Tsunami").build(); // Tsunami
         Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         // CraftBukkit end
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
         long startTimer = System.nanoTime(); // Tsunami - moved from below
+
+        // Tsunami start
+        this.reader = LineReaderBuilder.builder().appName("Tsunami").build();
+        this.reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
+        // Tsunami end
 
         this.consoleCommandHandler = new ConsoleCommandHandler(this);
         ThreadCommandReader threadcommandreader = new ThreadCommandReader(this);
