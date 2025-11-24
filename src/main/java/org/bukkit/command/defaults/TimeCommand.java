@@ -10,13 +10,13 @@ public class TimeCommand extends VanillaCommand {
     public TimeCommand() {
         super("time");
         this.description = "Changes the time on each world";
-        this.usageMessage = "/time set <value>\n/time add <value>";
+        this.usageMessage = "/time (set|add) <value>";
     }
 
     @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (args.length != 2)  {
-            sender.sendMessage(ChatColor.RED + "Incorrect usage. Correct usage:\n" + usageMessage);
+            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
             return false;
         }
 
