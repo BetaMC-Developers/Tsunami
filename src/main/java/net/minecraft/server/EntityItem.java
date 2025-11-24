@@ -71,7 +71,7 @@ public class EntityItem extends Entity {
                 || MathHelper.floor(this.lastZ) != MathHelper.floor(this.locZ);
 
         int rate = itemMoved ? 2 : 40;
-        if (this.ticksLived % rate == 0 && Tsunami.config().mergeDroppedItems() && this.isMergable()) {
+        if (this.ticksLived % rate == 0 && Tsunami.config().world().mergeDroppedItems() && this.isMergable()) {
             for (Object obj : this.world.a(EntityItem.class, this.boundingBox.b(0.5, 0.25, 0.5))) {
                 EntityItem entityitem = (EntityItem) obj;
                 tryMerge(entityitem);

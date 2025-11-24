@@ -668,8 +668,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         // CraftBukkit end
 
         // Tsunami start
-        if (Tsunami.config().saving().periodicPlayerSaving()) {
-            if (this.ticks % Tsunami.config().saving().playerSaveInterval() == 0) {
+        if (Tsunami.config().world().autoPlayerSaving().enabled()) {
+            if (this.ticks % Tsunami.config().world().autoPlayerSaving().interval() == 0) {
                 this.serverConfigurationManager.savePlayers();
             }
         }

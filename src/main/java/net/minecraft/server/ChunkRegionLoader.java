@@ -65,7 +65,7 @@ public class ChunkRegionLoader implements IChunkLoader {
                 }
             };
 
-            if (Tsunami.config().chunkIo().asyncSaving()) {
+            if (Tsunami.config().world().chunks().asyncSaving()) {
                 ((WorldServer) world).chunkProviderServer.saveExecutor.execute(saveTask);
             } else {
                 saveTask.run();

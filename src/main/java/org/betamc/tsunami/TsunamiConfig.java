@@ -23,13 +23,11 @@ public class TsunamiConfig {
     private static TsunamiConfig instance;
 
     private Console console;
-    private ChunkIo chunkIo;
     private Logging logging;
-    private boolean mergeDroppedItems = false;
-    private MobSpawning mobSpawning;
+    private Networking networking;
     private Rcon rcon;
-    private Saving saving;
     private ServerListPing serverListPing;
+    private World world;
 
     public static TsunamiConfig getInstance() {
         if (instance != null) return instance;
@@ -60,32 +58,24 @@ public class TsunamiConfig {
         return console;
     }
 
-    public ChunkIo chunkIo() {
-        return chunkIo;
-    }
-
     public Logging logging() {
         return logging;
     }
 
-    public boolean mergeDroppedItems() {
-        return mergeDroppedItems;
-    }
-
-    public MobSpawning mobSpawning() {
-        return mobSpawning;
+    public Networking networking() {
+        return networking;
     }
 
     public Rcon rcon() {
         return rcon;
     }
 
-    public Saving saving() {
-        return saving;
-    }
-
     public ServerListPing serverListPing() {
         return serverListPing;
+    }
+
+    public World world() {
+        return world;
     }
 
     @ConfigSerializable
@@ -108,25 +98,6 @@ public class TsunamiConfig {
     }
 
     @ConfigSerializable
-    public static class ChunkIo {
-        private boolean asyncLoading = false;
-        private boolean asyncSaving = false;
-        private int chunkPacketCompressionLevel = 6;
-
-        public boolean asyncLoading() {
-            return asyncLoading;
-        }
-
-        public boolean asyncSaving() {
-            return asyncSaving;
-        }
-
-        public int chunkPacketCompressionLevel() {
-            return Math.min(Math.max(chunkPacketCompressionLevel, -1), 9);
-        }
-    }
-
-    @ConfigSerializable
     public static class Logging {
         private boolean logUnknownCommands = false;
 
@@ -136,35 +107,11 @@ public class TsunamiConfig {
     }
 
     @ConfigSerializable
-    public static class MobSpawning {
-        private MobCaps mobCaps;
-        private boolean perPlayerMobCap = false;
+    public static class Networking {
+        private int chunkPacketCompressionLevel = 6;
 
-        public MobCaps mobCaps() {
-            return mobCaps;
-        }
-
-        public boolean perPlayerMobCap() {
-            return perPlayerMobCap;
-        }
-
-        @ConfigSerializable
-        public static class MobCaps {
-            private int monsters = 70;
-            private int animals = 15;
-            private int waterMobs = 5;
-
-            public int monsters() {
-                return Math.max(monsters, 0);
-            }
-
-            public int animals() {
-                return Math.max(animals, 0);
-            }
-
-            public int waterMobs() {
-                return Math.max(waterMobs, 0);
-            }
+        public int chunkPacketCompressionLevel() {
+            return Math.min(Math.max(chunkPacketCompressionLevel, -1), 9);
         }
     }
 
@@ -188,25 +135,6 @@ public class TsunamiConfig {
     }
 
     @ConfigSerializable
-    public static class Saving {
-        private int worldSaveInterval = 40;
-        private boolean periodicPlayerSaving = false;
-        private int playerSaveInterval = 40;
-
-        public int worldSaveInterval() {
-            return Math.max(worldSaveInterval, 1);
-        }
-
-        public boolean periodicPlayerSaving() {
-            return periodicPlayerSaving;
-        }
-
-        public int playerSaveInterval() {
-            return Math.max(playerSaveInterval, 1);
-        }
-    }
-
-    @ConfigSerializable
     public static class ServerListPing {
         private boolean enabled = false;
         private String motd = "A Minecraft Server";
@@ -222,6 +150,87 @@ public class TsunamiConfig {
 
         public boolean showPlayerNames() {
             return showPlayerNames;
+        }
+    }
+
+    @ConfigSerializable
+    public static class World {
+        private Chunks chunks;
+        private int autoSaveInterval = 40;
+        private AutoPlayerSaving autoPlayerSaving;
+        private MobCaps mobCaps;
+        private boolean perPlayerMobCap = false;
+        private boolean mergeDroppedItems = false;
+
+        public Chunks chunks() {
+            return chunks;
+        }
+
+        public int autoSaveInterval() {
+            return Math.max(autoSaveInterval, 1);
+        }
+
+        public AutoPlayerSaving autoPlayerSaving() {
+            return autoPlayerSaving;
+        }
+
+        public MobCaps mobCaps() {
+            return mobCaps;
+        }
+
+        public boolean perPlayerMobCap() {
+            return perPlayerMobCap;
+        }
+
+        public boolean mergeDroppedItems() {
+            return mergeDroppedItems;
+        }
+
+        @ConfigSerializable
+        public static class Chunks {
+            private boolean asyncLoading = false;
+            private boolean asyncSaving = false;
+
+            public boolean asyncLoading() {
+                return asyncLoading;
+            }
+
+            public boolean asyncSaving() {
+                return asyncSaving;
+            }
+        }
+
+        @ConfigSerializable
+        public static class AutoPlayerSaving {
+            private boolean enabled = false;
+            private int interval = 40;
+
+            public boolean enabled() {
+                return enabled;
+            }
+
+            public int interval() {
+                return Math.max(interval, 1);
+            }
+        }
+
+        @ConfigSerializable
+        public static class MobCaps {
+            private int monsters = 70;
+            private int animals = 15;
+            private int waterMobs = 5;
+
+            public int monsters() {
+                return Math.max(monsters, 0);
+            }
+
+            public int animals() {
+                return Math.max(animals, 0);
+            }
+
+            public int waterMobs() {
+                return Math.max(waterMobs, 0);
+            }
         }
     }
 
