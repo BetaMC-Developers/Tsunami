@@ -36,6 +36,6 @@ public class KickCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("kick ");
+        return input.equalsIgnoreCase("kick");
     }
 }
