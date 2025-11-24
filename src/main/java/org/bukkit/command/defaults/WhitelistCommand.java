@@ -10,7 +10,7 @@ public class WhitelistCommand extends VanillaCommand {
     public WhitelistCommand() {
         super("whitelist");
         this.description = "Prevents the specified player from using this server";
-        this.usageMessage = "/whitelist (add|remove) <player>\n/whitelist (on|off|list|reload)";
+        this.usageMessage = "/whitelist (add|remove) <player>, /whitelist (on|off|list|reload)";
     }
 
     @Override
@@ -70,7 +70,7 @@ public class WhitelistCommand extends VanillaCommand {
             }
         }
 
-        sender.sendMessage(ChatColor.RED + "Correct command usage:\n" + usageMessage);
+        sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
         return false;
     }
 
