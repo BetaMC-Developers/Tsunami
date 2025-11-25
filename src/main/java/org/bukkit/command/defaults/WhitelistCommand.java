@@ -10,6 +10,7 @@ public class WhitelistCommand extends VanillaCommand {
     public WhitelistCommand() {
         super("whitelist");
         this.description = "Prevents the specified player from using this server";
+        // Tsunami - Change usage message
         this.usageMessage = "/whitelist (add|remove) <player>, /whitelist (on|off|list|reload)";
     }
 
@@ -70,6 +71,7 @@ public class WhitelistCommand extends VanillaCommand {
             }
         }
 
+        // Tsunami - Change usage message
         sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
         return false;
     }
@@ -85,6 +87,7 @@ public class WhitelistCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("whitelist");
     }
 }

@@ -29,6 +29,7 @@ public class PardonIpCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("pardon-ip");
     }
 }

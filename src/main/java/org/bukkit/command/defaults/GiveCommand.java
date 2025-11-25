@@ -56,6 +56,7 @@ public class GiveCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("give");
     }
 }

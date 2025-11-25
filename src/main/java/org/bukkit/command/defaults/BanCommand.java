@@ -29,6 +29,7 @@ public class BanCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("ban");
     }
 }

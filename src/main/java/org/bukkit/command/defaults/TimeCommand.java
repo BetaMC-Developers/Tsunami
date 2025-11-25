@@ -10,12 +10,14 @@ public class TimeCommand extends VanillaCommand {
     public TimeCommand() {
         super("time");
         this.description = "Changes the time on each world";
+        // Tsunami - Change usage message
         this.usageMessage = "/time (set|add) <value>";
     }
 
     @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (args.length != 2)  {
+            // Tsunami - Change usage message
             sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
             return false;
         }
@@ -59,6 +61,7 @@ public class TimeCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("time");
     }
 }

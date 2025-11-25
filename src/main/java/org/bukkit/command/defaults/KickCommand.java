@@ -36,6 +36,7 @@ public class KickCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
+        // Tsunami - equalsIgnoreCase
         return input.equalsIgnoreCase("kick");
     }
 }

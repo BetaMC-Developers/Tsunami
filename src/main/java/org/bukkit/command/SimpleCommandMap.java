@@ -155,6 +155,7 @@ public class SimpleCommandMap implements CommandMap {
         String sentCommandLabel = args[0].toLowerCase();
         Command target = getCommand(sentCommandLabel);
         if (target == null) {
+            // Tsunami - give args[0] to getFallback() instead of commandline.toLowerCase()
             target = getFallback(args[0]);
         }
         if (target == null) {
