@@ -155,15 +155,15 @@ public class TsunamiConfig {
 
     @ConfigSerializable
     public static class World {
-        private Chunks chunks;
+        private AsyncChunkLoading asyncChunkLoading;
         private int autoSaveInterval = 40;
         private AutoPlayerSaving autoPlayerSaving;
         private MobCaps mobCaps;
         private boolean perPlayerMobCap = false;
         private boolean mergeDroppedItems = false;
 
-        public Chunks chunks() {
-            return chunks;
+        public AsyncChunkLoading asyncChunkLoading() {
+            return asyncChunkLoading;
         }
 
         public int autoSaveInterval() {
@@ -187,16 +187,16 @@ public class TsunamiConfig {
         }
 
         @ConfigSerializable
-        public static class Chunks {
-            private boolean asyncLoading = false;
-            private boolean asyncSaving = false;
+        public static class AsyncChunkLoading {
+            private boolean enabled = false;
+            private int threads = 3;
 
-            public boolean asyncLoading() {
-                return asyncLoading;
+            public boolean enabled() {
+                return enabled;
             }
 
-            public boolean asyncSaving() {
-                return asyncSaving;
+            public int threads() {
+                return Math.max(threads, 1);
             }
         }
 

@@ -36,7 +36,7 @@ class PlayerInstance {
         this.location = LongHash.toLong(i, j); // Tsunami
 
         // Tsunami start
-        if (Tsunami.config().world().chunks().asyncLoading()) {
+        if (Tsunami.config().world().asyncChunkLoading().enabled()) {
             this.chunk = playermanager.a().chunkProviderServer.getChunkAtAsync(i, j);
         } else {
             this.chunk = CompletableFuture.completedFuture(playermanager.a().chunkProviderServer.getChunkAt(i, j));

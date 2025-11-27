@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
@@ -15,12 +16,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChunkProviderServer implements IChunkProvider {
 
     // Tsunami start
-    public final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
-    public final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService loadExecutor = Executors.newFixedThreadPool(
+            Tsunami.config().world().asyncChunkLoading().threads(),
+            new ChunkLoaderThreadFactory());
     private final Long2ObjectOpenHashMap<ChunkLoadTask> loadQueue = new Long2ObjectOpenHashMap<>(1500);
     private final Queue<Runnable> postLoadQueue = new ConcurrentLinkedQueue<>();
     // Tsunami end
@@ -215,7 +219,7 @@ public class ChunkProviderServer implements IChunkProvider {
         if (task == null) {
             task = new ChunkLoadTask(i, j);
             this.loadQueue.put(LongHash.toLong(i, j), task);
-            this.loadExecutor.execute(task);
+            loadExecutor.execute(task);
         }
 
         return task.future;
@@ -357,6 +361,17 @@ public class ChunkProviderServer implements IChunkProvider {
             postLoadQueue.offer(() -> future.complete(postLoadChunk(chunk, x, z)));
         }
 
+    }
+
+    private static class ChunkLoaderThreadFactory implements ThreadFactory {
+        private final AtomicInteger id = new AtomicInteger(1);
+
+        @Override
+        public Thread newThread(Runnable task) {
+            Thread thread = new Thread(task);
+            thread.setName("Chunk loader thread #" + id.getAndIncrement());
+            return thread;
+        }
     }
     // Tsunami end
 
