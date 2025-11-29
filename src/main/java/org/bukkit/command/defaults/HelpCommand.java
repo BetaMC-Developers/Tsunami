@@ -38,6 +38,7 @@ public class HelpCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("help") || input.startsWith("?");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("help") || input.equalsIgnoreCase("?");
     }
 }
