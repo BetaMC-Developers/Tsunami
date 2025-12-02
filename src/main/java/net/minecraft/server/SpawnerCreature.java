@@ -2,7 +2,6 @@ package net.minecraft.server;
 
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
@@ -30,158 +29,119 @@ public final class SpawnerCreature {
         } else {
             b.clear();
 
-            for (int i = 0; i < world.players.size(); ++i) {
+            int i;
+            int j;
+
+            for (i = 0; i < world.players.size(); ++i) {
                 EntityHuman entityhuman = (EntityHuman) world.players.get(i);
-                int x = MathHelper.floor(entityhuman.locX / 16.0D);
-                int z = MathHelper.floor(entityhuman.locZ / 16.0D);
+                int k = MathHelper.floor(entityhuman.locX / 16.0D);
+
+                j = MathHelper.floor(entityhuman.locZ / 16.0D);
                 byte b0 = 8;
 
                 for (int l = -b0; l <= b0; ++l) {
                     for (int i1 = -b0; i1 <= b0; ++i1) {
-                        b.add(LongHash.toLong(l + x, i1 + z)); // Tsunami
+                        b.add(LongHash.toLong(l + k, i1 + j));
                     }
                 }
             }
 
-            int ret = 0;
+            i = 0;
+            ChunkCoordinates chunkcoordinates = world.getSpawn();
             EnumCreatureType[] aenumcreaturetype = EnumCreatureType.values();
 
-            for (int j1 = 0; j1 < aenumcreaturetype.length; ++j1) {
+            j = aenumcreaturetype.length;
+
+            for (int j1 = 0; j1 < j; ++j1) {
                 EnumCreatureType enumcreaturetype = aenumcreaturetype[j1];
+
                 if ((!enumcreaturetype.d() || flag1) && (enumcreaturetype.d() || flag) && world.a(enumcreaturetype.a()) <= enumcreaturetype.b() * b.size() / 256) {
-                    ret += spawnCreatureType(world, enumcreaturetype, b);
-                }
-            }
+                    LongIterator iterator = b.iterator();  // Tsunami - LongIterator
 
-            return ret;
-        }
-    }
+                    label113:
+                    while (iterator.hasNext()) {
+                        long coordPair = iterator.nextLong(); // Tsunami - ChunkCoordIntPair -> long
+                        BiomeBase biomebase = world.getWorldChunkManager().a(coordPair);
+                        List list = biomebase.a(enumcreaturetype);
 
-    // Tsunami start
-    public static final int spawnEntitiesPerPlayer(World world, boolean flag, boolean flag1) {
-        if (!flag && !flag1) {
-            return 0;
-        } else {
-            int ret = 0;
-            for (EnumCreatureType enumcreaturetype : EnumCreatureType.values()) {
-                b.clear();
+                        if (list != null && !list.isEmpty()) {
+                            int k1 = 0;
 
-                for (int i = 0; i < world.players.size(); i++) {
-                    EntityHuman entityhuman = (EntityHuman) world.players.get(i);
-                    if (entityhuman.dead || !(entityhuman instanceof EntityPlayer))
-                        continue;
-                    if (world.getPlayerMobCount(enumcreaturetype.a(), entityhuman) > enumcreaturetype.b())
-                        continue;
+                            BiomeMeta biomemeta;
 
-                    int x = MathHelper.floor(entityhuman.locX / 16.0);
-                    int z = MathHelper.floor(entityhuman.locZ / 16.0);
-                    byte b0 = 8;
+                            for (Iterator iterator1 = list.iterator(); iterator1.hasNext(); k1 += biomemeta.b) {
+                                biomemeta = (BiomeMeta) iterator1.next();
+                            }
 
-                    for (int l = -b0; l <= b0; ++l) {
-                        for (int i1 = -b0; i1 <= b0; ++i1) {
-                            b.add(LongHash.toLong(l + x, i1 + z)); // Tsunami
-                        }
-                    }
-                }
+                            int l1 = world.random.nextInt(k1);
 
-                if ((!enumcreaturetype.d() || flag1) && (enumcreaturetype.d() || flag)) {
-                    ret += spawnCreatureType(world, enumcreaturetype, b);
-                }
-            }
+                            biomemeta = (BiomeMeta) list.get(0);
+                            Iterator iterator2 = list.iterator();
 
-            return ret;
-        }
-    }
-    // Tsunami end
+                            while (iterator2.hasNext()) {
+                                BiomeMeta biomemeta1 = (BiomeMeta) iterator2.next();
 
-    // Tsunami start - code moved from spawnEntities
-    private static int spawnCreatureType(World world, EnumCreatureType enumcreaturetype, LongSet set) {
-        int ret = 0;
-        LongIterator iterator = set.iterator(); // Tsunami - LongIterator
+                                l1 -= biomemeta1.b;
+                                if (l1 < 0) {
+                                    biomemeta = biomemeta1;
+                                    break;
+                                }
+                            }
 
-        label113:
-        while (iterator.hasNext()) {
-            long coordPair = iterator.nextLong(); // Tsunami - ChunkCoordIntPair -> long
-            BiomeBase biomebase = world.getWorldChunkManager().a(coordPair);
-            List list = biomebase.a(enumcreaturetype);
+                            // Tsunami
+                            int i2 = LongHash.msw(coordPair) * 16 + world.random.nextInt(16);
+                            int j2 = world.random.nextInt(128);
+                            int k2 = LongHash.lsw(coordPair) * 16 + world.random.nextInt(16);
 
-            if (list != null && !list.isEmpty()) {
-                int k1 = 0;
+                            if (!world.e(i2, j2, k2) && world.getMaterial(i2, j2, k2) == enumcreaturetype.c()) {
+                                int l2 = 0;
 
-                BiomeMeta biomemeta;
+                                for (int i3 = 0; i3 < 3; ++i3) {
+                                    int j3 = i2;
+                                    int k3 = j2;
+                                    int l3 = k2;
+                                    byte b1 = 6;
 
-                for (Iterator iterator1 = list.iterator(); iterator1.hasNext(); k1 += biomemeta.b) {
-                    biomemeta = (BiomeMeta) iterator1.next();
-                }
+                                    for (int i4 = 0; i4 < 4; ++i4) {
+                                        j3 += world.random.nextInt(b1) - world.random.nextInt(b1);
+                                        k3 += world.random.nextInt(1) - world.random.nextInt(1);
+                                        l3 += world.random.nextInt(b1) - world.random.nextInt(b1);
+                                        if (a(enumcreaturetype, world, j3, k3, l3)) {
+                                            float f = (float) j3 + 0.5F;
+                                            float f1 = (float) k3;
+                                            float f2 = (float) l3 + 0.5F;
 
-                int l1 = world.random.nextInt(k1);
+                                            if (world.a((double) f, (double) f1, (double) f2, 24.0D) == null) {
+                                                float f3 = f - (float) chunkcoordinates.x;
+                                                float f4 = f1 - (float) chunkcoordinates.y;
+                                                float f5 = f2 - (float) chunkcoordinates.z;
+                                                float f6 = f3 * f3 + f4 * f4 + f5 * f5;
 
-                biomemeta = (BiomeMeta) list.get(0);
-                Iterator iterator2 = list.iterator();
+                                                if (f6 >= 576.0F) {
+                                                    EntityLiving entityliving;
 
-                while (iterator2.hasNext()) {
-                    BiomeMeta biomemeta1 = (BiomeMeta) iterator2.next();
+                                                    try {
+                                                        entityliving = (EntityLiving) biomemeta.a.getConstructor(new Class[] { World.class}).newInstance(new Object[] { world});
+                                                    } catch (Exception exception) {
+                                                        exception.printStackTrace();
+                                                        return i;
+                                                    }
 
-                    l1 -= biomemeta1.b;
-                    if (l1 < 0) {
-                        biomemeta = biomemeta1;
-                        break;
-                    }
-                }
+                                                    entityliving.setPositionRotation((double) f, (double) f1, (double) f2, world.random.nextFloat() * 360.0F, 0.0F);
+                                                    if (entityliving.d()) {
+                                                        ++l2;
+                                                        // CraftBukkit - added a reason for spawning this creature
+                                                        world.addEntity(entityliving, SpawnReason.NATURAL);
+                                                        a(entityliving, world, f, f1, f2);
+                                                        if (l2 >= entityliving.l()) {
+                                                            continue label113;
+                                                        }
+                                                    }
 
-                // Tsunami start
-                int i2 = LongHash.msw(coordPair) * 16 + world.random.nextInt(16);
-                int j2 = world.random.nextInt(128);
-                int k2 = LongHash.lsw(coordPair) * 16 + world.random.nextInt(16);
-                // Tsunami end
-
-                if (!world.e(i2, j2, k2) && world.getMaterial(i2, j2, k2) == enumcreaturetype.c()) {
-                    int l2 = 0;
-
-                    for (int i3 = 0; i3 < 3; ++i3) {
-                        int j3 = i2;
-                        int k3 = j2;
-                        int l3 = k2;
-                        byte b1 = 6;
-
-                        for (int i4 = 0; i4 < 4; ++i4) {
-                            j3 += world.random.nextInt(b1) - world.random.nextInt(b1);
-                            k3 += world.random.nextInt(1) - world.random.nextInt(1);
-                            l3 += world.random.nextInt(b1) - world.random.nextInt(b1);
-                            if (a(enumcreaturetype, world, j3, k3, l3)) {
-                                float f = (float) j3 + 0.5F;
-                                float f1 = (float) k3;
-                                float f2 = (float) l3 + 0.5F;
-
-                                if (world.a((double) f, (double) f1, (double) f2, 24.0D) == null) {
-                                    ChunkCoordinates chunkcoordinates = world.getSpawn();
-                                    float f3 = f - (float) chunkcoordinates.x;
-                                    float f4 = f1 - (float) chunkcoordinates.y;
-                                    float f5 = f2 - (float) chunkcoordinates.z;
-                                    float f6 = f3 * f3 + f4 * f4 + f5 * f5;
-
-                                    if (f6 >= 576.0F) {
-                                        EntityLiving entityliving;
-
-                                        try {
-                                            entityliving = (EntityLiving) biomemeta.a.getConstructor(new Class[] { World.class}).newInstance(new Object[] { world});
-                                        } catch (Exception exception) {
-                                            exception.printStackTrace();
-                                            return ret;
-                                        }
-
-                                        entityliving.setPositionRotation((double) f, (double) f1, (double) f2, world.random.nextFloat() * 360.0F, 0.0F);
-                                        if (entityliving.d()) {
-                                            ++l2;
-                                            // CraftBukkit - added a reason for spawning this creature
-                                            world.addEntity(entityliving, SpawnReason.NATURAL);
-                                            a(entityliving, world, f, f1, f2);
-                                            if (l2 >= entityliving.l()) {
-                                                continue label113;
+                                                    i += l2;
+                                                }
                                             }
                                         }
-
-                                        ret += l2;
                                     }
                                 }
                             }
@@ -189,10 +149,10 @@ public final class SpawnerCreature {
                     }
                 }
             }
+
+            return i;
         }
-        return ret;
     }
-    // Tsunami end
 
     private static boolean a(EnumCreatureType enumcreaturetype, World world, int i, int j, int k) {
         return enumcreaturetype.c() == Material.WATER ? world.getMaterial(i, j, k).isLiquid() && !world.e(i, j + 1, k) : world.e(i, j - 1, k) && !world.e(i, j, k) && !world.getMaterial(i, j, k).isLiquid() && !world.e(i, j + 1, k);

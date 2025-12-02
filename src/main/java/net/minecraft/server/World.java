@@ -1722,12 +1722,7 @@ public class World implements IBlockAccess {
 
         // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
         if ((this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.getServer().getHandle().players.size() > 0)) {
-            // Tsunami - add per-player mob cap
-            if (Tsunami.config().world().perPlayerMobCap()) {
-                SpawnerCreature.spawnEntitiesPerPlayer(this, this.allowMonsters, this.allowAnimals);
-            } else {
-                SpawnerCreature.spawnEntities(this, this.allowMonsters, this.allowAnimals);
-            }
+            SpawnerCreature.spawnEntities(this, this.allowMonsters, this.allowAnimals);
         }
         // CraftBukkit end
 
