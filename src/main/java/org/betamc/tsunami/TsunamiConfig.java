@@ -159,7 +159,7 @@ public class TsunamiConfig {
         private int autoSaveInterval = 40;
         private AutoPlayerSaving autoPlayerSaving;
         private MobCaps mobCaps;
-        private boolean perPlayerMobCap = false;
+        private boolean perPlayerMobSpawning = false;
         private boolean mergeDroppedItems = false;
 
         public AsyncChunkLoading asyncChunkLoading() {
@@ -178,8 +178,8 @@ public class TsunamiConfig {
             return mobCaps;
         }
 
-        public boolean perPlayerMobCap() {
-            return perPlayerMobCap;
+        public boolean perPlayerMobSpawning() {
+            return perPlayerMobSpawning;
         }
 
         public boolean mergeDroppedItems() {
