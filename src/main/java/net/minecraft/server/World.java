@@ -1885,10 +1885,6 @@ public class World implements IBlockAccess {
             }
         }
 
-        if (this.Q > 0) {
-            --this.Q;
-        }
-
         LongIterator iterator = this.P.iterator(); // Tsunami - LongIterator
 
         while (iterator.hasNext()) {
@@ -1901,24 +1897,7 @@ public class World implements IBlockAccess {
             int k1;
             int l1;
 
-            if (this.Q == 0) {
-                this.g = this.g * 3 + 1013904223;
-                k = this.g >> 2;
-                l = k & 15;
-                j1 = k >> 8 & 15;
-                k1 = k >> 16 & 127;
-                l1 = chunk.getTypeId(l, k1, j1);
-                l += i;
-                j1 += j;
-                if (l1 == 0 && this.k(l, k1, j1) <= this.random.nextInt(8) && this.a(EnumSkyBlock.SKY, l, k1, j1) <= 0) {
-                    EntityHuman entityhuman1 = this.a((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, 8.0D);
-
-                    if (entityhuman1 != null && entityhuman1.e((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D) > 4.0D) {
-                        this.makeSound((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, "ambient.cave.cave", 0.7F, 0.8F + this.random.nextFloat() * 0.2F);
-                        this.Q = this.random.nextInt(12000) + 6000;
-                    }
-                }
-            }
+            // Tsunami - remove cave sounds as they cannot be played to clients
 
             if (this.random.nextInt(100000) == 0 && this.v() && this.u()) {
                 this.g = this.g * 3 + 1013904223;
