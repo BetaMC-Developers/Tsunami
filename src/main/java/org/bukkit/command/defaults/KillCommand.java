@@ -34,6 +34,7 @@ public class KillCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("kill");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("kill");
     }
 }

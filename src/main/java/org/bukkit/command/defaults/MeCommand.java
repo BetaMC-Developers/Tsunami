@@ -34,6 +34,7 @@ public class MeCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("me ");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("me");
     }
 }

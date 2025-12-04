@@ -29,6 +29,7 @@ public class PardonCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("pardon ");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("pardon");
     }
 }

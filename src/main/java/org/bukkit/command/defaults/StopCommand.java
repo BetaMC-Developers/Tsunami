@@ -40,6 +40,7 @@ public class StopCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("stop");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("stop");
     }
 }

@@ -29,6 +29,7 @@ public class BanIpCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("ban-ip ");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("ban-ip");
     }
 }
