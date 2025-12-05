@@ -18,6 +18,7 @@ import net.minecraft.server.WorldServer;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.Collection;
 import java.util.List;
 
 public class LocalCreatureSpawner {
@@ -27,9 +28,8 @@ public class LocalCreatureSpawner {
 
     public static void spawnCreatures(WorldServer world, boolean spawnMonsters, boolean spawnAnimals) {
         LocalMobCapCalculator calculator = createCalculator(world);
-        for (Chunk chunk : world.chunkProviderServer.chunks.values()) {
-            spawnForChunk(world, chunk, calculator, spawnMonsters, spawnAnimals);
-        }
+        Collection<Chunk> chunks = world.chunkProviderServer.chunks.values();
+        chunks.forEach(chunk -> spawnForChunk(world, chunk, calculator, spawnMonsters, spawnAnimals));
     }
 
     private static void spawnForChunk(World world, Chunk chunk, LocalMobCapCalculator calculator, boolean spawnMonsters, boolean spawnAnimals) {
@@ -47,21 +47,26 @@ public class LocalCreatureSpawner {
 
         if (!isFullBlock(chunk, x, y, z) && getMaterial(chunk, x, y, z) == creatureType.c()) {
             BiomeMeta mob = getWeightedRandomMob(creatureType, world, chunk);
+            Chunk currentChunk;
             int count = 0;
             int radius = 6;
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 4; j++) {
+                    currentChunk = chunk;
                     int randX = x + world.random.nextInt(radius) - world.random.nextInt(radius);
                     int randZ = z + world.random.nextInt(radius) - world.random.nextInt(radius);
-                    // TODO: the chunk can and will be incorrect in isValidSpawnPosition!!
-                    if (hasDistanceToPlayersAndSpawn(world, randX, y, randZ) && isValidSpawnPosition(creatureType, chunk, randX, y, randZ)) {
+                    if (randX >> 4 != x >> 4 || randZ >> 4 != z >> 4) {
+                        currentChunk = world.getChunkAt(randX, randZ);
+                    }
+
+                    if (hasDistanceToPlayersAndSpawn(world, randX, y, randZ) && isValidSpawnPosition(creatureType, currentChunk, randX, y, randZ)) {
                         EntityLiving entity;
                         try {
                             entity = (EntityLiving) mob.a.getConstructor(World.class).newInstance(world);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            break;
+                            return;
                         }
 
                         entity.setPositionRotation(randX + 0.5, y, randZ + 0.5, world.random.nextFloat() * 360.0f, 0.0f);
@@ -69,7 +74,6 @@ public class LocalCreatureSpawner {
                             count++;
                             world.addEntity(entity, CreatureSpawnEvent.SpawnReason.NATURAL);
                             postSpawn(entity, world);
-                            calculator.addMob(chunk.x, chunk.z, creatureType);
                             if (count >= entity.l()) {
                                 return;
                             }
