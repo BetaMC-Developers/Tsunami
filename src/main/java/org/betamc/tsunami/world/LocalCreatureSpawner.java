@@ -5,16 +5,12 @@ import net.minecraft.server.BiomeMeta;
 import net.minecraft.server.Block;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordinates;
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityHuman;
 import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntitySheep;
 import net.minecraft.server.EntitySkeleton;
 import net.minecraft.server.EntitySpider;
 import net.minecraft.server.EnumCreatureType;
 import net.minecraft.server.Material;
-import net.minecraft.server.MathHelper;
 import net.minecraft.server.World;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -23,19 +19,22 @@ import java.util.List;
 
 public class LocalCreatureSpawner {
 
+    private static final LocalMobCapCalculator calculator = new LocalMobCapCalculator();
+
     private LocalCreatureSpawner() {
     }
 
     public static void spawnCreatures(World world, boolean spawnMonsters, boolean spawnAnimals) {
-        LocalMobCapCalculator calculator = createCalculator(world);
+        calculator.prepare(world);
         calculator.getEligibleChunkPositions().forEach(chunkPos -> {
             Chunk chunk = world.getChunkAt(LongHash.msw(chunkPos), LongHash.lsw(chunkPos));
-            spawnForChunk(world, chunk, calculator, spawnMonsters, spawnAnimals);
+            spawnForChunk(world, chunk, spawnMonsters, spawnAnimals);
         });
     }
 
-    private static void spawnForChunk(World world, Chunk chunk, LocalMobCapCalculator calculator, boolean spawnMonsters, boolean spawnAnimals) {
-        for (EnumCreatureType creatureType : EnumCreatureType.values()) {
+    private static void spawnForChunk(World world, Chunk chunk, boolean spawnMonsters, boolean spawnAnimals) {
+        for (int i = 0; i < EnumCreatureType.types().length; i++) {
+            EnumCreatureType creatureType = EnumCreatureType.types()[i];
             if ((!creatureType.d() || spawnAnimals) && (creatureType.d() || spawnMonsters) && calculator.canSpawn(creatureType, chunk)) {
                 spawnCreatureTypeForChunk(creatureType, world, chunk);
             }
@@ -86,51 +85,6 @@ public class LocalCreatureSpawner {
         }
     }
 
-    private static LocalMobCapCalculator createCalculator(World world) {
-        LocalMobCapCalculator calculator = new LocalMobCapCalculator();
-
-        for (int i = 0; i < world.players.size(); i++) {
-            EntityHuman player = (EntityHuman) world.players.get(i);
-            if (!(player instanceof EntityPlayer) || player.dead) {
-                continue;
-            }
-
-            int x = MathHelper.floor(player.locX) >> 4;
-            int z = MathHelper.floor(player.locZ) >> 4;
-            byte radius = 8;
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    calculator.addPlayerToChunk(x + dx, z + dz, (EntityPlayer) player);
-                    Chunk chunk = world.getChunkAt(x + dx, z + dz);
-
-                    for (List slice : chunk.entitySlices) {
-                        for (Object obj : slice) {
-                            if (!(obj instanceof Entity)) {
-                                continue;
-                            }
-                            Entity entity = (Entity) obj;
-                            EnumCreatureType creatureType = getCreatureType(entity);
-                            if (creatureType != null) {
-                                calculator.addMobToNearbyPlayer((EntityPlayer) player, creatureType);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return calculator;
-    }
-
-    private static EnumCreatureType getCreatureType(Entity entity) {
-        for (EnumCreatureType creatureType : EnumCreatureType.values()) {
-            if (creatureType.a().isAssignableFrom(entity.getClass())) {
-                return creatureType;
-            }
-        }
-        return null;
-    }
-
     private static int getTypeId(Chunk chunk, int x, int y, int z) {
         if (y >= 0 && y < 128) {
             return chunk.getTypeId(x & 15, y, z & 15);
@@ -157,14 +111,15 @@ public class LocalCreatureSpawner {
         }
 
         int totalWeight = 0;
-        for (Object obj : mobs) {
-            totalWeight += ((BiomeMeta) obj).b;
+        for (int i = 0; i < mobs.size(); i++) {
+            BiomeMeta mob = (BiomeMeta) mobs.get(i);
+            totalWeight += mob.b;
         }
 
         int rand = world.random.nextInt(totalWeight);
         BiomeMeta mob = (BiomeMeta) mobs.get(0);
-        for (Object obj : mobs) {
-            BiomeMeta otherMob = (BiomeMeta) obj;
+        for (int i = 0; i < mobs.size(); i++) {
+            BiomeMeta otherMob = (BiomeMeta) mobs.get(i);
             rand -= otherMob.b;
             if (rand < 0) {
                 mob = otherMob;
