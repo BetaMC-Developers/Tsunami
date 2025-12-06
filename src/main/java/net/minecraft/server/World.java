@@ -1725,7 +1725,7 @@ public class World implements IBlockAccess {
         if ((this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.getServer().getHandle().players.size() > 0)) {
             // Tsunami - per-player mob spawning
             if (Tsunami.config().world().perPlayerMobSpawning()) {
-                LocalCreatureSpawner.spawnCreatures((WorldServer) this, this.allowMonsters, this.allowAnimals);
+                LocalCreatureSpawner.spawnCreatures(this, this.allowMonsters, this.allowAnimals);
             } else {
                 SpawnerCreature.spawnEntities(this, this.allowMonsters, this.allowAnimals);
             }
@@ -2211,28 +2211,6 @@ public class World implements IBlockAccess {
 
         return entityhuman;
     }
-
-    // Tsunami start
-    public List<EntityPlayer> getNearbyPlayersForSpawning(long chunkPos) {
-        List<EntityPlayer> players = new ArrayList<>();
-        double x = (LongHash.msw(chunkPos) << 4) + 8;
-        double z = (LongHash.lsw(chunkPos) << 4) + 8;
-
-        for (int i = 0; i < this.players.size(); i++) {
-            EntityHuman player = (EntityHuman) this.players.get(i);
-            if (player == null || player.dead || !(player instanceof EntityPlayer)) {
-                continue;
-            }
-            double dx = x - player.locX;
-            double dz = z - player.locZ;
-            if (dx * dx + dz * dz < 16384.0) {
-                players.add((EntityPlayer) player);
-            }
-        }
-
-        return players;
-    }
-    // Tsunami end
 
     public EntityHuman a(String s) {
         for (int i = 0; i < this.players.size(); ++i) {

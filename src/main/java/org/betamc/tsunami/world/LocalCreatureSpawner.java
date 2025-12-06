@@ -6,7 +6,9 @@ import net.minecraft.server.Block;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordinates;
 import net.minecraft.server.Entity;
+import net.minecraft.server.EntityHuman;
 import net.minecraft.server.EntityLiving;
+import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntitySheep;
 import net.minecraft.server.EntitySkeleton;
 import net.minecraft.server.EntitySpider;
@@ -14,11 +16,9 @@ import net.minecraft.server.EnumCreatureType;
 import net.minecraft.server.Material;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.World;
-import net.minecraft.server.WorldServer;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import java.util.Collection;
 import java.util.List;
 
 public class LocalCreatureSpawner {
@@ -26,21 +26,23 @@ public class LocalCreatureSpawner {
     private LocalCreatureSpawner() {
     }
 
-    public static void spawnCreatures(WorldServer world, boolean spawnMonsters, boolean spawnAnimals) {
+    public static void spawnCreatures(World world, boolean spawnMonsters, boolean spawnAnimals) {
         LocalMobCapCalculator calculator = createCalculator(world);
-        Collection<Chunk> chunks = world.chunkProviderServer.chunks.values();
-        chunks.forEach(chunk -> spawnForChunk(world, chunk, calculator, spawnMonsters, spawnAnimals));
+        calculator.getEligibleChunkPositions().forEach(chunkPos -> {
+            Chunk chunk = world.getChunkAt(LongHash.msw(chunkPos), LongHash.lsw(chunkPos));
+            spawnForChunk(world, chunk, calculator, spawnMonsters, spawnAnimals);
+        });
     }
 
     private static void spawnForChunk(World world, Chunk chunk, LocalMobCapCalculator calculator, boolean spawnMonsters, boolean spawnAnimals) {
         for (EnumCreatureType creatureType : EnumCreatureType.values()) {
             if ((!creatureType.d() || spawnAnimals) && (creatureType.d() || spawnMonsters) && calculator.canSpawn(creatureType, chunk)) {
-                spawnCreatureTypeForChunk(creatureType, world, chunk, calculator);
+                spawnCreatureTypeForChunk(creatureType, world, chunk);
             }
         }
     }
 
-    private static void spawnCreatureTypeForChunk(EnumCreatureType creatureType, World world, Chunk chunk, LocalMobCapCalculator calculator) {
+    private static void spawnCreatureTypeForChunk(EnumCreatureType creatureType, World world, Chunk chunk) {
         int x = (chunk.x << 4) + world.random.nextInt(16);
         int y = world.random.nextInt(128);
         int z = (chunk.z << 4) + world.random.nextInt(16);
@@ -60,7 +62,7 @@ public class LocalCreatureSpawner {
                         currentChunk = world.getChunkAt(randX, randZ);
                     }
 
-                    if (hasDistanceToPlayersAndSpawn(world, randX, y, randZ) && isValidSpawnPosition(creatureType, currentChunk, randX, y, randZ)) {
+                    if (isValidSpawnPosition(creatureType, currentChunk, randX, y, randZ) && hasDistanceToPlayersAndSpawn(world, randX, y, randZ)) {
                         EntityLiving entity;
                         try {
                             entity = (EntityLiving) mob.a.getConstructor(World.class).newInstance(world);
@@ -85,14 +87,35 @@ public class LocalCreatureSpawner {
     }
 
     private static LocalMobCapCalculator createCalculator(World world) {
-        LocalMobCapCalculator calculator = new LocalMobCapCalculator(world);
-        for (int i = 0; i < world.entityList.size(); i++) {
-            Entity entity = (Entity) world.entityList.get(i);
-            EnumCreatureType creatureType = getCreatureType(entity);
-            if (creatureType != null) {
-                int x = MathHelper.floor(entity.locX) >> 4;
-                int z = MathHelper.floor(entity.locZ) >> 4;
-                calculator.addMob(x, z, creatureType);
+        LocalMobCapCalculator calculator = new LocalMobCapCalculator();
+
+        for (int i = 0; i < world.players.size(); i++) {
+            EntityHuman player = (EntityHuman) world.players.get(i);
+            if (!(player instanceof EntityPlayer) || player.dead) {
+                continue;
+            }
+
+            int x = MathHelper.floor(player.locX) >> 4;
+            int z = MathHelper.floor(player.locZ) >> 4;
+            byte radius = 8;
+            for (int dx = -radius; dx <= radius; dx++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    calculator.addPlayerToChunk(x + dx, z + dz, (EntityPlayer) player);
+                    Chunk chunk = world.getChunkAt(x + dx, z + dz);
+
+                    for (List slice : chunk.entitySlices) {
+                        for (Object obj : slice) {
+                            if (!(obj instanceof Entity)) {
+                                continue;
+                            }
+                            Entity entity = (Entity) obj;
+                            EnumCreatureType creatureType = getCreatureType(entity);
+                            if (creatureType != null) {
+                                calculator.addMobToNearbyPlayer((EntityPlayer) player, creatureType);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -108,13 +131,21 @@ public class LocalCreatureSpawner {
         return null;
     }
 
+    private static int getTypeId(Chunk chunk, int x, int y, int z) {
+        if (y >= 0 && y < 128) {
+            return chunk.getTypeId(x & 15, y, z & 15);
+        } else {
+            return 0;
+        }
+    }
+
     private static boolean isFullBlock(Chunk chunk, int x, int y, int z) {
-        Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+        Block block = Block.byId[getTypeId(chunk, x & 15, y, z & 15)];
         return block != null && block.material.h() && block.b();
     }
 
     private static Material getMaterial(Chunk chunk, int x, int y, int z) {
-        int id = chunk.getTypeId(x & 15, y, z & 15);
+        int id = getTypeId(chunk, x & 15, y, z & 15);
         return id == 0 ? Material.AIR : Block.byId[id].material;
     }
 
