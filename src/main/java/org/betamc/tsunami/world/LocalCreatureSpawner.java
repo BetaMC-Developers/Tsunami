@@ -6,6 +6,7 @@ import net.minecraft.server.Block;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordinates;
 import net.minecraft.server.EntityLiving;
+import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EntitySheep;
 import net.minecraft.server.EntitySkeleton;
 import net.minecraft.server.EntitySpider;
@@ -26,17 +27,14 @@ public class LocalCreatureSpawner {
 
     public static void spawnCreatures(World world, boolean spawnMonsters, boolean spawnAnimals) {
         calculator.prepare(world);
-        calculator.getEligibleChunkPositions().forEach(chunkPos -> {
-            Chunk chunk = world.getChunkAt(LongHash.msw(chunkPos), LongHash.lsw(chunkPos));
-            spawnForChunk(world, chunk, spawnMonsters, spawnAnimals);
-        });
+        calculator.forEachEntry((player, chunks) -> spawnForPlayer(world, player, chunks, spawnMonsters, spawnAnimals));
     }
 
-    private static void spawnForChunk(World world, Chunk chunk, boolean spawnMonsters, boolean spawnAnimals) {
+    private static void spawnForPlayer(World world, EntityPlayer player, List<Chunk> chunksNearPlayer, boolean spawnMonsters, boolean spawnAnimals) {
         for (int i = 0; i < EnumCreatureType.types().length; i++) {
             EnumCreatureType creatureType = EnumCreatureType.types()[i];
-            if ((!creatureType.d() || spawnAnimals) && (creatureType.d() || spawnMonsters) && calculator.canSpawn(creatureType, chunk)) {
-                spawnCreatureTypeForChunk(creatureType, world, chunk);
+            if ((!creatureType.d() || spawnAnimals) && (creatureType.d() || spawnMonsters) && calculator.canSpawnForPlayer(creatureType, player)) {
+                chunksNearPlayer.forEach(chunk -> spawnCreatureTypeForChunk(creatureType, world, chunk));
             }
         }
     }

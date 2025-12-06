@@ -1,10 +1,8 @@
 package org.betamc.tsunami.world;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.Entity;
 import net.minecraft.server.EntityHuman;
@@ -12,21 +10,19 @@ import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.EnumCreatureType;
 import net.minecraft.server.MathHelper;
 import net.minecraft.server.World;
-import org.bukkit.craftbukkit.util.LongHash;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class LocalMobCapCalculator {
 
-    private final Long2ObjectMap<List<EntityPlayer>> playersNearChunk = new Long2ObjectOpenHashMap<>();
+    private final Object2ObjectMap<EntityPlayer, ObjectArrayList<Chunk>> chunksNearPlayer = new Object2ObjectOpenHashMap<>();
     private final Object2ObjectMap<EntityPlayer, MobCounts> playerMobCounts = new Object2ObjectOpenHashMap<>();
 
     public void prepare(World world) {
-        this.playersNearChunk.clear();
+        this.chunksNearPlayer.clear();
         this.playerMobCounts.clear();
 
         for (int i = 0; i < world.players.size(); i++) {
@@ -40,8 +36,8 @@ public class LocalMobCapCalculator {
             byte radius = 8;
             for (int dx = -radius; dx <= radius; dx++) {
                 for (int dz = -radius; dz <= radius; dz++) {
-                    addPlayerToChunk(x + dx, z + dz, (EntityPlayer) player);
                     Chunk chunk = world.getChunkAt(x + dx, z + dz);
+                    addChunkToPlayer((EntityPlayer) player, chunk);
 
                     for (int j = 0; j < chunk.entitySlices.length; j++) {
                         List slice = chunk.entitySlices[j];
@@ -68,34 +64,21 @@ public class LocalMobCapCalculator {
         return null;
     }
 
-    private List<EntityPlayer> getNearbyPlayers(int x, int z) {
-        long chunkPos = LongHash.toLong(x, z);
-        return this.playersNearChunk.getOrDefault(chunkPos, Collections.emptyList());
+    public void forEachEntry(BiConsumer<EntityPlayer, ObjectArrayList<Chunk>> consumer) {
+        this.chunksNearPlayer.forEach(consumer);
     }
 
-    public LongSet getEligibleChunkPositions() {
-        return this.playersNearChunk.keySet();
-    }
-
-    public void addPlayerToChunk(int x, int z, EntityPlayer player) {
-        long chunkPos = LongHash.toLong(x, z);
-        this.playersNearChunk.computeIfAbsent(chunkPos, k -> new ArrayList<>()).add(player);
+    public void addChunkToPlayer(EntityPlayer player, Chunk chunk) {
+        this.chunksNearPlayer.computeIfAbsent(player, k -> new ObjectArrayList<>(289)).add(chunk);
     }
 
     public void addMobToNearbyPlayer(EntityPlayer player, EnumCreatureType creatureType) {
         this.playerMobCounts.computeIfAbsent(player, k -> new MobCounts()).add(creatureType);
     }
 
-    public boolean canSpawn(EnumCreatureType creatureType, Chunk chunk) {
-        List<EntityPlayer> nearbyPlayers = getNearbyPlayers(chunk.x, chunk.z);
-        for (int i = 0; i < nearbyPlayers.size(); i++) {
-            EntityPlayer player = nearbyPlayers.get(i);
-            MobCounts mobCounts = this.playerMobCounts.get(player);
-            if (mobCounts == null || mobCounts.canSpawn(creatureType)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean canSpawnForPlayer(EnumCreatureType creatureType, EntityPlayer player) {
+        MobCounts mobCounts = this.playerMobCounts.get(player);
+        return mobCounts == null || mobCounts.canSpawn(creatureType);
     }
 
     private static class MobCounts {
