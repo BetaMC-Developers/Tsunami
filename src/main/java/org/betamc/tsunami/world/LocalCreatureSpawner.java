@@ -1,5 +1,6 @@
 package org.betamc.tsunami.world;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.server.BiomeBase;
 import net.minecraft.server.BiomeMeta;
 import net.minecraft.server.Block;
@@ -21,11 +22,13 @@ import java.util.List;
 public class LocalCreatureSpawner {
 
     private static final LocalMobCapCalculator calculator = new LocalMobCapCalculator();
+    private static final LongOpenHashSet chunks = new LongOpenHashSet();
 
     private LocalCreatureSpawner() {
     }
 
     public static void spawnCreatures(World world, boolean spawnMonsters, boolean spawnAnimals) {
+        chunks.clear();
         calculator.prepare(world);
         calculator.forEachEntry((player, chunks) -> spawnForPlayer(world, player, chunks, spawnMonsters, spawnAnimals));
     }
@@ -40,6 +43,7 @@ public class LocalCreatureSpawner {
     }
 
     private static void spawnCreatureTypeForChunk(EnumCreatureType creatureType, World world, Chunk chunk) {
+        if (!chunks.add(LongHash.toLong(chunk.x, chunk.z))) return;
         int x = (chunk.x << 4) + world.random.nextInt(16);
         int y = world.random.nextInt(128);
         int z = (chunk.z << 4) + world.random.nextInt(16);
