@@ -1886,10 +1886,6 @@ public class World implements IBlockAccess {
             }
         }
 
-        if (this.Q > 0) {
-            --this.Q;
-        }
-
         LongIterator iterator = this.P.iterator(); // Tsunami - LongIterator
 
         while (iterator.hasNext()) {
@@ -1902,24 +1898,7 @@ public class World implements IBlockAccess {
             int k1;
             int l1;
 
-            if (this.Q == 0) {
-                this.g = this.g * 3 + 1013904223;
-                k = this.g >> 2;
-                l = k & 15;
-                j1 = k >> 8 & 15;
-                k1 = k >> 16 & 127;
-                l1 = chunk.getTypeId(l, k1, j1);
-                l += i;
-                j1 += j;
-                if (l1 == 0 && this.k(l, k1, j1) <= this.random.nextInt(8) && this.a(EnumSkyBlock.SKY, l, k1, j1) <= 0) {
-                    EntityHuman entityhuman1 = this.a((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, 8.0D);
-
-                    if (entityhuman1 != null && entityhuman1.e((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D) > 4.0D) {
-                        this.makeSound((double) l + 0.5D, (double) k1 + 0.5D, (double) j1 + 0.5D, "ambient.cave.cave", 0.7F, 0.8F + this.random.nextFloat() * 0.2F);
-                        this.Q = this.random.nextInt(12000) + 6000;
-                    }
-                }
-            }
+            // Tsunami - remove cave sounds as they cannot be played to clients
 
             if (this.random.nextInt(100000) == 0 && this.v() && this.u()) {
                 this.g = this.g * 3 + 1013904223;
@@ -1972,17 +1951,23 @@ public class World implements IBlockAccess {
                 }
             }
 
-            for (k = 0; k < 80; ++k) {
-                this.g = this.g * 3 + 1013904223;
-                l = this.g >> 2;
-                j1 = l & 15;
-                k1 = l >> 8 & 15;
-                l1 = l >> 16 & 127;
-                i2 = chunk.b[j1 << 11 | k1 << 7 | l1] & 255;
-                if (Block.n[i2]) {
-                    Block.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
+            // Tsunami start - don't tick chunk sections that have no tickable blocks
+            for (int section = 0; section < 8; section++) {
+                if (chunk.shouldTickSection(section)) {
+                    for (k = 0; k < 10; ++k) {
+                        this.g = this.g * 3 + 1013904223;
+                        l = this.g >> 2;
+                        j1 = l & 15;
+                        k1 = l >> 8 & 15;
+                        l1 = (section << 4) + (l >> 16 & 15);
+                        i2 = chunk.b[j1 << 11 | k1 << 7 | l1] & 255;
+                        if (Block.n[i2]) {
+                            Block.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
+                        }
+                    }
                 }
             }
+            // Tsunami end
         }
     }
 

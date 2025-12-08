@@ -37,6 +37,7 @@ public class OpCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("op ");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("op");
     }
 }

@@ -24,6 +24,7 @@ public class Chunk {
     public boolean p;
     public boolean q;
     public long r;
+    private final int[] chunkSections; // Tsunami
 
     public Chunk(World world, int i, int j) {
         this.tileEntities = new HashMap();
@@ -36,6 +37,7 @@ public class Chunk {
         this.x = i;
         this.z = j;
         this.heightMap = new byte[256];
+        this.chunkSections = new int[8]; // Tsunami
 
         for (int k = 0; k < this.entitySlices.length; ++k) {
             this.entitySlices[k] = new ArrayList();
@@ -55,6 +57,7 @@ public class Chunk {
         this.e = new NibbleArray(abyte.length);
         this.f = new NibbleArray(abyte.length);
         this.g = new NibbleArray(abyte.length);
+        initSections(); // Tsunami
     }
 
     public boolean a(int i, int j) {
@@ -235,6 +238,7 @@ public class Chunk {
             int i2 = this.z * 16 + k;
 
             this.b[i << 11 | k << 7 | j] = (byte) (b0 & 255);
+            sectionUpdate(j >> 4, k1, b0 & 255); // Tsunami
             if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.transmutation-fix.enabled", true)) {
                 this.e.a(i, j, k, i1);
                 if (k1 != 0 && !this.world.isStatic) {
@@ -282,6 +286,7 @@ public class Chunk {
             int l1 = this.z * 16 + k;
 
             this.b[i << 11 | k << 7 | j] = (byte) (b0 & 255);
+            sectionUpdate(j >> 4, j1, b0 & 255); // Tsunami
             if (j1 != 0) {
                 Block.byId[j1].remove(this.world, k1, j, l1);
             }
@@ -306,6 +311,44 @@ public class Chunk {
             return true;
         }
     }
+
+    // Tsunami start
+    void initSections() {
+        for (int section = 0; section < 8; section++) {
+            int tickableBlocks = 0;
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        int typeId = getTypeId(x, (section << 4) + y, z);
+                        if (Block.n[typeId]) tickableBlocks++;
+                    }
+                }
+            }
+
+            this.chunkSections[section] = tickableBlocks;
+        }
+    }
+
+    public boolean shouldTickSection(int section) {
+        if (section >= 0 && section < 8) {
+            return this.chunkSections[section] > 0;
+        } else {
+            return false;
+        }
+    }
+
+    private void sectionUpdate(int section, int oldType, int newType) {
+        if (Block.n[oldType]) {
+            if (!Block.n[newType]) {
+                --this.chunkSections[section];
+            }
+        } else {
+            if (Block.n[newType]) {
+                ++this.chunkSections[section];
+            }
+        }
+    }
+    // Tsunami end
 
     public int getData(int i, int j, int k) {
         return this.e.a(i, j, k);

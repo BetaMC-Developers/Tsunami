@@ -37,6 +37,7 @@ public class ListCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("list");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("list");
     }
 }

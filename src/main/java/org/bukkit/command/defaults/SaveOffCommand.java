@@ -28,6 +28,7 @@ public class SaveOffCommand extends VanillaCommand {
 
     @Override
     public boolean matches(String input) {
-        return input.startsWith("save-off");
+        // Tsunami - equalsIgnoreCase
+        return input.equalsIgnoreCase("save-off");
     }
 }
