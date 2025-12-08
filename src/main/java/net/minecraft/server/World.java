@@ -3,6 +3,7 @@ package net.minecraft.server;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.world.LocalCreatureSpawner;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -1722,9 +1723,9 @@ public class World implements IBlockAccess {
 
         // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
         if ((this.allowMonsters || this.allowAnimals) && (this instanceof WorldServer && this.getServer().getHandle().players.size() > 0)) {
-            // Tsunami - add per-player mob cap
-            if (Tsunami.config().world().perPlayerMobCap()) {
-                SpawnerCreature.spawnEntitiesPerPlayer(this, this.allowMonsters, this.allowAnimals);
+            // Tsunami - per-player mob spawning
+            if (Tsunami.config().world().perPlayerMobSpawning()) {
+                LocalCreatureSpawner.spawnCreatures(this, this.allowMonsters, this.allowAnimals);
             } else {
                 SpawnerCreature.spawnEntities(this, this.allowMonsters, this.allowAnimals);
             }
@@ -2063,25 +2064,6 @@ public class World implements IBlockAccess {
 
         return i;
     }
-
-    // Tsunami start
-    public int getPlayerMobCount(Class oclass, EntityHuman entityhuman) {
-        int ret = 0;
-        int playerX = MathHelper.floor(entityhuman.locX / 16.0);
-        int playerZ = MathHelper.floor(entityhuman.locZ / 16.0);
-
-        for (int i = 0; i < this.entityList.size(); i++) {
-            Entity entity = (Entity) this.entityList.get(i);
-            int entityX = MathHelper.floor(entity.locX / 16.0);
-            int entityZ = MathHelper.floor(entity.locZ / 16.0);
-            if (oclass.isAssignableFrom(entity.getClass()) && Math.abs(entityX - playerX) <= 8 && Math.abs(entityZ - playerZ) <= 8) {
-                ret++;
-            }
-        }
-
-        return ret;
-    }
-    // Tsunami end
 
     public void a(List list) {
         // CraftBukkit start

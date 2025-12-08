@@ -14,7 +14,13 @@ public enum EnumCreatureType {
     private final Material f;
     private final boolean g;
 
-    private static final EnumCreatureType[] h = new EnumCreatureType[] { MONSTER, CREATURE, WATER_CREATURE};
+    private static final EnumCreatureType[] h = new EnumCreatureType[] { MONSTER, CREATURE, WATER_CREATURE };
+
+    // Tsunami start
+    public static EnumCreatureType[] types() {
+        return h;
+    }
+    // Tsunami end
 
     private EnumCreatureType(String s, int i, Class oclass, int j, Material material, boolean flag) {
         this.d = oclass;
