@@ -1950,17 +1950,23 @@ public class World implements IBlockAccess {
                 }
             }
 
-            for (k = 0; k < 80; ++k) {
-                this.g = this.g * 3 + 1013904223;
-                l = this.g >> 2;
-                j1 = l & 15;
-                k1 = l >> 8 & 15;
-                l1 = l >> 16 & 127;
-                i2 = chunk.b[j1 << 11 | k1 << 7 | l1] & 255;
-                if (Block.n[i2]) {
-                    Block.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
+            // Tsunami start - don't tick chunk sections that have no tickable blocks
+            for (int section = 0; section < 8; section++) {
+                if (chunk.shouldTickSection(section)) {
+                    for (k = 0; k < 10; ++k) {
+                        this.g = this.g * 3 + 1013904223;
+                        l = this.g >> 2;
+                        j1 = l & 15;
+                        k1 = l >> 8 & 15;
+                        l1 = (section << 4) + (l >> 16 & 15);
+                        i2 = chunk.b[j1 << 11 | k1 << 7 | l1] & 255;
+                        if (Block.n[i2]) {
+                            Block.byId[i2].a(this, j1 + i, l1, k1 + j, this.random);
+                        }
+                    }
                 }
             }
+            // Tsunami end
         }
     }
 

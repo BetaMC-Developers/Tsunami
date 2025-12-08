@@ -33,6 +33,7 @@ public class ChunkRegionLoader implements IChunkLoader {
                 }
 
                 chunk.h();
+                chunk.initSections(); // Tsunami
                 return chunk;
             }
         } else {
