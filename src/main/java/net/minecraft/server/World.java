@@ -933,26 +933,38 @@ public class World implements IBlockAccess {
 
     public List getEntities(Entity entity, AxisAlignedBB axisalignedbb) {
         this.K.clear();
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
 
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = i1; l1 < j1; ++l1) {
-                if (this.isLoaded(k1, 64, l1)) {
-                    for (int i2 = k - 1; i2 < l; ++i2) {
-                        Block block = Block.byId[this.getTypeId(k1, i2, l1)];
+        // Tsunami start - optimize collisions
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = Math.max(0, MathHelper.floor(axisalignedbb.b));
+        int maxY = Math.max(0, MathHelper.floor(axisalignedbb.e + 1.0D));
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
-                        if (block != null) {
-                            block.a(this, k1, i2, l1, axisalignedbb, this.K);
+        for (int chunkX = minX >> 4; chunkX < maxX >> 4; chunkX++) {
+            for (int chunkZ = minZ >> 4; chunkZ < maxZ >> 4; chunkZ++) {
+                Chunk chunk = ((WorldServer) this).chunkProviderServer.chunks.get(LongHash.toLong(chunkX, chunkZ));
+                if (chunk == null) continue;
+                int startX = Math.max(minX, chunkX << 4);
+                int endX = Math.min(maxX, (chunkX << 4) + 16);
+                int startZ = Math.max(minZ, chunkZ << 4);
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = minY; y < maxY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+
+                            if (block != null) {
+                                block.a(this, x, y, z, axisalignedbb, this.K);
+                            }
                         }
                     }
                 }
             }
         }
+        // Tsunami end
 
         double d0 = 0.25D;
         List list = this.b(entity, axisalignedbb.b(d0, d0, d0));
