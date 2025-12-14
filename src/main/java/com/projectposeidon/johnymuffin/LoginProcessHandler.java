@@ -2,10 +2,14 @@ package com.projectposeidon.johnymuffin;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.PoseidonPlugin;
-import com.legacyminecraft.poseidon.uuid.ThreadUUIDFetcher;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NetLoginHandler;
 import net.minecraft.server.Packet1Login;
 import net.minecraft.server.ThreadLoginVerifier;
+import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.TsunamiConfig;
+import org.betamc.tsunami.profile.GameProfile;
+import org.betamc.tsunami.profile.ProfileFetchCallback;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;
@@ -15,8 +19,9 @@ import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 
 public class LoginProcessHandler {
@@ -83,24 +88,59 @@ public class LoginProcessHandler {
             verifyMojangSession();
         } else {
             //Server is not running online mode
-            getUserUUID();
+            getUserProfile();
         }
     }
 
-    private void getUserUUID() {
-        //UUID uuid = UUIDManager.getInstance().getUUIDFromUsername(packet1Login.name, true);
-        long unixTime = (System.currentTimeMillis() / 1000L);
-        UUID uuid = UUIDManager.getInstance().getUUIDFromUsername(packet1Login.name, true, unixTime);
-        if (uuid == null) {
-            boolean useGetMethod = PoseidonConfig.getInstance().getString("settings.uuid-fetcher.method.value", "POST").equalsIgnoreCase("GET");
-            (new ThreadUUIDFetcher(packet1Login, this, useGetMethod)).start();
+    // Tsunami start - rename and change logic
+    private void getUserProfile() {
+        String name = this.packet1Login.name;
+        Optional<GameProfile> cachedProfile = Tsunami.userCache().getProfile(name, true, ZonedDateTime.now());
+        if (cachedProfile.isPresent()) {
+            MinecraftServer.log.info("[Tsunami] Got cached profile for " + name + " with UUID " + cachedProfile.get().getUuid());
+            connectPlayer(cachedProfile.get().getUuid());
+        } else if (Tsunami.config().profiles().createOfflineProfiles() == TsunamiConfig.Profiles.CreateOfflineProfiles.ALWAYS) {
+            GameProfile offlineProfile = GameProfile.createOfflineProfile(name);
+            MinecraftServer.log.info("[Tsunami] Created offline profile for " + name + " with UUID " + offlineProfile.getUuid());
+            Tsunami.userCache().addProfile(offlineProfile);
+            connectPlayer(offlineProfile.getUuid());
         } else {
-            System.out.println("[Poseidon] Fetched UUID from Cache for " + packet1Login.name + " - " + uuid.toString());
-            connectPlayer(uuid);
+            Tsunami.userCache().profileFetcher().fetchOnlineProfile(name, new ProfileFetchCallback() {
+                @Override
+                public void onSuccess(Optional<GameProfile> onlineProfile) {
+                    if (onlineProfile.isPresent()) {
+                        MinecraftServer.log.info("[Tsunami] Fetched profile for " + name + " with UUID " + onlineProfile.get().getUuid());
+                        if (Tsunami.config().profiles().caseSensitiveUsernames() && !name.equals(onlineProfile.get().getName())) {
+                            MinecraftServer.log.info("[Tsunami] The username " + name + " has invalid casing, cancelling login as case sensitive usernames are enabled");
+                            cancelLoginProcess(ChatColor.RED + "Sorry, that username has invalid casing");
+                        } else {
+                            Tsunami.userCache().addProfile(onlineProfile.get());
+                            connectPlayer(onlineProfile.get().getUuid());
+                        }
+                    } else if (Tsunami.config().profiles().createOfflineProfiles() == TsunamiConfig.Profiles.CreateOfflineProfiles.WHEN_CRACKED) {
+                        GameProfile offlineProfile = GameProfile.createOfflineProfile(name);
+                        MinecraftServer.log.info("[Tsunami] " + name + " does not have an online profile");
+                        MinecraftServer.log.info("[Tsunami] Created offline profile for " + name + " with UUID " + offlineProfile.getUuid());
+                        Tsunami.userCache().addProfile(offlineProfile);
+                        connectPlayer(offlineProfile.getUuid());
+                    } else {
+                        MinecraftServer.log.info("[Tsunami] " + name + " does not have an online profile, cancelling login as offline profiles are disabled");
+                        cancelLoginProcess(ChatColor.RED + "Sorry, we only support premium accounts");
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable cause) {
+                    MinecraftServer.log.severe("[Tsunami] Failed to fetch profile for " + name);
+                    MinecraftServer.log.severe("[Tsunami] The Mojang API may be offline, your internet connection may be down, or another error may have occurred.");
+                    MinecraftServer.log.severe("[Tsunami] If the issue persists, try changing the profile fetch method in the Tsunami config.");
+                    cause.printStackTrace();
+                    cancelLoginProcess(ChatColor.RED + "Sorry, we can't connect to Mojang currently, please try again later");
+                }
+            });
         }
-
-
     }
+    // Tsunami end
 
     public synchronized void userUUIDReceived(UUID uuid, boolean onlineMode) {
         if (!onlineMode) {
@@ -153,7 +193,7 @@ public class LoginProcessHandler {
 
     public synchronized void userMojangSessionVerified() {
         if (!loginSuccessful & !loginCancelled) {
-            getUserUUID();
+            getUserProfile();
         }
     }
 

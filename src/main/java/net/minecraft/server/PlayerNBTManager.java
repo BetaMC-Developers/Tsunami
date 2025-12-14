@@ -1,7 +1,8 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
-import com.projectposeidon.johnymuffin.UUIDManager;
+import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.profile.GameProfile;
 
 import java.io.*;
 import java.util.List;
@@ -174,9 +175,12 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
 
                 entityhuman.d(nbttagcompound);
                 File file1 = new File(this.c, "_tmp_.dat");
-                //File file2 = new File(this.c, entityhuman.name + ".dat");
-                //UUIDPlayerStorage.getInstance().getUUIDGraceful(entityhuman.name)
-                File file2 = new File(this.c, UUIDManager.getInstance().getUUIDGraceful(entityhuman.name) + ".dat");
+                // Tsunami start
+                UUID uuid = Tsunami.userCache().getProfile(entityhuman.name)
+                        .orElse(GameProfile.createOfflineProfile(entityhuman.name))
+                        .getUuid();
+                File file2 = new File(this.c, uuid + ".dat");
+                // Tsunami end
                 CompressedStreamTools.a(nbttagcompound, (OutputStream) (new FileOutputStream(file1)));
                 if (file2.exists()) {
                     file2.delete();
@@ -235,7 +239,12 @@ public class PlayerNBTManager implements PlayerFileData, IDataManager {
     public NBTTagCompound a(String s) {
         if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.save-playerdata-by-uuid")) {
             try {
-                File file1 = new File(this.c, UUIDManager.getInstance().getUUIDGraceful(s) + ".dat");
+                // Tsunami start
+                UUID uuid = Tsunami.userCache().getProfile(s)
+                        .orElse(GameProfile.createOfflineProfile(s))
+                        .getUuid();
+                File file1 = new File(this.c, uuid + ".dat");
+                // Tsunami end
                 File file2 = new File(this.c, s + ".dat");
                 if (!file1.exists()) {
                     if (file2.exists()) {
