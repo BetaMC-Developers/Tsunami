@@ -94,7 +94,7 @@ public class UserCache {
     }
 
     public synchronized void addProfile(GameProfile profile) {
-        addProfile(profile, ZonedDateTime.now().plusDays(Tsunami.config().profiles().cacheForDays()));
+        addProfile(profile, ZonedDateTime.now().plusDays(Tsunami.config().profiles().refetchAfterDays()));
     }
 
     public synchronized void addProfile(GameProfile profile, ZonedDateTime expiresOn) {

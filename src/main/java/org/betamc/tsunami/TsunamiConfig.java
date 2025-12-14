@@ -123,9 +123,9 @@ public class TsunamiConfig {
         private FetchMethod fetchMethod = FetchMethod.POST;
         private String postUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/bulk/byname";
         private String getUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/name/{username}";
-        private int cacheForDays = 30;
+        private boolean verifyUsernameCasing = false;
         private CreateOfflineProfiles createOfflineProfiles = CreateOfflineProfiles.NEVER;
-        private boolean caseSensitiveUsernames = false;
+        private int refetchAfterDays = 30;
 
         public FetchMethod fetchMethod() {
             return fetchMethod;
@@ -139,16 +139,16 @@ public class TsunamiConfig {
             return getUrl;
         }
 
-        public int cacheForDays() {
-            return Math.max(cacheForDays, 1);
+        public boolean verifyUsernameCasing() {
+            return verifyUsernameCasing;
         }
 
         public CreateOfflineProfiles createOfflineProfiles() {
             return createOfflineProfiles;
         }
 
-        public boolean caseSensitiveUsernames() {
-            return caseSensitiveUsernames;
+        public int refetchAfterDays() {
+            return Math.max(refetchAfterDays, 1);
         }
 
         public enum FetchMethod {

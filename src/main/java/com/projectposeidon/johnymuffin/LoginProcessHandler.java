@@ -110,8 +110,8 @@ public class LoginProcessHandler {
                 public void onSuccess(Optional<GameProfile> onlineProfile) {
                     if (onlineProfile.isPresent()) {
                         MinecraftServer.log.info("[Tsunami] Fetched profile for " + name + " with UUID " + onlineProfile.get().getUuid());
-                        if (Tsunami.config().profiles().caseSensitiveUsernames() && !name.equals(onlineProfile.get().getName())) {
-                            MinecraftServer.log.info("[Tsunami] The username " + name + " has invalid casing, cancelling login as case sensitive usernames are enabled");
+                        if (Tsunami.config().profiles().verifyUsernameCasing() && !name.equals(onlineProfile.get().getName())) {
+                            MinecraftServer.log.info("[Tsunami] The username " + name + " has invalid casing, cancelling login as username casing verification is enabled");
                             cancelLoginProcess(ChatColor.RED + "Sorry, that username has invalid casing");
                         } else {
                             Tsunami.userCache().addProfile(onlineProfile.get());
