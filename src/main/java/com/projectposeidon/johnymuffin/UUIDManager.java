@@ -1,182 +1,119 @@
 package com.projectposeidon.johnymuffin;
 
-import com.legacyminecraft.poseidon.PoseidonConfig;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
+import net.minecraft.server.MinecraftServer;
+import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.profile.GameProfile;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class UUIDManager {
     private static UUIDManager singleton;
-    private JSONArray UUIDJsonArray;
+    //private JSONArray UUIDJsonArray; // Tsunami
 
     private UUIDManager() {
-        File configFile = new File("uuidcache.json");
-        //Check if uuidcache.json exists
-        if (!configFile.exists()) {
-            try (FileWriter file = new FileWriter("uuidcache.json")) {
-                System.out.println("[Poseidon] Generating uuidcache.json for Project Poseidon");
-                UUIDJsonArray = new JSONArray();
-                file.write(UUIDJsonArray.toJSONString());
-                file.flush();
+        // Tsunami start - uuidcache.json -> usercache.json migration
+        File uuidcacheJson = new File("uuidcache.json");
+        File usercacheJson = new File("usercache.json");
+        if (!uuidcacheJson.exists() || usercacheJson.exists()) return;
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        MinecraftServer.log.info("");
+        MinecraftServer.log.info("********************************************************************************");
+        MinecraftServer.log.info("Migrating uuidcache.json to usercache.json to replicate modern server software more accurately.");
+        MinecraftServer.log.info("Note that many configurations related to UUIDs in the Poseidon config are no longer effective.");
+        MinecraftServer.log.info("Please make sure to set these configurations accordingly in the 'profiles' section of the Tsunami config.");
+        MinecraftServer.log.info("********************************************************************************");
+        MinecraftServer.log.info("");
+
         try {
-            System.out.println("[Poseidon] Reading uuidcache.json for Project Poseidon");
-            JSONParser parser = new JSONParser();
-            UUIDJsonArray = (JSONArray) parser.parse(new FileReader("uuidcache.json"));
-        } catch (IOException e) {
+            List<UuidCacheEntry> entries;
+            try (BufferedReader reader = Files.newBufferedReader(uuidcacheJson.toPath(), StandardCharsets.UTF_8)) {
+                Type listType = new TypeToken<List<UuidCacheEntry>>() {}.getType();
+                Gson gson = new GsonBuilder()
+                        .registerTypeHierarchyAdapter(UuidCacheEntry.class, new UuidCacheEntryDeserializer())
+                        .create();
+                entries = gson.fromJson(reader, listType);
+            }
+
+            Tsunami.userCache();
+            for (UuidCacheEntry entry : entries) {
+                GameProfile profile = new GameProfile(entry.uuid, entry.name, entry.onlineUUID);
+                ZonedDateTime expiresOn = ZonedDateTime.ofInstant(Instant.ofEpochSecond(entry.expiresOn), ZoneId.systemDefault());
+                Tsunami.userCache().addProfile(profile, expiresOn);
+            }
+            Tsunami.userCache().save();
+
+            MinecraftServer.log.info("[Tsunami] Successfully migrated uuidcache.json to usercache.json");
+        } catch (Throwable e) {
+            MinecraftServer.log.severe("[Tsunami] Failed to migrate uuidcache.json to usercache.json");
             e.printStackTrace();
-        } catch (ParseException e) {
-            System.out.println("[Poseidon] The UUIDCache is corrupt or unreadable, resetting");
-            UUIDJsonArray = new JSONArray();
-            saveJsonArray();
-
-            //e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println("[Poseidon] Error reading uuidcache.json, changing to memory only cache: " + e + ": " + e.getMessage());
-            UUIDJsonArray = new JSONArray();
         }
-
-
+        // Tsunami end
     }
 
     public UUID getUUIDGraceful(String username) {
-        UUID uuid = getUUIDFromUsername(username, true);
-        if (uuid == null) {
-            uuid = generateOfflineUUID(username);
-        }
-        return uuid;
+        // Tsunami start
+        return Tsunami.userCache().getProfile(username, true)
+                .orElse(GameProfile.createOfflineProfile(username))
+                .getUuid();
+        // Tsunami end
     }
-
 
     public static UUID generateOfflineUUID(String username) {
-        //TODO we should look at using the modern system: UUID offlineUUID = UUID.nameUUIDFromBytes(("OfflinePlayer:" + <playerName>).getBytes(Charsets.UTF_8));
-        return UUID.nameUUIDFromBytes(username.getBytes());
+        return GameProfile.createOfflineProfile(username).getUuid(); // Tsunami
     }
 
-
     public void saveJsonArray() {
-        try (FileWriter file = new FileWriter("uuidcache.json")) {
-            System.out.println("[Poseidon] Saving UUID Cache");
-            file.write(UUIDJsonArray.toJSONString());
-            file.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Tsunami - no-op
     }
 
     public void receivedUUID(String username, UUID uuid, Long expiry, boolean online) {
-        //Check if the UUID is already in the cache, if so update the expiry
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            if (tmp.get("name").equals(username) && UUID.fromString((String) tmp.get("uuid")).equals(uuid) && tmp.get("onlineUUID").equals(online)) {
-                tmp.replace("expiresOn", expiry);
-                UUIDJsonArray.set(i, tmp);
-                return;
-            }
-        }
-        removeInstancesOfUsername(username);
-        removeInstancesOfUUID(uuid);
-        addUser(username, uuid, expiry, online);
-
-
+        // Tsunami start
+        ZonedDateTime expiresOn = ZonedDateTime.ofInstant(Instant.ofEpochSecond(expiry), ZoneId.systemDefault());
+        GameProfile profile = new GameProfile(uuid, username, online);
+        Tsunami.userCache().addProfile(profile, expiresOn);
+        // Tsunami end
     }
 
-
-    private void addUser(String username, UUID uuid, Long expiry, boolean online) {
-        JSONObject tmp = new JSONObject();
-        tmp.put("name", username);
-        tmp.put("uuid", uuid.toString());
-        tmp.put("expiresOn", expiry);
-        tmp.put("onlineUUID", online);
-        UUIDJsonArray.add(tmp);
-    }
+    // Tsunami - removed addUser()
 
     public UUID getUUIDFromUsername(String username) {
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            if (tmp.get("name").equals(username)) {
-                return UUID.fromString((String) tmp.get("uuid"));
-            }
-        }
-        return null;
+        return Tsunami.userCache().getProfile(username).map(GameProfile::getUuid).orElse(null); // Tsunami
     }
 
-
     public UUID getUUIDFromUsername(String username, boolean online) {
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            if (tmp.get("name").equals(username) && tmp.get("onlineUUID").equals(online)) {
-                return UUID.fromString((String) tmp.get("uuid"));
-            }
-        }
-        return null;
+        return Tsunami.userCache().getProfile(username, online).map(GameProfile::getUuid).orElse(null); // Tsunami
     }
 
     public UUID getUUIDFromUsername(String username, boolean online, Long afterUnix) {
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            Long expire = Long.valueOf(String.valueOf(tmp.get("expiresOn")));
-            if (tmp.get("name").equals(username) && tmp.get("onlineUUID").equals(online) && expire > afterUnix) {
-                return UUID.fromString((String) tmp.get("uuid"));
-            }
-        }
-        return null;
+        // Tsunami start
+        ZonedDateTime after = ZonedDateTime.ofInstant(Instant.ofEpochSecond(afterUnix), ZoneId.systemDefault());
+        return Tsunami.userCache().getProfile(username, online, after).map(GameProfile::getUuid).orElse(null);
+        // Tsunami end
     }
 
     public String getUsernameFromUUID(UUID uuid) {
-        // Get most recent username from UUID
-        String username = null;
-        long expiry = -1;
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject playerEntry = (JSONObject) UUIDJsonArray.get(i);
-            UUID entryUUID = UUID.fromString(String.valueOf(playerEntry.get("uuid")));
-            long expiresOn = Long.valueOf(String.valueOf(playerEntry.get("expiresOn")));
-            if (entryUUID.equals(uuid) && expiresOn >= expiry) {
-                expiry = expiresOn;
-                username = String.valueOf(playerEntry.get("name"));
-            }
-        }
-        return username;
+        return Tsunami.userCache().getProfile(uuid).map(GameProfile::getName).orElse(null); // Tsunami
     }
 
-    private void removeInstancesOfUsername(String username) {
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            if (tmp.get("name").equals(username)) {
-                UUIDJsonArray.remove(i);
-            }
-        }
-    }
-
-    private void removeInstancesOfUUID(UUID uuid) {
-        for (int i = 0; i < UUIDJsonArray.size(); i++) {
-            JSONObject tmp = (JSONObject) UUIDJsonArray.get(i);
-            if (UUID.fromString((String) tmp.get("uuid")).equals(uuid)) {
-                if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.delete-duplicate-uuids")) {
-                    //Remove the duplicate UUID
-                    UUIDJsonArray.remove(i);
-                    //Decrement i to account for the removed element
-                    i--;
-                } else {
-                    //This allows for plugins to use a old username and find UUID.
-                    tmp.replace("expiresOn", 1);
-                    UUIDJsonArray.set(i, tmp);
-                }
-            }
-        }
-    }
-
+    // Tsunami - removed removeInstancesOfUsername() and removeInstancesOfUUID()
 
     public static UUIDManager getInstance() {
         if (UUIDManager.singleton == null) {
@@ -184,5 +121,39 @@ public class UUIDManager {
         }
         return UUIDManager.singleton;
     }
+
+    // Tsunami start
+    private static class UuidCacheEntry {
+        private UUID uuid;
+        private String name;
+        private boolean onlineUUID;
+        private long expiresOn;
+
+        public UuidCacheEntry(UUID uuid, String name, boolean onlineUUID, long expiresOn) {
+            Objects.requireNonNull(uuid, "uuid must not be null");
+            Objects.requireNonNull(name, "name must not be null");
+            this.uuid = uuid;
+            this.name = name;
+            this.onlineUUID = onlineUUID;
+            this.expiresOn = expiresOn;
+        }
+    }
+
+    private static class UuidCacheEntryDeserializer implements JsonDeserializer<UuidCacheEntry> {
+        @Override
+        public UuidCacheEntry deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
+            try {
+                JsonObject object = element.getAsJsonObject();
+                UUID uuid = UUID.fromString(object.get("uuid").getAsString());
+                String name = object.get("name").getAsString();
+                boolean onlineUUID = object.get("onlineUUID").getAsBoolean();
+                long expiresOn = object.get("expiresOn").getAsLong();
+                return new UuidCacheEntry(uuid, name, onlineUUID, expiresOn);
+            } catch (Exception e) {
+                throw new JsonParseException("Failed to parse JSON element into UUID cache entry", e);
+            }
+        }
+    }
+    // Tsunami end
 
 }
