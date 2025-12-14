@@ -101,7 +101,7 @@ public class LoginProcessHandler {
             connectPlayer(cachedProfile.get().getUuid());
         } else if (Tsunami.config().profiles().createOfflineProfiles() == TsunamiConfig.Profiles.CreateOfflineProfiles.ALWAYS) {
             GameProfile offlineProfile = GameProfile.createOfflineProfile(name);
-            MinecraftServer.log.info("[Tsunami] Created offline profile for " + name + " with UUID " + offlineProfile.getUuid());
+            MinecraftServer.log.info("[Tsunami] Using offline profile for " + name + " with UUID " + offlineProfile.getUuid());
             Tsunami.userCache().addProfile(offlineProfile);
             connectPlayer(offlineProfile.getUuid());
         } else {
@@ -120,7 +120,7 @@ public class LoginProcessHandler {
                     } else if (Tsunami.config().profiles().createOfflineProfiles() == TsunamiConfig.Profiles.CreateOfflineProfiles.WHEN_CRACKED) {
                         GameProfile offlineProfile = GameProfile.createOfflineProfile(name);
                         MinecraftServer.log.info("[Tsunami] " + name + " does not have an online profile");
-                        MinecraftServer.log.info("[Tsunami] Created offline profile for " + name + " with UUID " + offlineProfile.getUuid());
+                        MinecraftServer.log.info("[Tsunami] Using offline profile for " + name + " with UUID " + offlineProfile.getUuid());
                         Tsunami.userCache().addProfile(offlineProfile);
                         connectPlayer(offlineProfile.getUuid());
                     } else {
