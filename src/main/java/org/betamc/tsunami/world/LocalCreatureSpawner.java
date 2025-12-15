@@ -50,6 +50,7 @@ public class LocalCreatureSpawner {
 
         if (!isFullBlock(chunk, x, y, z) && getMaterial(chunk, x, y, z) == creatureType.c()) {
             BiomeMeta mob = getWeightedRandomMob(creatureType, world, chunk);
+            if (mob == null) return;
             Chunk currentChunk;
             int count = 0;
             int radius = 6;
