@@ -148,7 +148,7 @@ public class TsunamiConfig {
         }
 
         public int refetchAfterDays() {
-            return Math.max(refetchAfterDays, 1);
+            return Math.max(refetchAfterDays, 0);
         }
 
         public enum FetchMethod {
