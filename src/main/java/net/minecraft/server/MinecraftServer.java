@@ -180,7 +180,10 @@ public class MinecraftServer implements Runnable, ICommandListener {
         Poseidon.getServer().initializeServer();
         //Project Poseidon End
 
-        Tsunami.config(); // Tsunami
+        // Tsunami start
+        Tsunami.config();
+        Tsunami.userCache();
+        // Tsunami end
 
         // log rotator process start.
         if ((boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.enabled") && (boolean) PoseidonConfig.getInstance().getConfigOption("settings.per-day-log-file.latest-log.enabled")) {
@@ -393,6 +396,8 @@ public class MinecraftServer implements Runnable, ICommandListener {
         Poseidon.getServer().shutdownServer();
 
         //Project Poseidon End
+
+        Tsunami.userCache().save(); // Tsunami
 
         // CraftBukkit start
         if (this.server != null) {

@@ -3,9 +3,7 @@ package org.betamc.tsunami;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
@@ -25,6 +23,7 @@ public class TsunamiConfig {
     private Console console;
     private Logging logging;
     private Networking networking;
+    private Profiles profiles;
     private Rcon rcon;
     private ServerListPing serverListPing;
     private World world;
@@ -36,14 +35,14 @@ public class TsunamiConfig {
                 .path(Paths.get("tsunami.yml"))
                 .indent(2)
                 .nodeStyle(NodeStyle.BLOCK)
+                .defaultOptions(opt -> opt.header(HEADER))
                 .build();
 
         try {
             ConfigurationNode node = loader.load();
-            ObjectMapper<TsunamiConfig> mapper = ObjectMapper.factory().get(TsunamiConfig.class);
-            instance = mapper.load(node);
-            ConfigurationNode dump = CommentedConfigurationNode.root(ConfigurationOptions.defaults().header(HEADER));
-            mapper.save(instance, dump);
+            instance = node.get(TsunamiConfig.class);
+            ConfigurationNode dump = CommentedConfigurationNode.root(loader.defaultOptions());
+            dump.set(instance);
             loader.save(dump);
             return instance;
         } catch (ConfigurateException e) {
@@ -64,6 +63,10 @@ public class TsunamiConfig {
 
     public Networking networking() {
         return networking;
+    }
+
+    public Profiles profiles() {
+        return profiles;
     }
 
     public Rcon rcon() {
@@ -112,6 +115,51 @@ public class TsunamiConfig {
 
         public int chunkPacketCompressionLevel() {
             return Math.min(Math.max(chunkPacketCompressionLevel, -1), 9);
+        }
+    }
+
+    @ConfigSerializable
+    public static class Profiles {
+        private FetchMethod fetchMethod = FetchMethod.POST;
+        private String postUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/bulk/byname";
+        private String getUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/name/{username}";
+        private boolean verifyUsernameCasing = false;
+        private CreateOfflineProfiles createOfflineProfiles = CreateOfflineProfiles.NEVER;
+        private int refetchAfterDays = 30;
+
+        public FetchMethod fetchMethod() {
+            return fetchMethod;
+        }
+
+        public String postUrl() {
+            return postUrl;
+        }
+
+        public String getUrl() {
+            return getUrl;
+        }
+
+        public boolean verifyUsernameCasing() {
+            return verifyUsernameCasing;
+        }
+
+        public CreateOfflineProfiles createOfflineProfiles() {
+            return createOfflineProfiles;
+        }
+
+        public int refetchAfterDays() {
+            return Math.max(refetchAfterDays, 0);
+        }
+
+        public enum FetchMethod {
+            POST,
+            GET
+        }
+
+        public enum CreateOfflineProfiles {
+            NEVER,
+            WHEN_CRACKED,
+            ALWAYS
         }
     }
 

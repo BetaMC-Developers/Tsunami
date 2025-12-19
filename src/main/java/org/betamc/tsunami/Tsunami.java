@@ -1,5 +1,7 @@
 package org.betamc.tsunami;
 
+import org.betamc.tsunami.profile.UserCache;
+
 public class Tsunami {
 
     private Tsunami() {
@@ -11,6 +13,10 @@ public class Tsunami {
 
     public static TsunamiConfig config() {
         return TsunamiConfig.getInstance();
+    }
+
+    public static UserCache userCache() {
+        return UserCache.getInstance();
     }
 
 }
