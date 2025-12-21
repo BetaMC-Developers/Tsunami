@@ -13,6 +13,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>Alpine Cloud</id>
+            <url>https://lib.alpn.cloud/alpine-public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
@@ -59,9 +66,9 @@
             <version>1.7</version>
         </dependency>
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-yaml</artifactId>
-            <version>4.2.0</version>
+            <groupId>dev.tomwmth.configlib</groupId>
+            <artifactId>configlib-yaml</artifactId>
+            <version>4.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

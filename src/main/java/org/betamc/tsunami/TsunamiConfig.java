@@ -1,22 +1,15 @@
 package org.betamc.tsunami;
 
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.yaml.NodeStyle;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import de.exlll.configlib.Comment;
+import de.exlll.configlib.Configuration;
+import de.exlll.configlib.NameFormatters;
+import de.exlll.configlib.YamlConfigurations;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
-@ConfigSerializable
+@Configuration
 public class TsunamiConfig {
-
-    private static final String HEADER =
-            "Tsunami configuration file\n\n" +
-            "Notice:\n" +
-            "- You must use spaces for indentation, NOT tabs.\n" +
-            "- Durations are measured in game ticks.";
 
     private static TsunamiConfig instance;
 
@@ -29,25 +22,14 @@ public class TsunamiConfig {
     private World world;
 
     public static TsunamiConfig getInstance() {
-        if (instance != null) return instance;
-
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(Paths.get("tsunami.yml"))
-                .indent(2)
-                .nodeStyle(NodeStyle.BLOCK)
-                .defaultOptions(opt -> opt.header(HEADER))
-                .build();
-
-        try {
-            ConfigurationNode node = loader.load();
-            instance = node.get(TsunamiConfig.class);
-            ConfigurationNode dump = CommentedConfigurationNode.root(loader.defaultOptions());
-            dump.set(instance);
-            loader.save(dump);
-            return instance;
-        } catch (ConfigurateException e) {
-            throw new RuntimeException(e);
+        if (instance == null) {
+            instance = YamlConfigurations.update(Paths.get("tsunami.yml"), TsunamiConfig.class, builder -> builder
+                    .charset(StandardCharsets.UTF_8)
+                    .setNameFormatter(NameFormatters.LOWER_KEBAB_CASE)
+                    .inputNulls(false)
+                    .outputNulls(false));
         }
+        return instance;
     }
 
     private TsunamiConfig() {
@@ -81,10 +63,16 @@ public class TsunamiConfig {
         return world;
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class Console {
+        @Comment({
+                "The prompt which will show in console.",
+                "Color codes (§[0-9a-f]) can be used here."
+        })
         private String prompt = "> ";
+        @Comment("If warning messages should be highlighted.")
         private boolean highlightWarnings = true;
+        @Comment("If error messages should be highlighted.")
         private boolean highlightErrors = true;
 
         public String prompt() {
@@ -100,8 +88,9 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class Logging {
+        @Comment("If attempts to issue unknown commands should be logged.")
         private boolean logUnknownCommands = false;
 
         public boolean logUnknownCommands() {
@@ -109,8 +98,12 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class Networking {
+        @Comment({
+                "The deflate compression level used to compress chunk packets.",
+                "Acceptable values are [-1..9]."
+        })
         private int chunkPacketCompressionLevel = 6;
 
         public int chunkPacketCompressionLevel() {
@@ -118,13 +111,25 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class Profiles {
+        @Comment({
+                "The HTTP method used to fetch player profiles.",
+                "Acceptable values are POST and GET."
+        })
         private FetchMethod fetchMethod = FetchMethod.POST;
+        @Comment("The URL which should be used for POST requests.")
         private String postUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/bulk/byname";
+        @Comment("The URL which should be used for GET requests. {username} will be replaced by the actual name.")
         private String getUrl = "https://api.minecraftservices.com/minecraft/profile/lookup/name/{username}";
+        @Comment("If the name of a player with an online profile is required to exactly match the name returned by the API.")
         private boolean verifyUsernameCasing = false;
+        @Comment({
+                "Specifies in which cases offline profiles should be created for players.",
+                "Acceptable values are NEVER, WHEN_CRACKED and ALWAYS."
+        })
         private CreateOfflineProfiles createOfflineProfiles = CreateOfflineProfiles.NEVER;
+        @Comment("After how many days online profiles should be refetched.")
         private int refetchAfterDays = 30;
 
         public FetchMethod fetchMethod() {
@@ -163,10 +168,16 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class Rcon {
+        @Comment({
+                "If the remote console protocol should be enabled.",
+                "Please note that RCON is not encrypted and should not be used in a production environment."
+        })
         private boolean enabled = false;
+        @Comment("The port used to listen for RCON connections.")
         private int port = 25575;
+        @Comment("The password required to establish an RCON connection.")
         private String password = "";
 
         public boolean enabled() {
@@ -182,10 +193,16 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class ServerListPing {
+        @Comment("If the 1.7+ query protocol should be enabled.")
         private boolean enabled = false;
+        @Comment({
+                "The MOTD which should be included in the query response.",
+                "Color codes (§[0-9a-f]) can be used here."
+        })
         private String motd = "A Minecraft Server";
+        @Comment("If the names of connected players should be included in the query response.")
         private boolean showPlayerNames = true;
 
         public boolean enabled() {
@@ -201,13 +218,16 @@ public class TsunamiConfig {
         }
     }
 
-    @ConfigSerializable
+    @Configuration
     public static class World {
         private AsyncChunkLoading asyncChunkLoading;
+        @Comment("The interval in game ticks in which world data should be auto-saved.")
         private int autoSaveInterval = 40;
         private AutoPlayerSaving autoPlayerSaving;
         private MobCaps mobCaps;
+        @Comment("If mob caps should be enforced on a per-player basis instead of globally.")
         private boolean perPlayerMobSpawning = false;
+        @Comment("If dropped items should merge if they are of the same type.")
         private boolean mergeDroppedItems = false;
 
         public AsyncChunkLoading asyncChunkLoading() {
@@ -234,9 +254,11 @@ public class TsunamiConfig {
             return mergeDroppedItems;
         }
 
-        @ConfigSerializable
+        @Configuration
         public static class AsyncChunkLoading {
+            @Comment("If chunks should be loaded from disk asynchronously.")
             private boolean enabled = false;
+            @Comment("The amount of threads to use for loading chunks.")
             private int threads = 3;
 
             public boolean enabled() {
@@ -248,9 +270,11 @@ public class TsunamiConfig {
             }
         }
 
-        @ConfigSerializable
+        @Configuration
         public static class AutoPlayerSaving {
+            @Comment("If player data should be auto-saved.")
             private boolean enabled = false;
+            @Comment("The interval in game ticks in which player data should be auto-saved.")
             private int interval = 40;
 
             public boolean enabled() {
@@ -262,10 +286,13 @@ public class TsunamiConfig {
             }
         }
 
-        @ConfigSerializable
+        @Configuration
         public static class MobCaps {
+            @Comment("The mob cap for hostile mobs.")
             private int monsters = 70;
+            @Comment("The mob cap for passive mobs.")
             private int animals = 15;
+            @Comment("The mob cap for water mobs (squids).")
             private int waterMobs = 5;
 
             public int monsters() {
