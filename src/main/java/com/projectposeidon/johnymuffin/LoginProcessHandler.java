@@ -107,15 +107,16 @@ public class LoginProcessHandler {
         } else {
             Tsunami.userCache().profileFetcher().fetchOnlineProfile(name, new ProfileFetchCallback() {
                 @Override
-                public void onSuccess(Optional<GameProfile> onlineProfile) {
-                    if (onlineProfile.isPresent()) {
-                        MinecraftServer.log.info("[Tsunami] Fetched profile for " + name + " with UUID " + onlineProfile.get().getUuid());
-                        if (Tsunami.config().profiles().verifyUsernameCasing() && !name.equals(onlineProfile.get().getName())) {
+                public void onSuccess(Optional<GameProfile> profile) {
+                    if (profile.isPresent()) {
+                        MinecraftServer.log.info("[Tsunami] Fetched profile for " + name + " with UUID " + profile.get().getUuid());
+                        if (Tsunami.config().profiles().verifyUsernameCasing() && !name.equals(profile.get().getName())) {
                             MinecraftServer.log.info("[Tsunami] The username " + name + " has invalid casing, cancelling login as username casing verification is enabled");
                             cancelLoginProcess(ChatColor.RED + "Sorry, that username has invalid casing");
                         } else {
-                            Tsunami.userCache().addProfile(onlineProfile.get());
-                            connectPlayer(onlineProfile.get().getUuid());
+                            GameProfile onlineProfile = new GameProfile(profile.get().getUuid(), name, profile.get().isOnline());
+                            Tsunami.userCache().addProfile(onlineProfile);
+                            connectPlayer(onlineProfile.getUuid());
                         }
                     } else if (Tsunami.config().profiles().createOfflineProfiles() == TsunamiConfig.Profiles.CreateOfflineProfiles.WHEN_CRACKED) {
                         GameProfile offlineProfile = GameProfile.createOfflineProfile(name);
