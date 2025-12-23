@@ -26,6 +26,7 @@ public final class PluginDescriptionFile {
     private String version = null;
     private Object commands = null;
     private String description = null;
+    private String prefix = null; // Tsunami
     private ArrayList<String> authors = new ArrayList<String>();
     private String website = null;
     private boolean database = false;
@@ -128,6 +129,17 @@ public final class PluginDescriptionFile {
     public String getDescription() {
         return description;
     }
+
+    // Tsunami start
+    /**
+     * Gets the token to prefix plugin-specific logging messages with
+     *
+     * @return the prefixed logging token
+     */
+    public String getPrefix() {
+        return prefix;
+    }
+    // Tsunami end
 
     public ArrayList<String> getAuthors() {
         return authors;
@@ -233,6 +245,16 @@ public final class PluginDescriptionFile {
             }
         }
 
+        // Tsunami start
+        if (map.containsKey("prefix")) {
+            try {
+                prefix = (String) map.get("prefix");
+            } catch (ClassCastException ex) {
+                throw new InvalidDescriptionException(ex, "prefix is of wrong type");
+            }
+        }
+        // Tsunami end
+
         if (map.containsKey("load")) {
             try {
                 order = PluginLoadOrder.valueOf(((String)map.get("load")).toUpperCase().replaceAll("\\W", ""));
@@ -307,6 +329,11 @@ public final class PluginDescriptionFile {
         if (description != null) {
             map.put("description", description);
         }
+        // Tsunami start
+        if (prefix != null) {
+            map.put("prefix", prefix);
+        }
+        // Tsunami end
 
         if (authors.size() == 1) {
             map.put("author", authors.get(0));

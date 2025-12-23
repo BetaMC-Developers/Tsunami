@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 public class PoseidonPlugin implements Plugin {
 
@@ -78,6 +79,13 @@ public class PoseidonPlugin implements Plugin {
     public void setNaggable(boolean canNag) {
 
     }
+
+    // Tsunami start
+    @Override
+    public Logger getLogger() {
+        return null;
+    }
+    // Tsunami end
 
     @Override
     public EbeanServer getDatabase() {

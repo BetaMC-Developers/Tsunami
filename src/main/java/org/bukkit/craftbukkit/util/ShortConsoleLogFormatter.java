@@ -43,6 +43,7 @@ public class ShortConsoleLogFormatter extends Formatter {
 
     @Override
     public String format(LogRecord record) {
+        String formattedMessage = super.formatMessage(record); // Tsunami
         StringBuilder builder = new StringBuilder();
         Throwable ex = record.getThrown();
 
@@ -50,7 +51,7 @@ public class ShortConsoleLogFormatter extends Formatter {
         builder.append(" [");
         builder.append(record.getLevel().getLocalizedName().toUpperCase());
         builder.append("] ");
-        builder.append(record.getMessage());
+        builder.append(formattedMessage);
         builder.append('\n');
 
         if (ex != null) {

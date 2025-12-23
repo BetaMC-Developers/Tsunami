@@ -16,6 +16,7 @@ final class ConsoleLogFormatter extends Formatter {
     ConsoleLogFormatter() {}
 
     public String format(LogRecord logrecord) {
+        String formattedMessage = super.formatMessage(logrecord); // Tsunami
         StringBuilder stringbuilder = new StringBuilder();
 
         stringbuilder.append(a.format(Long.valueOf(logrecord.getMillis())));
@@ -38,7 +39,7 @@ final class ConsoleLogFormatter extends Formatter {
         }
 
         // Tsunami start - get rid of ansi codes
-        String message = ANSI_PATTERN.matcher(logrecord.getMessage()).replaceAll("");
+        String message = ANSI_PATTERN.matcher(formattedMessage).replaceAll("");
         stringbuilder.append(message);
         // Tsunami end
         stringbuilder.append('\n');

@@ -14,11 +14,13 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
+import org.bukkit.plugin.PluginLogger;
 import org.bukkit.util.config.Configuration;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Represents a Java plugin
@@ -34,6 +36,7 @@ public abstract class JavaPlugin implements Plugin {
     private ClassLoader classLoader = null;
     private Configuration config = null;
     private boolean naggable = true;
+    private Logger logger = null; // Tsunami
     private EbeanServer ebean = null;
 
     public JavaPlugin() {}
@@ -154,6 +157,7 @@ public abstract class JavaPlugin implements Plugin {
             this.description = description;
             this.dataFolder = dataFolder;
             this.classLoader = classLoader;
+            this.logger = new PluginLogger(this); // Tsunami
             this.config = new Configuration(new File(dataFolder, "config.yml"));
             this.config.load();
 
@@ -246,6 +250,13 @@ public abstract class JavaPlugin implements Plugin {
     public final void setNaggable(boolean canNag) {
         this.naggable = canNag;
     }
+
+    // Tsunami start
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
+    // Tsunami end
 
     public EbeanServer getDatabase() {
         return ebean;

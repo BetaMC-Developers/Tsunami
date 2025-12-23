@@ -15,6 +15,7 @@ class GuiLogFormatter extends Formatter {
     }
 
     public String format(LogRecord logrecord) {
+        String formattedMessage = super.formatMessage(logrecord); // Tsunami
         StringBuilder stringbuilder = new StringBuilder();
         Level level = logrecord.getLevel();
 
@@ -34,7 +35,7 @@ class GuiLogFormatter extends Formatter {
             stringbuilder.append("[" + level.getLocalizedName() + "] ");
         }
 
-        stringbuilder.append(logrecord.getMessage());
+        stringbuilder.append(formattedMessage);
         stringbuilder.append('\n');
         Throwable throwable = logrecord.getThrown();
 

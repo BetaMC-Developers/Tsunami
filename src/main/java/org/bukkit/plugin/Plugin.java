@@ -7,6 +7,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.util.config.Configuration;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 /**
  * Represents a Plugin
@@ -83,6 +84,17 @@ public interface Plugin extends CommandExecutor {
      * @param canNag is this plugin still naggable?
      */
     public void setNaggable(boolean canNag);
+
+    // Tsunami start
+    /**
+     * Returns the plugin logger associated with this server's logger. The
+     * returned logger automatically tags all log messages with the plugin's
+     * name.
+     *
+     * @return Logger associated with this plugin
+     */
+    public Logger getLogger();
+    // Tsunami end
 
     /**
      * Gets the {@link EbeanServer} tied to this plugin
