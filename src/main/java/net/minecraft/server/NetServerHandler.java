@@ -392,10 +392,16 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             double d14 = this.player.motX * this.player.motX + this.player.motY * this.player.motY + this.player.motZ * this.player.motZ;
             double d8 = d4 * d4 + d6 * d6 + d7 * d7;
 
-            if ((boolean) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.enabled", true)) {
-                if (d8 - d14 > (double) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.distance", 100.0D) && this.checkMovement) { // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
+            // Tsunami
+            boolean flagQuickMovement = !getPlayer().isOp() && !getPlayer().hasPermission("tsunami.anticheat.quick-movement.bypass");
+            boolean flagWrongMovement = !getPlayer().isOp() && !getPlayer().hasPermission("tsunami.anticheat.wrong-movement.bypass");
+            boolean flagFlight = !getPlayer().isOp() && !getPlayer().hasPermission("tsunami.anticheat.flight.bypass");
+
+            // Tsunami start - configurable quick movement flagging
+            if (Tsunami.config().anticheat().flagQuickMovement().enabled() && flagQuickMovement) {
+                if (d8 - d14 > Tsunami.config().anticheat().flagQuickMovement().threshold() && this.checkMovement) { // CraftBukkit - Added this.checkMovement condition to solve this check being triggered by teleports
                     a.warning(this.player.name + " moved too quickly! " + d4 + "," + d6 + "," + d7 + " (" + d4 + ", " + d6 + ", " + d7 + ")");
-                    if ((boolean) PoseidonConfig.getInstance().getConfigOption("world.settings.speed-hack-check.teleport", true)) {
+                    if (Tsunami.config().anticheat().flagQuickMovement().teleportBack()) {
                         this.a(this.x, this.y, this.z, this.player.yaw, this.player.pitch);
                     } else {
                         this.disconnect("You moved too quickly :( (Hacking?)");
@@ -403,6 +409,7 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
                     return;
                 }
             }
+            // Tsunami end
 
             float f4 = 0.0625F;
             boolean flag = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
@@ -418,32 +425,41 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             d8 = d4 * d4 + d6 * d6 + d7 * d7;
             boolean flag1 = false;
 
-            if (d8 > 0.0625D && !this.player.isSleeping()) {
-                flag1 = true;
-                a.warning(this.player.name + " moved wrongly!");
-                System.out.println("Got position " + d1 + ", " + d2 + ", " + d3);
-                System.out.println("Expected " + this.player.locX + ", " + this.player.locY + ", " + this.player.locZ);
+            // Tsunami start - configurable wrong movement flagging
+            if (Tsunami.config().anticheat().flagWrongMovement().enabled() && flagWrongMovement) {
+                if (d8 > Tsunami.config().anticheat().flagWrongMovement().threshold() && !this.player.isSleeping()) {
+                    flag1 = true;
+                    a.warning(this.player.name + " moved wrongly!");
+                    System.out.println("Got position " + d1 + ", " + d2 + ", " + d3);
+                    System.out.println("Expected " + this.player.locX + ", " + this.player.locY + ", " + this.player.locZ);
+                }
             }
 
             this.player.setLocation(d1, d2, d3, f2, f3);
-            boolean flag2 = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
 
-            if (flag && (flag1 || !flag2) && !this.player.isSleeping()) {
-                this.a(this.x, this.y, this.z, f2, f3);
-                return;
+            if (Tsunami.config().anticheat().flagWrongMovement().enabled() && flagWrongMovement) {
+                boolean flag2 = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
+
+                if (Tsunami.config().anticheat().flagWrongMovement().teleportBack() && flag && (flag1 || !flag2) && !this.player.isSleeping()) {
+                    this.a(this.x, this.y, this.z, f2, f3);
+                    return;
+                }
             }
+            // Tsunami end
 
             AxisAlignedBB axisalignedbb = this.player.boundingBox.clone().b((double) f4, (double) f4, (double) f4).a(0.0D, -0.55D, 0.0D);
 
-            if (!this.minecraftServer.allowFlight && !worldserver.b(axisalignedbb)) {
+            // Tsunami start - configurable flight flagging
+            if (!this.minecraftServer.allowFlight && flagFlight && !worldserver.b(axisalignedbb)) {
                 if (d6 >= -0.03125D) {
                     ++this.h;
-                    if (this.h > 80) {
+                    if (this.h > Tsunami.config().anticheat().flagFlight().kickAfter()) {
                         a.warning(this.player.name + " was kicked for floating too long!");
                         this.disconnect("Flying is not enabled on this server");
                         return;
                     }
                 }
+                // Tsunami end
             } else {
                 this.h = 0;
             }

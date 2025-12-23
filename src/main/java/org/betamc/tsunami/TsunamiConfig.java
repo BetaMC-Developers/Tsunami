@@ -13,13 +13,14 @@ public class TsunamiConfig {
 
     private static TsunamiConfig instance;
 
-    private Console console;
-    private Logging logging;
-    private Networking networking;
-    private Profiles profiles;
-    private Rcon rcon;
-    private ServerListPing serverListPing;
-    private World world;
+    private Console console = new Console();
+    private Logging logging = new Logging();
+    private Networking networking = new Networking();
+    private Profiles profiles = new Profiles();
+    private Rcon rcon = new Rcon();
+    private ServerListPing serverListPing = new ServerListPing();
+    private Anticheat anticheat = new Anticheat();
+    private World world = new World();
 
     public static TsunamiConfig getInstance() {
         if (instance == null) {
@@ -57,6 +58,10 @@ public class TsunamiConfig {
 
     public ServerListPing serverListPing() {
         return serverListPing;
+    }
+
+    public Anticheat anticheat() {
+        return anticheat;
     }
 
     public World world() {
@@ -219,12 +224,97 @@ public class TsunamiConfig {
     }
 
     @Configuration
+    public static class Anticheat {
+        private FlagQuickMovement flagQuickMovement = new FlagQuickMovement();
+        private FlagWrongMovement flagWrongMovement = new FlagWrongMovement();
+        private FlagFlight flagFlight = new FlagFlight();
+
+        public FlagQuickMovement flagQuickMovement() {
+            return flagQuickMovement;
+        }
+
+        public FlagWrongMovement flagWrongMovement() {
+            return flagWrongMovement;
+        }
+
+        public FlagFlight flagFlight() {
+            return flagFlight;
+        }
+
+        @Configuration
+        public static class FlagQuickMovement {
+            @Comment({
+                    "If too quick movement should be flagged.",
+                    "Players with the permission 'tsunami.anticheat.quick-movement.bypass' are exempt from being flagged."
+            })
+            private boolean enabled = true;
+            @Comment("The distance threshold for quick movement to be flagged.")
+            private double threshold = 100.0;
+            @Comment({
+                    "If flagged players should be teleported back to their previous location.",
+                    "If this is disabled, players will be kicked instead."
+            })
+            private boolean teleportBack = false;
+
+            public boolean enabled() {
+                return enabled;
+            }
+
+            public double threshold() {
+                return threshold;
+            }
+
+            public boolean teleportBack() {
+                return teleportBack;
+            }
+        }
+
+        @Configuration
+        public static class FlagWrongMovement {
+            @Comment({
+                    "If wrong movement should be flagged.",
+                    "Players with the permission 'tsunami.anticheat.wrong-movement.bypass' are exempt from being flagged."
+            })
+            private boolean enabled = true;
+            @Comment("The distance threshold for wrong movement to be flagged.")
+            private double threshold = 0.0625;
+            @Comment("If flagged players should be teleported back to their previous location.")
+            private boolean teleportBack = true;
+
+            public boolean enabled() {
+                return enabled;
+            }
+
+            public double threshold() {
+                return threshold;
+            }
+
+            public boolean teleportBack() {
+                return teleportBack;
+            }
+        }
+
+        @Configuration
+        public static class FlagFlight {
+            @Comment({
+                    "After how many ticks players should be kicked for flying.",
+                    "Players with the permission 'tsunami.anticheat.flight.bypass' are exempt from being flagged."
+            })
+            private int kickAfter = 80;
+
+            public int kickAfter() {
+                return kickAfter;
+            }
+        }
+    }
+
+    @Configuration
     public static class World {
-        private AsyncChunkLoading asyncChunkLoading;
-        @Comment("The interval in game ticks in which world data should be auto-saved.")
+        private AsyncChunkLoading asyncChunkLoading = new AsyncChunkLoading();
+        @Comment("The interval in ticks in which world data should be auto-saved.")
         private int autoSaveInterval = 40;
-        private AutoPlayerSaving autoPlayerSaving;
-        private MobCaps mobCaps;
+        private AutoPlayerSaving autoPlayerSaving = new AutoPlayerSaving();
+        private MobCaps mobCaps = new MobCaps();
         @Comment("If mob caps should be enforced on a per-player basis instead of globally.")
         private boolean perPlayerMobSpawning = false;
         @Comment("If dropped items should merge if they are of the same type.")
@@ -274,7 +364,7 @@ public class TsunamiConfig {
         public static class AutoPlayerSaving {
             @Comment("If player data should be auto-saved.")
             private boolean enabled = false;
-            @Comment("The interval in game ticks in which player data should be auto-saved.")
+            @Comment("The interval in ticks in which player data should be auto-saved.")
             private int interval = 40;
 
             public boolean enabled() {
