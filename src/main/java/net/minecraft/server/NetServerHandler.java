@@ -423,29 +423,28 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
             d7 = d3 - this.player.locZ;
             d8 = d4 * d4 + d6 * d6 + d7 * d7;
-            boolean flag1 = false;
 
             // Tsunami start - configurable wrong movement flagging
             if (Tsunami.config().anticheat().flagWrongMovement().enabled() && flagWrongMovement) {
                 if (d8 > Tsunami.config().anticheat().flagWrongMovement().threshold() && !this.player.isSleeping()) {
-                    flag1 = true;
                     a.warning(this.player.name + " moved wrongly!");
-                    System.out.println("Got position " + d1 + ", " + d2 + ", " + d3);
-                    System.out.println("Expected " + this.player.locX + ", " + this.player.locY + ", " + this.player.locZ);
-                }
-            }
-
-            this.player.setLocation(d1, d2, d3, f2, f3);
-
-            if (Tsunami.config().anticheat().flagWrongMovement().enabled() && flagWrongMovement) {
-                boolean flag2 = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
-
-                if (Tsunami.config().anticheat().flagWrongMovement().teleportBack() && flag && (flag1 || !flag2) && !this.player.isSleeping()) {
-                    this.a(this.x, this.y, this.z, f2, f3);
-                    return;
+                    a.warning("Got position " + d1 + ", " + d2 + ", " + d3);
+                    a.warning("Expected " + this.player.locX + ", " + this.player.locY + ", " + this.player.locZ);
+                    if (Tsunami.config().anticheat().flagWrongMovement().teleportBack()) {
+                        this.a(this.x, this.y, this.z, f2, f3);
+                        return;
+                    }
                 }
             }
             // Tsunami end
+
+            this.player.setLocation(d1, d2, d3, f2, f3);
+
+            boolean flag2 = worldserver.getEntities(this.player, this.player.boundingBox.clone().shrink((double) f4, (double) f4, (double) f4)).size() == 0;
+            if (flag && !flag2 && !this.player.isSleeping()) {
+                this.a(this.x, this.y, this.z, f2, f3);
+                return;
+            }
 
             AxisAlignedBB axisalignedbb = this.player.boundingBox.clone().b((double) f4, (double) f4, (double) f4).a(0.0D, -0.55D, 0.0D);
 
