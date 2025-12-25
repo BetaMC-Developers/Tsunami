@@ -100,15 +100,11 @@ public final class PoseidonServer {
         }
 
         poseidonVersionChecker = new PoseidonVersionChecker(craftServer, releaseVersion);
-        long checkIntervalTicks = PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks"); // Tsunami
-
-        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every " + checkIntervalTicks + " ticks."); // Tsunami
-        Bukkit.getScheduler().scheduleAsyncRepeatingTask(new PoseidonPlugin(), new Runnable() {
-            @Override
-            public void run() {
-                poseidonVersionChecker.fetchLatestVersion();
-            }
-        }, 0, checkIntervalTicks); // Tsunami
+        // Tsunami start - print correct interval
+        long checkIntervalTicks = PoseidonConfig.getInstance().getConfigLong("settings.update-checker.interval.ticks");
+        getLogger().info("[Poseidon] Version checker enabled. The server will check for updates every " + checkIntervalTicks + " ticks.");
+        // Tsunami end
+        Bukkit.getScheduler().scheduleAsyncRepeatingTask(new PoseidonPlugin(), () -> poseidonVersionChecker.fetchLatestVersion(), 0, checkIntervalTicks);
     }
 
     public void shutdownServer() {
@@ -135,7 +131,7 @@ public final class PoseidonServer {
     }
 
     public String getAppName() {
-        return versionProperties.getProperty("app_name", "Unknown");
+        return "Tsunami"; // Tsunami
     }
 
     public String getReleaseVersion() {
@@ -143,7 +139,7 @@ public final class PoseidonServer {
     }
 
     public String getMavenVersion() {
-        return versionProperties.getProperty("maven_version", "Unknown");
+        return versionProperties.getProperty("release_version", "Unknown"); // Tsunami - maven_version -> release_version
     }
 
     public String getBuildTimestamp() {

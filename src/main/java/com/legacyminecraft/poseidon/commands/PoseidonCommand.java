@@ -3,20 +3,14 @@ package com.legacyminecraft.poseidon.commands;
 import com.legacyminecraft.poseidon.Poseidon;
 import com.projectposeidon.api.PoseidonUUID;
 import com.projectposeidon.api.UUIDType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.UUID;
 
 public class PoseidonCommand extends Command {
-
-    private final Properties versionProperties = new Properties();
 
     public PoseidonCommand(String name) {
         super(name);
@@ -37,7 +31,6 @@ public class PoseidonCommand extends Command {
         if (args.length == 0) {
             String appName = Poseidon.getServer().getAppName();
             String releaseVersion = Poseidon.getServer().getReleaseVersion();
-            String mavenVersion = Poseidon.getServer().getMavenVersion();
             String buildTimestamp = Poseidon.getServer().getBuildTimestamp();
             String gitCommit = Poseidon.getServer().getGitCommit();
             String buildType = Poseidon.getServer().getBuildType();
@@ -55,11 +48,11 @@ public class PoseidonCommand extends Command {
                 sender.sendMessage(ChatColor.GRAY + " - Built at: " + ChatColor.YELLOW + buildTimestamp);
                 sender.sendMessage(ChatColor.GRAY + " - Git SHA: " + ChatColor.YELLOW + gitCommit);
 
-                if ("production".equalsIgnoreCase(buildType)) {
+                if ("release".equalsIgnoreCase(buildType)) { // Tsunami - production -> release
                     sender.sendMessage(ChatColor.GREEN + "This is a release build.");
-                } else if ("pull_request".equalsIgnoreCase(buildType)) {
+                } /*else if ("pull_request".equalsIgnoreCase(buildType)) { // Tsunami - remove
                     sender.sendMessage(ChatColor.BLUE + "This is a pull request build.");
-                } else {
+                }*/ else {
                     sender.sendMessage(ChatColor.GRAY + "This is a development build.");
                 }
             }
