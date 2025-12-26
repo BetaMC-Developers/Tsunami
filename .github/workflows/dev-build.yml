@@ -1,0 +1,48 @@
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - .github/workflows/**
+      - src/**
+      - pom.xml
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 8
+
+      - name: Create Dev Build Version
+        run: |
+          PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          BUILD_TIMESTAMP=$(date --utc +'%Y-%m-%dT%H:%M:%SZ')
+          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c 1-7)
+          DEV_VERSION="${PROJECT_VERSION}-dev-${COMMIT_SHA}"
+
+          echo "DEV_VERSION=$DEV_VERSION" >> $GITHUB_ENV
+          mvn versions:set -DnewVersion="${DEV_VERSION}" -DgenerateBackupPoms=false
+
+          {
+            echo "release_version=${DEV_VERSION}"
+            echo "build_type=development"
+            echo "build_timestamp=${BUILD_TIMESTAMP}"
+            echo "git_commit=${GITHUB_SHA}"
+          } > src/main/resources/version.properties
+
+      - name: Build JAR
+        run: mvn clean package
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.DEV_VERSION }}
+          path: target/*.jar

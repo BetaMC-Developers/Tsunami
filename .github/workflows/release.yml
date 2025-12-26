@@ -1,19 +1,17 @@
 on:
   push:
     branches:
-      - dev
       - release
     paths:
       - .github/workflows/**
       - src/**
       - pom.xml
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -25,38 +23,38 @@ jobs:
           distribution: zulu
           java-version: 8
 
-      - name: Create Release Version
+      - name: Get Latest Version
         run: |
-          PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+
+      - name: Get Current Version
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Create Release Version
+        if: ${{ env.CURRENT_VERSION != env.LATEST_VERSION }}
+        run: |
           BUILD_TIMESTAMP=$(date --utc +'%Y-%m-%dT%H:%M:%SZ')
 
-          if [ $GITHUB_REF_NAME == "release" ]; then
-            RELEASE_VERSION="${PROJECT_VERSION}"
-            BUILD_TYPE="release"
-          else
-            COMMIT_SHA=$(echo $GITHUB_SHA | cut -c 1-7)
-            RELEASE_VERSION="${PROJECT_VERSION}-${COMMIT_SHA}-dev"
-            BUILD_TYPE="development"
-          fi
-
-          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          mvn versions:set -DnewVersion="${RELEASE_VERSION}" -DgenerateBackupPoms=false
-
           {
-            echo "release_version=${RELEASE_VERSION}"
-            echo "build_type=${BUILD_TYPE}"
+            echo "release_version=${{ env.CURRENT_VERSION }}"
+            echo "build_type=release"
             echo "build_timestamp=${BUILD_TIMESTAMP}"
             echo "git_commit=${GITHUB_SHA}"
           } > src/main/resources/version.properties
 
       - name: Build JAR
+        if: ${{ env.CURRENT_VERSION != env.LATEST_VERSION }}
         run: mvn clean package
 
       - name: Create GitHub Release
+        if: ${{ env.CURRENT_VERSION != env.LATEST_VERSION }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_VERSION }}
-          name: ${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.CURRENT_VERSION }}
+          name: ${{ env.CURRENT_VERSION }}
           files: target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
