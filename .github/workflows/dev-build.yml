@@ -8,7 +8,7 @@ on:
       - pom.xml
 
 jobs:
-  release:
+  dev-build:
     runs-on: ubuntu-latest
 
     steps:
