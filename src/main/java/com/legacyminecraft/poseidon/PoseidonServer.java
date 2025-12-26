@@ -89,13 +89,14 @@ public final class PoseidonServer {
 
         String releaseVersion = getReleaseVersion();
 
-        if (releaseVersion == null) {
+        if (releaseVersion.equalsIgnoreCase("Unknown")) { // Tsunami - check for "Unknown" instead of null
             getLogger().warning("[Poseidon] Version checker is disabled as no version.properties file was found.");
             return;
         }
 
-        if (!getBuildType().equalsIgnoreCase("production")) {
-            getLogger().warning("[Poseidon] Version checker is disabled as this is a " + getBuildType() + " build. The updater will only check for updates on production builds.");
+        if (!getBuildType().equalsIgnoreCase("release")) { // Tsunami - production -> release
+            // Tsunami - change message
+            getLogger().warning("[Poseidon] Version checker is disabled as this is a development build. The updater will only check for updates on release builds.");
             return;
         }
 

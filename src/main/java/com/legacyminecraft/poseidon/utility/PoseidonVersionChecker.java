@@ -9,13 +9,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 public class PoseidonVersionChecker {
 
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/retromcorg/Project-Poseidon/releases/latest";
-    private static final String releaseUrl = "https://github.com/retromcorg/Project-Poseidon/releases";
+    // Tsunami - change urls to Tsunami repository
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/BetaMC-Developers/Tsunami/releases/latest";
+    private static final String releaseUrl = "https://github.com/BetaMC-Developers/Tsunami/releases/tag/";
     private final String currentVersion;
     private volatile String latestVersion;
     private CraftServer server;
@@ -52,7 +52,7 @@ public class PoseidonVersionChecker {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                server.getLogger().log(Level.WARNING, "[Poseidon] Failed to check GitHub for latest version. HTTP Response Code: " + responseCode);
+                server.getLogger().log(Level.WARNING, "[Tsunami] Failed to check GitHub for latest version. HTTP Response Code: " + responseCode);
             }
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -70,15 +70,15 @@ public class PoseidonVersionChecker {
             this.latestVersion = (String) json.get("tag_name");
 
             if (isUpdateAvailable()) {
-                server.getLogger().log(Level.INFO, "[Poseidon] A new version is available: " + latestVersion);
-                server.getLogger().log(Level.INFO, "[Poseidon] You are currently running version: " + currentVersion);
-                server.getLogger().log(Level.INFO, "[Poseidon] Download the latest version here: " + releaseUrl);
+                server.getLogger().log(Level.INFO, "[Tsunami] A new version is available: " + latestVersion);
+                server.getLogger().log(Level.INFO, "[Tsunami] You are currently running version: " + currentVersion);
+                server.getLogger().log(Level.INFO, "[Tsunami] Download the latest version here: " + releaseUrl + latestVersion); // Tsunami - print direct link
             } else {
                 if (PoseidonConfig.getInstance().getConfigBoolean("settings.update-checker.notify-if-up-to-date.enabled"))
-                    server.getLogger().log(Level.INFO, "[Poseidon] You are running the latest version (" + currentVersion + ") of Project Poseidon.");
+                    server.getLogger().log(Level.INFO, "[Tsunami] You are running the latest version (" + currentVersion + ") of Tsunami.");
             }
         } catch (Exception e) {
-            server.getLogger().log(Level.WARNING, "[Poseidon] Failed to check GitHub for latest version.", e);
+            server.getLogger().log(Level.WARNING, "[Tsunami] Failed to check GitHub for latest version.", e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
