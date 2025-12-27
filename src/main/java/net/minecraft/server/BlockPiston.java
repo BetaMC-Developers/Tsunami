@@ -4,7 +4,7 @@ import com.legacyminecraft.poseidon.PoseidonConfig;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class BlockPiston extends Block {
 
@@ -202,7 +202,7 @@ public class BlockPiston extends Block {
         }
     }
 
-    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
+    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, List arraylist) { // Tsunami - ArrayList -> List
         this.a(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
         super.a(world, i, j, k, axisalignedbb, arraylist);
     }

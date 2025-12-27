@@ -1,6 +1,6 @@
 package net.minecraft.server;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class BlockPistonExtension extends Block {
@@ -59,7 +59,7 @@ public class BlockPistonExtension extends Block {
         return 0;
     }
 
-    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
+    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, List arraylist) { // Tsunami - ArrayList -> List
         int l = world.getData(i, j, k);
 
         switch (b(l)) {

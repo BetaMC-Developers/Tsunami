@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.betamc.tsunami.Tsunami;
 import org.betamc.tsunami.world.LocalCreatureSpawner;
 import org.bukkit.Bukkit;
@@ -61,7 +62,7 @@ public class World implements IBlockAccess {
     public boolean isLoading;
     private boolean J;
     public WorldMapCollection worldMaps;
-    private ArrayList K = new ArrayList();
+    private List K = new ObjectArrayList(); // Tsunami - ArrayList -> ObjectArrayList
     private boolean L;
     private int M = 0;
     public boolean allowMonsters = true; // CraftBukkit - private -> public
@@ -70,6 +71,7 @@ public class World implements IBlockAccess {
     private LongOpenHashSet P = new LongOpenHashSet(); // Tsunami - HashSet -> LongOpenHashSet
     private int Q;
     private List R;
+    private List S; // Tsunami
     public boolean isStatic;
     public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<>(); // Paper - Optimize explosions
 
@@ -112,7 +114,8 @@ public class World implements IBlockAccess {
         // CraftBukkit end
 
         this.Q = this.random.nextInt(12000);
-        this.R = new ArrayList();
+        this.R = new ObjectArrayList(); // Tsunami - ArrayList -> ObjectArrayList
+        this.S = new ObjectArrayList(); // Tsunami
         this.isStatic = false;
         this.w = idatamanager;
         this.worldMaps = new WorldMapCollection(idatamanager);
@@ -283,6 +286,12 @@ public class World implements IBlockAccess {
         return this.chunkProvider.getOrCreateChunk(i, j); // Tsunami
     }
     // CraftBukkit end
+
+    // Tsunami start
+    public Chunk getChunkIfLoaded(int i, int j) {
+        return ((WorldServer) this).chunkProviderServer.chunks.get(LongHash.toLong(i, j));
+    }
+    // Tsunami end
 
     public boolean setRawTypeIdAndData(int i, int j, int k, int l, int i1) {
         if (i >= -32000000 && k >= -32000000 && i < 32000000 && k <= 32000000) {
@@ -933,26 +942,41 @@ public class World implements IBlockAccess {
 
     public List getEntities(Entity entity, AxisAlignedBB axisalignedbb) {
         this.K.clear();
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = i1; l1 < j1; ++l1) {
-                if (this.isLoaded(k1, 64, l1)) {
-                    for (int i2 = k - 1; i2 < l; ++i2) {
-                        Block block = Block.byId[this.getTypeId(k1, i2, l1)];
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
 
-                        if (block != null) {
-                            block.a(this, k1, i2, l1, axisalignedbb, this.K);
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
+
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+                            if (block != null) {
+                                block.a(this, x, y, z, axisalignedbb, this.K);
+                            }
                         }
                     }
                 }
             }
         }
+        // Tsunami end
 
         double d0 = 0.25D;
         List list = this.b(entity, axisalignedbb.b(d0, d0, d0));
@@ -1275,130 +1299,197 @@ public class World implements IBlockAccess {
     }
 
     public boolean b(AxisAlignedBB axisalignedbb) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
         if (axisalignedbb.a < 0.0D) {
-            --i;
+            --minX;
         }
 
         if (axisalignedbb.b < 0.0D) {
-            --k;
+            --minY;
         }
 
         if (axisalignedbb.c < 0.0D) {
-            --i1;
+            --minZ;
         }
 
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = k; l1 < l; ++l1) {
-                for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
 
-                    if (block != null) {
-                        return true;
-                    }
-                }
-            }
-        }
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
 
-        return false;
-    }
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
 
-    public boolean c(AxisAlignedBB axisalignedbb) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
 
-        if (axisalignedbb.a < 0.0D) {
-            --i;
-        }
-
-        if (axisalignedbb.b < 0.0D) {
-            --k;
-        }
-
-        if (axisalignedbb.c < 0.0D) {
-            --i1;
-        }
-
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = k; l1 < l; ++l1) {
-                for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
-
-                    if (block != null && block.material.isLiquid()) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public boolean d(AxisAlignedBB axisalignedbb) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
-
-        if (this.a(i, k, i1, j, l, j1)) {
-            for (int k1 = i; k1 < j; ++k1) {
-                for (int l1 = k; l1 < l; ++l1) {
-                    for (int i2 = i1; i2 < j1; ++i2) {
-                        int j2 = this.getTypeId(k1, l1, i2);
-
-                        if (j2 == Block.FIRE.id || j2 == Block.LAVA.id || j2 == Block.STATIONARY_LAVA.id) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public boolean a(AxisAlignedBB axisalignedbb, Material material, Entity entity) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
-
-        if (!this.a(i, k, i1, j, l, j1)) {
-            return false;
-        } else {
-            boolean flag = false;
-            Vec3D vec3d = Vec3D.create(0.0D, 0.0D, 0.0D);
-
-            for (int k1 = i; k1 < j; ++k1) {
-                for (int l1 = k; l1 < l; ++l1) {
-                    for (int i2 = i1; i2 < j1; ++i2) {
-                        Block block = Block.byId[this.getTypeId(k1, l1, i2)];
-
-                        if (block != null && block.material == material) {
-                            double d0 = (double) ((float) (l1 + 1) - BlockFluids.c(this.getData(k1, l1, i2)));
-
-                            if ((double) l >= d0) {
-                                flag = true;
-                                block.a(this, k1, l1, i2, entity, vec3d);
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+                            if (block != null) {
+                                return true;
                             }
                         }
                     }
                 }
             }
+        }
+        // Tsunami end
+
+        return false;
+    }
+
+    public boolean c(AxisAlignedBB axisalignedbb) {
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
+
+        if (axisalignedbb.a < 0.0D) {
+            --minX;
+        }
+
+        if (axisalignedbb.b < 0.0D) {
+            --minY;
+        }
+
+        if (axisalignedbb.c < 0.0D) {
+            --minZ;
+        }
+
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
+
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
+
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+                            if (block != null && block.material.isLiquid()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Tsunami end
+
+        return false;
+    }
+
+    public boolean d(AxisAlignedBB axisalignedbb) {
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
+
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
+
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
+
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            int typeId = chunk.getTypeId(x & 15, y, z & 15);
+                            if (typeId == Block.FIRE.id || typeId == Block.LAVA.id || typeId == Block.STATIONARY_LAVA.id) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Tsunami end
+
+        return false;
+    }
+
+    public boolean a(AxisAlignedBB axisalignedbb, Material material, Entity entity) {
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
+
+        if (!this.a(minX, minY, minZ, maxX, maxY, maxZ)) {
+            return false;
+        } else {
+            boolean flag = false;
+            Vec3D vec3d = Vec3D.create(0.0D, 0.0D, 0.0D);
+
+            // Tsunami start - optimize AABB methods
+            int startY = Math.max(minY, 0);
+            int endY = Math.min(maxY, 128);
+
+            for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+                int startX = Math.max(minX, (chunkX << 4));
+                int endX = Math.min(maxX, (chunkX << 4) + 16);
+
+                for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                    int startZ = Math.max(minZ, (chunkZ << 4));
+                    int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                    Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                    if (chunk == null) continue;
+
+                    for (int x = startX; x < endX; x++) {
+                        for (int z = startZ; z < endZ; z++) {
+                            for (int y = startY; y < endY; y++) {
+                                Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+
+                                if (block != null && block.material == material) {
+                                    double d0 = (double) ((float) (y + 1) - BlockFluids.c(chunk.getData(x & 15, y, z & 15)));
+
+                                    if ((double) maxY >= d0) {
+                                        flag = true;
+                                        block.a(this, x, y, z, entity, vec3d);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Tsunami end
 
             if (vec3d.c() > 0.0D) {
                 vec3d = vec3d.b();
@@ -1414,56 +1505,91 @@ public class World implements IBlockAccess {
     }
 
     public boolean a(AxisAlignedBB axisalignedbb, Material material) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = k; l1 < l; ++l1) {
-                for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
 
-                    if (block != null && block.material == material) {
-                        return true;
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
+
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
+
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+                            if (block != null && block.material == material) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
         }
+        // Tsunami end
 
         return false;
     }
 
     public boolean b(AxisAlignedBB axisalignedbb, Material material) {
-        int i = MathHelper.floor(axisalignedbb.a);
-        int j = MathHelper.floor(axisalignedbb.d + 1.0D);
-        int k = MathHelper.floor(axisalignedbb.b);
-        int l = MathHelper.floor(axisalignedbb.e + 1.0D);
-        int i1 = MathHelper.floor(axisalignedbb.c);
-        int j1 = MathHelper.floor(axisalignedbb.f + 1.0D);
+        int minX = MathHelper.floor(axisalignedbb.a);
+        int maxX = MathHelper.floor(axisalignedbb.d + 1.0D);
+        int minY = MathHelper.floor(axisalignedbb.b);
+        int maxY = MathHelper.floor(axisalignedbb.e + 1.0D);
+        int minZ = MathHelper.floor(axisalignedbb.c);
+        int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
-        for (int k1 = i; k1 < j; ++k1) {
-            for (int l1 = k; l1 < l; ++l1) {
-                for (int i2 = i1; i2 < j1; ++i2) {
-                    Block block = Block.byId[this.getTypeId(k1, l1, i2)];
+        // Tsunami start - optimize AABB methods
+        int startY = Math.max(minY, 0);
+        int endY = Math.min(maxY, 128);
 
-                    if (block != null && block.material == material) {
-                        int j2 = this.getData(k1, l1, i2);
-                        double d0 = (double) (l1 + 1);
+        for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
+            int startX = Math.max(minX, (chunkX << 4));
+            int endX = Math.min(maxX, (chunkX << 4) + 16);
 
-                        if (j2 < 8) {
-                            d0 = (double) (l1 + 1) - (double) j2 / 8.0D;
-                        }
+            for (int chunkZ = (minZ >> 4); chunkZ <= ((maxZ - 1) >> 4); chunkZ++) {
+                int startZ = Math.max(minZ, (chunkZ << 4));
+                int endZ = Math.min(maxZ, (chunkZ << 4) + 16);
 
-                        if (d0 >= axisalignedbb.b) {
-                            return true;
+                Chunk chunk = getChunkIfLoaded(chunkX, chunkZ);
+                if (chunk == null) continue;
+
+                for (int x = startX; x < endX; x++) {
+                    for (int z = startZ; z < endZ; z++) {
+                        for (int y = startY; y < endY; y++) {
+                            Block block = Block.byId[chunk.getTypeId(x & 15, y, z & 15)];
+
+                            if (block != null && block.material == material) {
+                                int j2 = chunk.getData(x & 15, y, z & 15);
+                                double d0 = (double) (y + 1);
+
+                                if (j2 < 8) {
+                                    d0 = (double) (y + 1) - (double) j2 / 8.0D;
+                                }
+
+                                if (d0 >= axisalignedbb.b) {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        // Tsunami end
 
         return false;
     }
@@ -2014,9 +2140,12 @@ public class World implements IBlockAccess {
 
         for (int i1 = i; i1 <= j; ++i1) {
             for (int j1 = k; j1 <= l; ++j1) {
-                if (this.isChunkLoaded(i1, j1)) {
-                    this.getChunkAt(i1, j1).a(entity, axisalignedbb, this.R);
+                // Tsunami start - optimize AABB methods
+                Chunk chunk = getChunkIfLoaded(i1, j1);
+                if (chunk != null) {
+                    chunk.a(entity, axisalignedbb, this.R);
                 }
+                // Tsunami end
             }
         }
 
@@ -2024,21 +2153,24 @@ public class World implements IBlockAccess {
     }
 
     public List a(Class oclass, AxisAlignedBB axisalignedbb) {
+        this.S.clear(); // Tsunami - reuse list
         int i = MathHelper.floor((axisalignedbb.a - 2.0D) / 16.0D);
         int j = MathHelper.floor((axisalignedbb.d + 2.0D) / 16.0D);
         int k = MathHelper.floor((axisalignedbb.c - 2.0D) / 16.0D);
         int l = MathHelper.floor((axisalignedbb.f + 2.0D) / 16.0D);
-        ArrayList arraylist = new ArrayList();
 
         for (int i1 = i; i1 <= j; ++i1) {
             for (int j1 = k; j1 <= l; ++j1) {
-                if (this.isChunkLoaded(i1, j1)) {
-                    this.getChunkAt(i1, j1).a(oclass, axisalignedbb, arraylist);
+                // Tsunami start - optimize AABB methods
+                Chunk chunk = getChunkIfLoaded(i1, j1);
+                if (chunk != null) {
+                    chunk.a(oclass, axisalignedbb, this.S);
                 }
+                // Tsunami end
             }
         }
 
-        return arraylist;
+        return this.S;
     }
 
     public void b(int i, int j, int k, TileEntity tileentity) {

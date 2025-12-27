@@ -2,7 +2,6 @@ package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -242,7 +241,7 @@ public class Block {
         return this.textureId;
     }
 
-    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, ArrayList arraylist) {
+    public void a(World world, int i, int j, int k, AxisAlignedBB axisalignedbb, List arraylist) { // Tsunami - ArrayList -> List
         AxisAlignedBB axisalignedbb1 = this.e(world, i, j, k);
 
         if (axisalignedbb1 != null && axisalignedbb.a(axisalignedbb1)) {
