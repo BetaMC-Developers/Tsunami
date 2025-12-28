@@ -312,8 +312,9 @@ public class TsunamiConfig {
     public static class World {
         private AsyncChunkLoading asyncChunkLoading = new AsyncChunkLoading();
         @Comment("The interval in ticks in which world data should be auto-saved.")
-        private int autoSaveInterval = 40;
-        private AutoPlayerSaving autoPlayerSaving = new AutoPlayerSaving();
+        private int autoSaveInterval = 6000;
+        @Comment("The maximum amount of chunks to auto-save per tick.")
+        private int maxAutoSaveChunksPerTick = 24;
         private MobCaps mobCaps = new MobCaps();
         @Comment("If mob caps should be enforced on a per-player basis instead of globally.")
         private boolean perPlayerMobSpawning = false;
@@ -328,8 +329,8 @@ public class TsunamiConfig {
             return Math.max(autoSaveInterval, 1);
         }
 
-        public AutoPlayerSaving autoPlayerSaving() {
-            return autoPlayerSaving;
+        public int maxAutoSaveChunksPerTick() {
+            return Math.max(maxAutoSaveChunksPerTick, 1);
         }
 
         public MobCaps mobCaps() {
@@ -357,22 +358,6 @@ public class TsunamiConfig {
 
             public int threads() {
                 return Math.max(threads, 1);
-            }
-        }
-
-        @Configuration
-        public static class AutoPlayerSaving {
-            @Comment("If player data should be auto-saved.")
-            private boolean enabled = false;
-            @Comment("The interval in ticks in which player data should be auto-saved.")
-            private int interval = 40;
-
-            public boolean enabled() {
-                return enabled;
-            }
-
-            public int interval() {
-                return Math.max(interval, 1);
             }
         }
 
