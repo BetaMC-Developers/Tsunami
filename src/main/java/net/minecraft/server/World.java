@@ -950,7 +950,7 @@ public class World implements IBlockAccess {
         int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
         // Tsunami start - optimize AABB methods
-        int startY = Math.max(minY, 0);
+        int startY = Math.max(minY - 1, 0);
         int endY = Math.min(maxY, 128);
 
         for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
