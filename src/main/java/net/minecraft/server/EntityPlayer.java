@@ -174,6 +174,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
         this.y();
         // CraftBukkit end
+        updateInventory(this.activeContainer); // Tsunami
     }
 
     public boolean damageEntity(Entity entity, int i) {

@@ -3,6 +3,8 @@ package net.minecraft.server;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.betamc.tsunami.Tsunami;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -25,17 +27,25 @@ public class ChunkProviderServer implements IChunkProvider {
     private static final ExecutorService loadExecutor = Executors.newFixedThreadPool(
             Tsunami.config().world().asyncChunkLoading().threads(),
             new ChunkLoaderThreadFactory());
-    private final Long2ObjectOpenHashMap<ChunkLoadTask> loadQueue = new Long2ObjectOpenHashMap<>(1500);
+    private final Long2ObjectOpenHashMap<ChunkLoadTask> loadQueue = new Long2ObjectOpenHashMap<>();
     private final Queue<Runnable> postLoadQueue = new ConcurrentLinkedQueue<>();
+    public final ObjectRBTreeSet<Chunk> autoSaveQueue = new ObjectRBTreeSet<>((c1, c2) -> {
+        if (c1 == c2) return 0;
+        int lastSaveCompare = Long.compare(c1.r, c2.r);
+        if (lastSaveCompare != 0) return lastSaveCompare;
+        return Long.compare(LongHash.toLong(c1.x, c1.z), LongHash.toLong(c2.x, c2.z));
+    });
+    private final ObjectArrayList<Chunk> autoSaveReschedule = new ObjectArrayList<>();
+    long lastAutoSave;
     // Tsunami end
 
     // CraftBukkit start
-    public LongLinkedOpenHashSet unloadQueue = new LongLinkedOpenHashSet(1500); // Tsunami - LongHashset -> LongLinkedOpenHashSet
+    public LongLinkedOpenHashSet unloadQueue = new LongLinkedOpenHashSet(); // Tsunami - LongHashset -> LongLinkedOpenHashSet
     public Chunk emptyChunk;
     public IChunkProvider chunkProvider; // CraftBukkit
     private IChunkLoader e;
     public boolean forceChunkLoad = false;
-    public Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>(5000); // Tsunami - LongHashtable -> Long2ObjectOpenHashMap
+    public Long2ObjectOpenHashMap<Chunk> chunks = new Long2ObjectOpenHashMap<>(); // Tsunami - LongHashtable -> Long2ObjectOpenHashMap
     //public List chunkList = new ArrayList(); // Tsunami
     public WorldServer world;
     // CraftBukkit end
@@ -45,6 +55,7 @@ public class ChunkProviderServer implements IChunkProvider {
         this.world = worldserver;
         this.e = ichunkloader;
         this.chunkProvider = ichunkprovider;
+        this.lastAutoSave = worldserver.worldData.f(); // Tsunami
     }
 
     public boolean isChunkLoaded(int i, int j) {
@@ -152,7 +163,11 @@ public class ChunkProviderServer implements IChunkProvider {
             this.getChunkAt(this, i - 1, j - 1);
         }
 
-        this.loadQueue.remove(LongHash.toLong(i, j)); // Tsunami
+        // Tsunami start
+        this.loadQueue.remove(LongHash.toLong(i, j));
+        this.autoSaveQueue.add(chunk);
+        // Tsunami end
+
         return chunk;
     }
 
@@ -237,6 +252,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public void saveChunk(Chunk chunk) { // CraftBukkit - private -> public
+        this.autoSaveQueue.remove(chunk); // Tsunami
         if (this.e != null) {
             try {
                 chunk.r = this.world.getTime();
@@ -279,31 +295,29 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
     public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
-        int i = 0;
+        // Tsunami start - rewrite world saving
+        this.autoSaveReschedule.clear();
+        long maxSaveTime = this.lastAutoSave - Tsunami.config().world().autoSaveInterval();
+        int maxToSave = Tsunami.config().world().maxAutoSaveChunksPerTick();
 
-        // Tsunami - iterate directly over values
-        for (Chunk chunk : this.chunks.values()) {
-            if (flag && !chunk.p) {
-                this.saveChunkNOP(chunk);
-            }
+        for (int autoSaved = 0; (flag || autoSaved < maxToSave) && !this.autoSaveQueue.isEmpty();) {
+            Chunk chunk = this.autoSaveQueue.first();
+            if (!flag && chunk.r > maxSaveTime) break;
 
-            if (chunk.a(flag)) {
+            if (chunk.q || chunk.o) {
                 this.saveChunk(chunk);
                 chunk.o = false;
-                ++i;
-                if (i == 24 && !flag) {
-                    return false;
-                }
-            }
-        }
-
-        if (flag) {
-            if (this.e == null) {
-                return true;
+                autoSaved++;
+            } else {
+                this.autoSaveQueue.remove(chunk);
             }
 
-            this.e.b();
+            chunk.r = this.lastAutoSave;
+            this.autoSaveReschedule.add(chunk);
         }
+
+        this.autoSaveReschedule.forEach(this.autoSaveQueue::add);
+        // Tsunami end
 
         return true;
     }

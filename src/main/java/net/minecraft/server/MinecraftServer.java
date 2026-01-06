@@ -656,11 +656,20 @@ public class MinecraftServer implements Runnable, ICommandListener {
         }
         // CraftBukkit end
 
-        // Tsunami start
-        if (Tsunami.config().world().autoPlayerSaving().enabled()) {
-            if (this.ticks % Tsunami.config().world().autoPlayerSaving().interval() == 0) {
-                this.serverConfigurationManager.savePlayers();
+        // Tsunami start - rewrite world saving
+        if (this.ticks % Tsunami.config().world().autoSaveInterval() == 0) {
+            log.log(Level.INFO, "Saving worlds");
+            for (int w = 0; w < this.worlds.size(); w++) {
+                WorldServer worldserver = this.worlds.get(w);
+                worldserver.w();
+                worldserver.chunkProviderServer.lastAutoSave = worldserver.worldData.f();
             }
+            this.serverConfigurationManager.savePlayers();
+        }
+
+        for (int w = 0; w < this.worlds.size(); w++) {
+            WorldServer worldserver = this.worlds.get(w);
+            worldserver.chunkProviderServer.saveChunks(false, null);
         }
         // Tsunami end
 

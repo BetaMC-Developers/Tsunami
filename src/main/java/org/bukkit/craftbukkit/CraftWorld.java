@@ -291,6 +291,8 @@ public class CraftWorld implements World {
             if (world.chunkProviderServer.isChunkLoaded(x - 1, z - 1) && !world.chunkProviderServer.getOrCreateChunk(x - 1, z - 1).done && world.chunkProviderServer.isChunkLoaded(x - 1, z - 1) && world.chunkProviderServer.isChunkLoaded(x, z - 1) && world.chunkProviderServer.isChunkLoaded(x - 1, z)) {
                 world.chunkProviderServer.getChunkAt(world.chunkProviderServer, x - 1, z - 1);
             }
+
+            world.chunkProviderServer.autoSaveQueue.add(chunk); // Tsunami
         }
     }
 

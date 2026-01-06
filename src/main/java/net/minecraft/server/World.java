@@ -228,7 +228,7 @@ public class World implements IBlockAccess {
         }
     }
 
-    private void w() {
+    void w() { // Tsunami - private -> package-private
         this.k();
         this.w.a(this.worldData, this.players);
         this.worldMaps.a();
@@ -950,7 +950,7 @@ public class World implements IBlockAccess {
         int maxZ = MathHelper.floor(axisalignedbb.f + 1.0D);
 
         // Tsunami start - optimize AABB methods
-        int startY = Math.max(minY, 0);
+        int startY = Math.max(minY - 1, 0);
         int endY = Math.min(maxY, 128);
 
         for (int chunkX = (minX >> 4); chunkX <= ((maxX - 1) >> 4); chunkX++) {
@@ -1870,10 +1870,7 @@ public class World implements IBlockAccess {
         }
 
         i = this.worldData.f() + 1L;
-        // Tsunami - make world saving interval configurable
-        if (i % (long) Tsunami.config().world().autoSaveInterval() == 0L) {
-            this.save(false, (IProgressUpdate) null);
-        }
+        //this.save(false, (IProgressUpdate) null); // Tsunami - rewrite world saving
 
         this.worldData.a(i);
         this.a(false);
