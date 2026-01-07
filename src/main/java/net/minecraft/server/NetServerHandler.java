@@ -165,7 +165,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         // CraftBukkit end
 
         this.player.B();
-        this.sendPacket(new Packet255KickDisconnect(s));
+        String kickReason = s.substring(0, Math.min(s.length(), 100)); // Tsunami - truncate to 100 characters
+        this.sendPacket(new Packet255KickDisconnect(kickReason));
         this.networkManager.d();
 
         // CraftBukkit start

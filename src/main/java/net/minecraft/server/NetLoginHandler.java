@@ -77,7 +77,8 @@ public class NetLoginHandler extends NetHandler {
     public void disconnect(String s) {
         try {
             a.info("Disconnecting " + this.b() + ": " + s);
-            this.networkManager.queue(new Packet255KickDisconnect(s));
+            String kickReason = s.substring(0, Math.min(s.length(), 100)); // Tsunami - truncate to 100 characters
+            this.networkManager.queue(new Packet255KickDisconnect(kickReason));
             this.networkManager.d();
             this.c = true;
         } catch (Exception exception) {
