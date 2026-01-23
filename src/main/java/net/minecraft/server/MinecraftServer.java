@@ -661,15 +661,19 @@ public class MinecraftServer implements Runnable, ICommandListener {
             log.log(Level.INFO, "Saving worlds");
             for (int w = 0; w < this.worlds.size(); w++) {
                 WorldServer worldserver = this.worlds.get(w);
-                worldserver.w();
-                worldserver.chunkProviderServer.lastAutoSave = worldserver.worldData.f();
+                if (worldserver.chunkProviderServer.canSave()) {
+                    worldserver.w();
+                    worldserver.chunkProviderServer.lastAutoSave = worldserver.worldData.f();
+                }
             }
             this.serverConfigurationManager.savePlayers();
         }
 
         for (int w = 0; w < this.worlds.size(); w++) {
             WorldServer worldserver = this.worlds.get(w);
-            worldserver.chunkProviderServer.saveChunks(false, null);
+            if (worldserver.chunkProviderServer.canSave()) {
+                worldserver.chunkProviderServer.saveChunks(false, null);
+            }
         }
         // Tsunami end
 
