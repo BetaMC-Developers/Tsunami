@@ -22,7 +22,8 @@ public class PlayerTeleportEvent extends PlayerMoveEvent {
 
     //Poseidon - Start
     private void blockCrossDimensionDupe() {
-        if (this.getFrom().getWorld() != this.getTo().getWorld()) {
+        // Tsunami - fix NPE
+        if (this.getTo() != null && this.getFrom().getWorld() != this.getTo().getWorld()) {
             EntityPlayer entity = ((CraftPlayer) this.getPlayer()).getHandle();
             if (entity.activeContainer == entity.defaultContainer)
                 return;
