@@ -42,7 +42,13 @@ final class ConsoleLogFormatter extends Formatter {
         String message = ANSI_PATTERN.matcher(formattedMessage).replaceAll("");
         stringbuilder.append(message);
         // Tsunami end
-        stringbuilder.append('\n');
+
+        // Tsunami start - fix double newlines on newer Java versions
+        if (stringbuilder.charAt(stringbuilder.length() - 1) != '\n') {
+            stringbuilder.append('\n');
+        }
+        // Tsunami end
+
         Throwable throwable = logrecord.getThrown();
 
         if (throwable != null) {
