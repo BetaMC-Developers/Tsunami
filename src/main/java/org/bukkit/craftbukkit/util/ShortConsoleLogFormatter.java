@@ -52,7 +52,7 @@ public class ShortConsoleLogFormatter extends Formatter {
         builder.append(record.getLevel().getLocalizedName().toUpperCase());
         builder.append("] ");
         builder.append(formattedMessage);
-        builder.append('\n');
+        // Tsunami - removed builder.append('\n');
 
         if (ex != null) {
             StringWriter writer = new StringWriter();
