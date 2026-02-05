@@ -337,6 +337,20 @@ public abstract class Event implements Serializable {
          * @see org.bukkit.event.player.PlayerItemDamageEvent
          */
         PLAYER_ITEM_DAMAGE(Category.PLAYER),
+        // Tsunami start - backport plugin messaging
+        /**
+         * Called when a player registers for a plugin channel
+         *
+         * @see org.bukkit.event.player.PlayerRegisterChannelEvent
+         */
+        PLAYER_REGISTER_CHANNEL(Category.PLAYER),
+        /**
+         * Called when a player unregisters for a plugin channel
+         *
+         * @see org.bukkit.event.player.PlayerUnregisterChannelEvent
+         */
+        PLAYER_UNREGISTER_CHANNEL(Category.PLAYER),
+        // Tsunami end
 
         /**
          * BLOCK EVENTS

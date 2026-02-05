@@ -205,4 +205,20 @@ public class PlayerListener implements Listener {
      * @param event Relevant event details
      */
     public void onPlayerItemDamage(PlayerItemDamageEvent event) {}
+
+    // Tsunami start - backport plugin messaging
+    /**
+     * Called when a player registers for a plugin channel
+     *
+     * @param event Relevant event details
+     */
+    public void onPlayerRegisterChannel(PlayerRegisterChannelEvent event) {}
+
+    /**
+     * Called when a player unregisters for a plugin channel
+     *
+     * @param event Relevant event details
+     */
+    public void onPlayerUnregisterChannel(PlayerUnregisterChannelEvent event) {}
+    // Tsunami end
 }

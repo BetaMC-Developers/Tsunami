@@ -22,6 +22,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.packet.PacketReceivedEvent;
 import org.bukkit.event.player.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -1237,6 +1238,24 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             }
         }
     }
+
+    // Tsunami start - backport plugin messaging
+    public void a(Packet250PluginMessage packet250pluginmessage) {
+        if (packet250pluginmessage.channel.equals("REGISTER")) {
+            String channels = new String(packet250pluginmessage.message, StandardCharsets.UTF_8);
+            for (String channel : channels.split("\0")) {
+                getPlayer().addChannel(channel);
+            }
+        } else if (packet250pluginmessage.channel.equals("UNREGISTER")) {
+            String channels = new String(packet250pluginmessage.message, StandardCharsets.UTF_8);
+            for (String channel : channels.split("\0")) {
+                getPlayer().removeChannel(channel);
+            }
+        } else {
+            this.server.getMessenger().dispatchIncomingMessage(getPlayer(), packet250pluginmessage.channel, packet250pluginmessage.message);
+        }
+    }
+    // Tsunami end
 
     public boolean c() {
         return true;

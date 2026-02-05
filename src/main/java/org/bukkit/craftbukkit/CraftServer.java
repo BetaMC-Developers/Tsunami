@@ -35,6 +35,8 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitWorker;
 import org.bukkit.util.config.Configuration;
@@ -63,6 +65,7 @@ public final class CraftServer implements Server {
     private final String gameVersion = "b1.7.3";
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final BukkitScheduler scheduler;
+    private final Messenger messenger = new StandardMessenger(); // Tsunami
     private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
     private final PluginManager pluginManager;
     protected final MinecraftServer console;
@@ -347,6 +350,12 @@ public final class CraftServer implements Server {
         return scheduler;
     }
 
+    // Tsunami start - backport plugin messaging
+    public Messenger getMessenger() {
+        return messenger;
+    }
+    // Tsunami end
+
     public ServicesManager getServicesManager() {
         return servicesManager;
     }
@@ -380,6 +389,23 @@ public final class CraftServer implements Server {
 
         return false;
     }
+
+    // Tsunami start - backport plugin messaging
+    public void sendPluginMessage(Plugin source, String channel, byte[] message) {
+        StandardMessenger.validatePluginMessage(getMessenger(), source, channel, message);
+        for (Player player : getOnlinePlayers()) {
+            player.sendPluginMessage(source, channel, message);
+        }
+    }
+
+    public Set<String> getListeningPluginChannels() {
+        Set<String> result = new HashSet<>();
+        for (Player player : getOnlinePlayers()) {
+            result.addAll(player.getListeningPluginChannels());
+        }
+        return result;
+    }
+    // Tsunami end
 
     public void reload() {
         loadConfig();

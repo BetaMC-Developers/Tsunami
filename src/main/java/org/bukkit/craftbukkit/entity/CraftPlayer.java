@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.projectposeidon.ConnectionType;
 import net.minecraft.server.*;
 import org.bukkit.Achievement;
@@ -11,17 +12,26 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.map.CraftMapView;
 import org.bukkit.craftbukkit.map.RenderData;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.bukkit.map.MapView;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.messaging.StandardMessenger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class CraftPlayer extends CraftHumanEntity implements Player {
     private Set<UUID> hiddenPlayers = new HashSet<UUID>();
+    private final Set<String> channels = new HashSet<>(); // Tsunami
 
     public CraftPlayer(CraftServer server, EntityPlayer entity) {
         super(server, entity);
@@ -106,6 +116,49 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void sendMessage(String message) {
         this.sendRawMessage(message);
     }
+
+    // Tsunami start - backport plugin messaging
+    public void addChannel(String channel) {
+        if (this.channels.add(channel)) {
+            this.server.getPluginManager().callEvent(new PlayerRegisterChannelEvent(this, channel));
+        }
+    }
+
+    public void removeChannel(String channel) {
+        if (this.channels.remove(channel)) {
+            this.server.getPluginManager().callEvent(new PlayerUnregisterChannelEvent(this, channel));
+        }
+    }
+
+    public void sendPluginMessage(Plugin source, String channel, byte[] message) {
+        StandardMessenger.validatePluginMessage(this.server.getMessenger(), source, channel, message);
+        if (this.channels.contains(channel)) {
+            getHandle().netServerHandler.sendPacket(new Packet250PluginMessage(channel, message));
+        }
+    }
+
+    public Set<String> getListeningPluginChannels() {
+        return ImmutableSet.copyOf(this.channels);
+    }
+
+    public void sendSupportedChannels() {
+        Set<String> listening = this.server.getMessenger().getIncomingChannels();
+        if (!listening.isEmpty()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            for (String channel : listening) {
+                try {
+                    out.write(channel.getBytes(StandardCharsets.UTF_8));
+                    out.write((byte) 0);
+                } catch (IOException e) {
+                    MinecraftServer.log.log(Level.SEVERE, "Failed to send plugin channel REGISTER to " + getName(), e);
+                }
+            }
+
+            getHandle().netServerHandler.sendPacket(new Packet250PluginMessage("REGISTER", out.toByteArray()));
+        }
+    }
+    // Tsunami end
 
     public String getDisplayName() {
         return getHandle().displayName;

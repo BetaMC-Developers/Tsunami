@@ -9,6 +9,8 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.map.MapView;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.PluginMessageRecipient;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.logging.Logger;
 /**
  * Represents a server implementation
  */
-public interface Server {
+public interface Server extends PluginMessageRecipient { // Tsunami - extends PluginMessageRecipient
 
 
     /**
@@ -220,6 +222,15 @@ public interface Server {
      * @return Scheduler for this Server instance
      */
     public BukkitScheduler getScheduler();
+
+    // Tsunami start - backport plugin messaging
+    /**
+     * Gets the {@link Messenger} responsible for this server.
+     *
+     * @return Messenger responsible for this server.
+     */
+    public Messenger getMessenger();
+    // Tsunami end
 
     /**
      * Gets a services manager

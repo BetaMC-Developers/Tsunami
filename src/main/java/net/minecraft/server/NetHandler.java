@@ -211,4 +211,10 @@ public abstract class NetHandler {
     public void a(Packet61 packet61) {
         this.a((Packet) packet61);
     }
+
+    // Tsunami start - backport plugin messaging
+    public void a(Packet250PluginMessage packet250pluginmessage) {
+        this.a((Packet) packet250pluginmessage);
+    }
+    // Tsunami end
 }
