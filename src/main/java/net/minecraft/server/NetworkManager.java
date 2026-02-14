@@ -292,7 +292,7 @@ public class NetworkManager {
 //        }
 
         Packet packet;
-        while ((packet = this.m.poll()) != null && i-- >= 0) { // Tsunami - poll
+        while (i-- > 0 && (packet = this.m.poll()) != null) { // Tsunami - poll
             //Poseidon Start - Packet Receive Event
             if (firePacketEvents && this.p instanceof NetServerHandler) {
                 PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) this.p).player.name, packet);
