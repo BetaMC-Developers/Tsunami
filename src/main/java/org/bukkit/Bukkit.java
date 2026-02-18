@@ -268,4 +268,11 @@ public final class Bukkit {
     public static void reloadWhitelist() {
         server.reloadWhitelist();
     }
+
+    // Tsunami start
+    public static boolean isPrimaryThread() {
+        return server.isPrimaryThread();
+    }
+    // Tsunami end
+
 }

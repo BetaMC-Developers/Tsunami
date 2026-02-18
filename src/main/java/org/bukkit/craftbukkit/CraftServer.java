@@ -74,7 +74,6 @@ public final class CraftServer implements Server {
     private final Configuration configuration;
     private final Yaml yaml = new Yaml(new SafeConstructor());
     private boolean shuttingdown = false;
-    private final List<String> hiddenCommands = new ArrayList<>(); //Project Poseidon - Create variable
 
     public CraftServer(MinecraftServer console, ServerConfigurationManager server) {
         this.console = console;
@@ -887,6 +886,12 @@ public final class CraftServer implements Server {
     public boolean isShuttingdown() {
         return shuttingdown;
     }
+
+    // Tsunami start
+    public boolean isPrimaryThread() {
+        return console.isPrimaryThread();
+    }
+    // Tsunami end
 
     public void setShuttingdown(boolean shuttingdown) {
         this.shuttingdown = shuttingdown;

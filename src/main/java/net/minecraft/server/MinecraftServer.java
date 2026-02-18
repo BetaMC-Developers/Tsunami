@@ -47,6 +47,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public static Logger log = Logger.getLogger("Minecraft");
     private static final long NANOS_PER_TICK = 50_000_000; // Tsunami
     public static HashMap trackerList = new HashMap();
+    private Thread primaryThread; // Tsunami
     public NetworkListenThread networkListenThread;
     public PropertyManager propertyManager;
     // public WorldServer[] worldServer; // CraftBukkit - removed!
@@ -90,6 +91,12 @@ public class MinecraftServer implements Runnable, ICommandListener {
         this.options = options;
         Runtime.getRuntime().addShutdownHook(this.shutdownHook);
         // CraftBukkit end
+
+        // Tsunami - keep reference to primary thread
+        Thread primaryThread = new ThreadServerApplication("Server thread", this);
+        this.primaryThread = primaryThread;
+        primaryThread.start();
+        // Tsunami end
     }
 
     private boolean init() throws UnknownHostException { // CraftBukkit - added throws UnknownHostException
@@ -752,11 +759,17 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
             // CraftBukkit - remove gui
 
-            (new ThreadServerApplication("Server thread", minecraftserver)).start();
+            //(new ThreadServerApplication("Server thread", minecraftserver)).start(); // Tsunami - moved to MinecraftServer constructor
         } catch (Exception exception) {
             log.log(Level.SEVERE, "Failed to start the minecraft server", exception);
         }
     }
+
+    // Tsunami start
+    public boolean isPrimaryThread() {
+        return Thread.currentThread() == this.primaryThread;
+    }
+    // Tsunami end
 
     public File a(String s) {
         return new File(s);

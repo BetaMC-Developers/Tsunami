@@ -479,4 +479,15 @@ public interface Server extends PluginMessageRecipient { // Tsunami - extends Pl
      */
     public Set<OfflinePlayer> getBannedPlayers();
 
+    // Tsunami start
+    /**
+     * Checks the current thread against the expected primary thread for the
+     * server.
+     *
+     * @return true if the current thread matches the expected primary thread,
+     *     false otherwise
+     */
+    public boolean isPrimaryThread();
+    // Tsunami end
+
 }
