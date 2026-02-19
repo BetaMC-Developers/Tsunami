@@ -5,6 +5,7 @@ import com.legacyminecraft.poseidon.event.PlayerSendPacketEvent;
 import com.projectposeidon.ConnectionType;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.network.NetworkUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -194,6 +195,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     // Tsunami end
 
     public void a(Packet27 packet27) {
+        NetworkUtil.ensureOnMainThread(packet27, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet27);
         server.getPluginManager().callEvent(event);
@@ -204,6 +207,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet10Flying packet10flying) {
+        NetworkUtil.ensureOnMainThread(packet10flying, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet10flying);
         server.getPluginManager().callEvent(pevent);
@@ -533,6 +538,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet14BlockDig packet14blockdig) {
+        NetworkUtil.ensureOnMainThread(packet14blockdig, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet14blockdig);
         server.getPluginManager().callEvent(event);
@@ -623,6 +630,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet15Place packet15place) {
+        NetworkUtil.ensureOnMainThread(packet15place, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet15place);
         server.getPluginManager().callEvent(pevent);
@@ -808,6 +817,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet16BlockItemSwitch packet16blockitemswitch) {
+        NetworkUtil.ensureOnMainThread(packet16blockitemswitch, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet16blockitemswitch);
         server.getPluginManager().callEvent(pevent);
@@ -830,6 +841,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet3Chat packet3chat) {
+        NetworkUtil.ensureOnMainThread(packet3chat, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet3chat);
         server.getPluginManager().callEvent(event);
@@ -955,6 +968,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet18ArmAnimation packet18armanimation) {
+        NetworkUtil.ensureOnMainThread(packet18armanimation, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet18armanimation);
         server.getPluginManager().callEvent(pevent);
@@ -999,6 +1014,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet19EntityAction packet19entityaction) {
+        NetworkUtil.ensureOnMainThread(packet19entityaction, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet19entityaction);
         server.getPluginManager().callEvent(pevent);
@@ -1055,6 +1072,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet7UseEntity packet7useentity) {
+        NetworkUtil.ensureOnMainThread(packet7useentity, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet7useentity);
         server.getPluginManager().callEvent(pevent);
@@ -1102,6 +1121,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet9Respawn packet9respawn) {
+        NetworkUtil.ensureOnMainThread(packet9respawn, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet9respawn);
         server.getPluginManager().callEvent(event);
@@ -1116,12 +1137,16 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet101CloseWindow packet101closewindow) {
+        NetworkUtil.ensureOnMainThread(packet101closewindow, this, this.minecraftServer); // Tsunami
+
         if (this.player.dead) return; // CraftBukkit
 
         this.player.A();
     }
 
     public void a(Packet102WindowClick packet102windowclick) {
+        NetworkUtil.ensureOnMainThread(packet102windowclick, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent event = new PacketReceivedEvent(server.getPlayer(player), packet102windowclick);
         server.getPluginManager().callEvent(event);
@@ -1161,6 +1186,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             this.ping = (this.ping * 3 + time) / 4;
             this.pingTimestamp = -1;
             return;
+        } else {
+            NetworkUtil.ensureOnMainThread(packet106transaction, this, this.minecraftServer);
         }
         // Tsunami end
 
@@ -1180,6 +1207,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
     }
 
     public void a(Packet130UpdateSign packet130updatesign) {
+        NetworkUtil.ensureOnMainThread(packet130updatesign, this, this.minecraftServer); // Tsunami
+
         // poseidon
         PacketReceivedEvent pevent = new PacketReceivedEvent(server.getPlayer(player), packet130updatesign);
         server.getPluginManager().callEvent(pevent);
@@ -1253,6 +1282,8 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 
     // Tsunami start - backport plugin messaging
     public void a(Packet250PluginMessage packet250pluginmessage) {
+        NetworkUtil.ensureOnMainThread(packet250pluginmessage, this, this.minecraftServer);
+
         if (packet250pluginmessage.channel.equals("REGISTER")) {
             String channels = new String(packet250pluginmessage.message, StandardCharsets.UTF_8);
             for (String channel : channels.split("\0")) {

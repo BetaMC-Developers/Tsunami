@@ -37,6 +37,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
@@ -62,6 +63,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
     private List r = new ArrayList();
     private List s = Collections.synchronizedList(new ArrayList());
     private final Queue<RemoteCommand> remoteCommands = new LinkedBlockingQueue<>(); // Tsunami
+    private final Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<>(); // Tsunami
     // public EntityTracker[] tracker = new EntityTracker[2]; // CraftBukkit - removed!
     public boolean onlineMode;
     public boolean spawnAnimals;
@@ -605,6 +607,18 @@ public class MinecraftServer implements Runnable, ICommandListener {
         Vec3D.a();
         ++this.ticks;
 
+        // Tsunami start
+        Runnable task;
+        int count = this.taskQueue.size();
+        while (count-- > 0 && (task = this.taskQueue.poll()) != null) {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                log.log(Level.SEVERE, "Error executing queued task", t);
+            }
+        }
+        // Tsunami end
+
         ((CraftScheduler) this.server.getScheduler()).mainThreadHeartbeat(this.ticks); // CraftBukkit
 
         //Project Poseidon Start - Tick Update
@@ -694,6 +708,12 @@ public class MinecraftServer implements Runnable, ICommandListener {
             log.log(Level.WARNING, "Unexpected exception while parsing console command", exception);
         }
     }
+
+    // Tsunami start
+    public void scheduleTask(Runnable task) {
+        this.taskQueue.add(task);
+    }
+    // Tsunami end
 
     public void issueCommand(String s, ICommandListener icommandlistener) {
         this.s.add(new ServerCommand(s, icommandlistener));

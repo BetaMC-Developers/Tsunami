@@ -55,7 +55,8 @@ public class NetworkListenThread {
             try {
                 netHandler.a();
             } catch (Exception e) {
-                a.log(Level.WARNING, "Failed to tick connection: " + e, e);
+                a.log(Level.WARNING, "Failed to tick connection", e);
+                netHandler.disconnect("Internal server error");
             }
 
             if (netHandler.disconnected()) {

@@ -6,6 +6,7 @@ import com.projectposeidon.ConnectionType;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.network.NetworkUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;
@@ -99,11 +100,16 @@ public class NetLoginHandler extends NetHandler {
     // Tsunami end
 
     public void a(Packet2Handshake packet2handshake) {
+        // Tsunami start
+        NetworkManager netManager = this.networkManager;
+        if (netManager == null) return;
+        // Tsunami end
+
         if (this.server.onlineMode) {
             this.serverId = Long.toHexString(d.nextLong());
-            this.networkManager.queue(new Packet2Handshake(this.serverId));
+            netManager.queue(new Packet2Handshake(this.serverId));
         } else {
-            this.networkManager.queue(new Packet2Handshake("-"));
+            netManager.queue(new Packet2Handshake("-"));
         }
     }
 
@@ -112,6 +118,8 @@ public class NetLoginHandler extends NetHandler {
     }
 
     public void a(Packet1Login packet1login) {
+        NetworkUtil.ensureOnMainThread(packet1login, this, this.server); // Tsunami
+
         if (receivedLoginPacket) {
             this.disconnect("Multiple login packets received.");
             return;
