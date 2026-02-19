@@ -74,6 +74,12 @@ public class NetLoginHandler extends NetHandler {
         }
     }
 
+    // Tsunami start
+    public boolean disconnected() {
+        return this.c;
+    }
+    // Tsunami end
+
     public void disconnect(String s) {
         try {
             a.info("Disconnecting " + this.b() + ": " + s);
@@ -85,6 +91,12 @@ public class NetLoginHandler extends NetHandler {
             exception.printStackTrace();
         }
     }
+
+    // Tsunami start
+    public NetworkManager getNetManager() {
+        return this.networkManager;
+    }
+    // Tsunami end
 
     public void a(Packet2Handshake packet2handshake) {
         if (this.server.onlineMode) {
@@ -246,7 +258,6 @@ public class NetLoginHandler extends NetHandler {
 
         this.networkManager.d();
         this.networkManager.socket.close();
-        this.server.networkListenThread.b(this);
         this.c = true;
     }
     // Tsunami end

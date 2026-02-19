@@ -148,6 +148,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         // Tsunami end
     }
 
+    // Tsunami start
+    public boolean disconnected() {
+        return this.disconnected;
+    }
+    // Tsunami end
+
     public void disconnect(String s) {
         if (disconnected) return; // Poseidon: Kick/Disconnect spam fix
 
@@ -180,6 +186,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
         this.minecraftServer.serverConfigurationManager.disconnect(this.player);
         this.disconnected = true;
     }
+
+    // Tsunami start
+    public NetworkManager getNetManager() {
+        return this.networkManager;
+    }
+    // Tsunami end
 
     public void a(Packet27 packet27) {
         // poseidon

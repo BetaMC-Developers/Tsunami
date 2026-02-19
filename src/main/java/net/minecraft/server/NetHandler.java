@@ -6,6 +6,16 @@ public abstract class NetHandler {
 
     public abstract boolean c();
 
+    // Tsunami start - rewrite networking code
+    public abstract void a();
+
+    public abstract boolean disconnected();
+
+    public abstract void disconnect(String s);
+
+    public abstract NetworkManager getNetManager();
+    // Tsunami end
+
     public void a(Packet51MapChunk packet51mapchunk) {}
 
     public void a(Packet packet) {}
