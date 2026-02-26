@@ -39,7 +39,6 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -502,38 +501,36 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public void run() {
         try {
             if (this.init()) {
-                long i = System.nanoTime(); // Tsunami - System.nanoTime()
+                // Tsunami start - improve tick loop
+                long nextTickTime = System.nanoTime();
 
-                for (long j = 0L; this.isRunning;) {
-                    long k = System.nanoTime(); // Tsunami - System.nanoTime()
-                    long l = k - i;
+                while (this.isRunning) {
+                    long behind = System.nanoTime() - nextTickTime;
 
-                    if (l > NANOS_PER_TICK * 40L) {
-                        // Tsunami - improve message
-                        log.warning("Can't keep up! Did the system time change, or is the server overloaded? Running " + l / 1_000_000 + "ms behind, skipping " + l / NANOS_PER_TICK + " tick(s)");
-                        l = NANOS_PER_TICK * 40L;
-                    }
-
-                    if (l < 0L) {
-                        log.warning("Time ran backwards! Did the system time change?");
-                        l = 0L;
-                    }
-
-                    j += l;
-                    i = k;
-                    if (this.worlds.get(0).everyoneDeeplySleeping()) { // CraftBukkit
-                        this.h();
-                        j = 0L;
+                    if (behind > NANOS_PER_TICK * 40L) {
+                        long skipTicks = behind / NANOS_PER_TICK;
+                        log.warning("Can't keep up! Did the system time change, or is the server overloaded? Running " + behind / 1_000_000 + "ms behind, skipping " + skipTicks + " tick(s)");
+                        nextTickTime += skipTicks * NANOS_PER_TICK;
                     } else {
-                        while (j > NANOS_PER_TICK) { // Tsunami
-                            MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
-                            getWatchdog().tickUpdate(); // Project Poseidon
-                            j -= NANOS_PER_TICK; // Tsunami
-                            this.h();
+                        nextTickTime += NANOS_PER_TICK;
+                    }
+
+                    MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
+                    getWatchdog().tickUpdate(); // Project Poseidon
+                    this.h();
+
+                    Runnable task;
+                    while (System.nanoTime() < nextTickTime) {
+                        task = taskQueue.poll();
+                        if (task != null) {
+                            try {
+                                task.run();
+                            } catch (Throwable t) {
+                                log.log(Level.SEVERE, "Error executing queued task", t);
+                            }
                         }
                     }
-
-                    LockSupport.parkNanos(NANOS_PER_TICK - j); // Tsunami - use LockSupport.parkNanos() instead of Thread.sleep()
+                    // Tsunami end
                 }
             } else {
                 while (this.isRunning) {

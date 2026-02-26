@@ -14,7 +14,7 @@ public class NetworkUtil {
                 try {
                     packet.a(netHandler);
                 } catch (Exception e) {
-                    MinecraftServer.log.log(Level.WARNING, "Failed to handle packet", e);
+                    MinecraftServer.log.log(Level.WARNING, "Failed to handle packet: ", e);
                     netHandler.disconnect("Internal server error");
                 }
             });

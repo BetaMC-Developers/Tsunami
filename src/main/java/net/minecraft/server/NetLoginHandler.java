@@ -28,7 +28,7 @@ public class NetLoginHandler extends NetHandler {
 
     public static Logger a = Logger.getLogger("Minecraft");
     private static Random d = new Random();
-    public NetworkManager networkManager;
+    public final NetworkManager networkManager; // Tsunami - final
     public boolean c = false;
     private MinecraftServer server;
     private int f = 0;
@@ -52,8 +52,8 @@ public class NetLoginHandler extends NetHandler {
         this.server = minecraftserver;
         this.networkManager = new NetworkManager(socket, s, this);
         this.networkManager.f = 0;
-        
         this.msgKickShutdown = PoseidonConfig.getInstance().getConfigString("message.kick.shutdown");
+        this.networkManager.startThreads(); // Tsunami
     }
 
     // CraftBukkit start
@@ -100,16 +100,11 @@ public class NetLoginHandler extends NetHandler {
     // Tsunami end
 
     public void a(Packet2Handshake packet2handshake) {
-        // Tsunami start
-        NetworkManager netManager = this.networkManager;
-        if (netManager == null) return;
-        // Tsunami end
-
         if (this.server.onlineMode) {
             this.serverId = Long.toHexString(d.nextLong());
-            netManager.queue(new Packet2Handshake(this.serverId));
+            this.networkManager.queue(new Packet2Handshake(this.serverId));
         } else {
-            netManager.queue(new Packet2Handshake("-"));
+            this.networkManager.queue(new Packet2Handshake("-"));
         }
     }
 

@@ -90,9 +90,14 @@ public class NetworkManager {
         // CraftBukkit end */
         this.s = new NetworkReaderThread(this, s + " read thread");
         this.r = new NetworkWriterThread(this, s + " write thread");
+    }
+
+    // Tsunami start - rewrite networking code
+    void startThreads() {
         this.s.start();
         this.r.start();
     }
+    // Tsunami end
 
     //Project Poseidon Start
     public void setSocketAddress(SocketAddress socketAddress) {
@@ -241,7 +246,7 @@ public class NetworkManager {
             packet.a(netHandler);
         } catch (PacketScheduledException e) {
         } catch (Exception e) {
-            MinecraftServer.log.log(Level.WARNING, "Failed to handle packet", e);
+            MinecraftServer.log.log(Level.WARNING, "Failed to handle packet: ", e);
             netHandler.disconnect("Internal server error");
         }
     }
