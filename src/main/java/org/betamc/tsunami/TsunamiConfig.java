@@ -105,9 +105,14 @@ public class TsunamiConfig {
     @ConfigSerializable
     public static class Networking {
         private int chunkPacketCompressionLevel = 6;
+        private int maxChunkPacketsPerTick = 10;
 
         public int chunkPacketCompressionLevel() {
             return Math.min(Math.max(chunkPacketCompressionLevel, -1), 9);
+        }
+
+        public int maxChunkPacketsPerTick() {
+            return Math.max(maxChunkPacketsPerTick, 1);
         }
     }
 
