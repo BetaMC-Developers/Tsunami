@@ -1,5 +1,18 @@
 package org.bukkit.persistence;
 
+/**
+ * Represents a data type which is used to convert a complex value to a
+ * primitive value, and vice versa. This is used by {@link PersistentDataContainer}
+ * for storage and retrieval of values.
+ * <p>
+ * Allowed primitive types are {@code Byte}, {@code Short}, {@code Integer},
+ * {@code Long}, {@code Float}, {@code Double}, {@code String}, {@code byte[]}
+ * and {@code PersistentDataContainer}.
+ *
+ * @see PersistentDataContainer
+ * @param <P> the primitive type
+ * @param <C> the complex type
+ */
 public interface PersistentDataType<P, C> {
 
     PersistentDataType<Byte, Byte> BYTE = new PrimitivePersistentDataType<>(Byte.class);
@@ -14,12 +27,34 @@ public interface PersistentDataType<P, C> {
     PersistentDataType<byte[], byte[]> BYTE_ARRAY = new PrimitivePersistentDataType<>(byte[].class);
     PersistentDataType<PersistentDataContainer, PersistentDataContainer> DATA_CONTAINER = new PrimitivePersistentDataType<>(PersistentDataContainer.class);
 
+    /**
+     * Returns the primitive type of a value of this data type.
+     *
+     * @return the primitive type
+     */
     Class<P> getPrimitiveType();
 
+    /**
+     * Returns the complex type of a value of this data type.
+     *
+     * @return the complex type
+     */
     Class<C> getComplexType();
 
+    /**
+     * Converts the given complex value to a primitive value.
+     *
+     * @param complex the complex value
+     * @return the primitive value
+     */
     P toPrimitive(C complex);
 
+    /**
+     * Converts the given primitive value to a complex value.
+     *
+     * @param primitive the primitive value
+     * @return the complex value
+     */
     C fromPrimitive(P primitive);
 
     final class PrimitivePersistentDataType<P> implements PersistentDataType<P, P> {
