@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.metadata.MetadataValue;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class TileEntity {
     public int y;
     public int z;
     protected boolean h;
+    public final CraftPersistentDataContainer container = new CraftPersistentDataContainer(); // Tsunami
     public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public TileEntity() {}
@@ -32,6 +34,12 @@ public class TileEntity {
         this.x = nbttagcompound.e("x");
         this.y = nbttagcompound.e("y");
         this.z = nbttagcompound.e("z");
+
+        // Tsunami start - PersistentDataContainer API
+        CraftPersistentDataContainer container = new CraftPersistentDataContainer(nbttagcompound.k(CraftPersistentDataContainer.TAG_KEY));
+        container.copyTo(this.container, true);
+        // Tsunami end
+
         // Tsunami start
         NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
         this.metadataStore.putAll(NBTMetadataConvert.compoundToMetadata(metadata));
@@ -48,6 +56,7 @@ public class TileEntity {
             nbttagcompound.a("x", this.x);
             nbttagcompound.a("y", this.y);
             nbttagcompound.a("z", this.z);
+            nbttagcompound.a(CraftPersistentDataContainer.TAG_KEY, this.container.asCompound()); // Tsunami - PersistentDataContainer API
             nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore)); // Tsunami
         }
     }

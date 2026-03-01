@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.legacyminecraft.poseidon.PoseidonConfig;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 
 import java.util.*;
 
@@ -25,6 +26,7 @@ public class Chunk {
     public boolean q;
     public long r;
     private final int[] chunkSections; // Tsunami
+    public final CraftPersistentDataContainer container = new CraftPersistentDataContainer(); // Tsunami
 
     public Chunk(World world, int i, int j) {
         this.tileEntities = new HashMap();

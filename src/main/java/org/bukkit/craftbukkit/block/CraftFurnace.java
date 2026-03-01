@@ -6,8 +6,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 
 public class CraftFurnace extends CraftBlockState implements Furnace {
@@ -51,6 +53,18 @@ public class CraftFurnace extends CraftBlockState implements Furnace {
     public void setCookTime(short cookTime) {
         furnace.cookTime = cookTime;
     }
+
+    // Tsunami start - PersistentDataContainer API
+    @Override
+    public PersistentDataContainer getPersistentDataContainer() {
+        return this.furnace.container;
+    }
+
+    @Override
+    public PersistentDataContainer newPersistentDataContainer() {
+        return new CraftPersistentDataContainer();
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

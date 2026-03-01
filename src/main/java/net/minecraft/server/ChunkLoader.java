@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
+
 import java.io.*;
 import java.util.Iterator;
 
@@ -155,6 +157,8 @@ public class ChunkLoader implements IChunkLoader {
         }
 
         nbttagcompound.a("TileEntities", (NBTBase) nbttaglist1);
+
+        nbttagcompound.a(CraftPersistentDataContainer.TAG_KEY, chunk.container.asCompound()); // Tsunami - PersistentDataContainer API
     }
 
     public static Chunk a(World world, NBTTagCompound nbttagcompound) {
@@ -209,6 +213,11 @@ public class ChunkLoader implements IChunkLoader {
                 }
             }
         }
+
+        // Tsunami start - PersistentDataContainer API
+        CraftPersistentDataContainer container = new CraftPersistentDataContainer(nbttagcompound.k(CraftPersistentDataContainer.TAG_KEY));
+        container.copyTo(chunk.container, true);
+        // Tsunami end
 
         return chunk;
     }

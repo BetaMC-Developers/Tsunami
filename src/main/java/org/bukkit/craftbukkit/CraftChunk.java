@@ -11,7 +11,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.entity.Entity;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentMap;
@@ -223,4 +225,17 @@ public class CraftChunk implements Chunk {
         }
         return new EmptyChunkSnapshot(x, z, world.getName(), world.getFullTime(), biome, biomeTemp, biomeRain);
     }
+
+    // Tsunami start - PersistentDataContainer API
+    @Override
+    public PersistentDataContainer getPersistentDataContainer() {
+        return getHandle().container;
+    }
+
+    @Override
+    public PersistentDataContainer newPersistentDataContainer() {
+        return new CraftPersistentDataContainer();
+    }
+    // Tsunami end
+
 }

@@ -1,13 +1,14 @@
 package org.bukkit.block;
 
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.persistence.PersistentDataHolder;
 
 /**
  * Represents a furnace.
  *
  * @author sk89q
  */
-public interface Furnace extends BlockState, ContainerBlock, Metadatable { // Tsunami - extends Metadatable
+public interface Furnace extends BlockState, ContainerBlock, PersistentDataHolder, Metadatable { // Tsunami - extends PersistentDataHolder, Metadatable
 
     /**
      * Get burn time.

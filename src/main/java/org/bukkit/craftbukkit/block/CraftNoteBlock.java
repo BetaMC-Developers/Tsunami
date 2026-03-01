@@ -8,7 +8,9 @@ import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.block.NoteBlock;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 
 public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
@@ -76,6 +78,18 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
             }
         }
     }
+
+    // Tsunami start - PersistentDataContainer API
+    @Override
+    public PersistentDataContainer getPersistentDataContainer() {
+        return this.note.container;
+    }
+
+    @Override
+    public PersistentDataContainer newPersistentDataContainer() {
+        return new CraftPersistentDataContainer();
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

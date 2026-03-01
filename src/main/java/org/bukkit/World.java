@@ -8,6 +8,7 @@ import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Represents a world, which may contain entities, chunks and blocks
  */
-public interface World extends Metadatable { // Tsunami - extends Metadatable
+public interface World extends PersistentDataHolder, Metadatable { // Tsunami - extends PersistentDataHolder, Metadatable
 
     /**
      * Gets the {@link Block} at the given coordinates

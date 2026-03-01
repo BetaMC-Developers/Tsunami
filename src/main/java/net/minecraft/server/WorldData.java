@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.metadata.MetadataValue;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class WorldData {
     private int m;
     private boolean n;
     private int o;
+    public final CraftPersistentDataContainer container = new CraftPersistentDataContainer(); // Tsunami
     public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public WorldData(NBTTagCompound nbttagcompound) {
@@ -48,6 +50,12 @@ public class WorldData {
             this.h = nbttagcompound.k("Player");
             this.i = this.h.e("Dimension");
         }
+
+        // Tsunami start - PersistentDataContainer API
+        CraftPersistentDataContainer container = new CraftPersistentDataContainer(nbttagcompound.k(CraftPersistentDataContainer.TAG_KEY));
+        container.copyTo(this.container, true);
+        // Tsunami end
+
         // Tsunami start
         NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
         this.metadataStore.putAll(NBTMetadataConvert.compoundToMetadata(metadata));
@@ -123,6 +131,7 @@ public class WorldData {
         if (nbttagcompound1 != null) {
             nbttagcompound.a("Player", nbttagcompound1);
         }
+        nbttagcompound.a(CraftPersistentDataContainer.TAG_KEY, this.container.asCompound()); // Tsunami - PersistentDataContainer API
         nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore));
     }
 
