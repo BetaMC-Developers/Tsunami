@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.map.MapView;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.messaging.Messenger;
@@ -168,6 +169,12 @@ public final class Bukkit {
     public static World getWorld(UUID uid) {
         return server.getWorld(uid);
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public static PersistentDataContainer createPersistentDataContainer() {
+        return server.createPersistentDataContainer();
+    }
+    // Tsunami end
 
     public static MapView getMap(short id) {
         return server.getMap(id);

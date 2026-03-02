@@ -8,7 +8,6 @@ import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.*;
-import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.*;
@@ -852,14 +851,8 @@ public class CraftWorld implements World {
     }
 
     // Tsunami start - PersistentDataContainer API
-    @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return getHandle().worldData.container;
-    }
-
-    @Override
-    public PersistentDataContainer newPersistentDataContainer() {
-        return new CraftPersistentDataContainer();
     }
     // Tsunami end
 

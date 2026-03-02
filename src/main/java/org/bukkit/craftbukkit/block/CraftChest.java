@@ -6,7 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
-import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -39,14 +38,8 @@ public class CraftChest extends CraftBlockState implements Chest {
     }
 
     // Tsunami start - PersistentDataContainer API
-    @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return this.chest.container;
-    }
-
-    @Override
-    public PersistentDataContainer newPersistentDataContainer() {
-        return new CraftPersistentDataContainer();
     }
     // Tsunami end
 

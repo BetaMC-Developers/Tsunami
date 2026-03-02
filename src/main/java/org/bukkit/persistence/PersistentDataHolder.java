@@ -14,11 +14,4 @@ public interface PersistentDataHolder {
      * @return this object's {@link PersistentDataContainer}
      */
     PersistentDataContainer getPersistentDataContainer();
-
-    /**
-     * Creates a new empty {@link PersistentDataContainer}.
-     *
-     * @return a new {@link PersistentDataContainer}
-     */
-    PersistentDataContainer newPersistentDataContainer();
 }

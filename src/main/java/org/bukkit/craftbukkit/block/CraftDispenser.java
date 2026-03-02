@@ -8,7 +8,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
-import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -58,14 +57,8 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
     }
 
     // Tsunami start - PersistentDataContainer API
-    @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return this.dispenser.container;
-    }
-
-    @Override
-    public PersistentDataContainer newPersistentDataContainer() {
-        return new CraftPersistentDataContainer();
     }
     // Tsunami end
 

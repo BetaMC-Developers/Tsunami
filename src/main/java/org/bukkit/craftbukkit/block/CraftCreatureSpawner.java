@@ -5,7 +5,6 @@ import net.minecraft.server.TileEntityMobSpawner;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -52,14 +51,8 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
     }
 
     // Tsunami start - PersistentDataContainer API
-    @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return this.spawner.container;
-    }
-
-    @Override
-    public PersistentDataContainer newPersistentDataContainer() {
-        return new CraftPersistentDataContainer();
     }
     // Tsunami end
 

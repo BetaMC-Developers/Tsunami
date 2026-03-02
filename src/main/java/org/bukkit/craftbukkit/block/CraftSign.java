@@ -5,7 +5,6 @@ import net.minecraft.server.TileEntitySign;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
@@ -45,14 +44,8 @@ public class CraftSign extends CraftBlockState implements Sign {
     }
 
     // Tsunami start - PersistentDataContainer API
-    @Override
     public PersistentDataContainer getPersistentDataContainer() {
         return this.sign.container;
-    }
-
-    @Override
-    public PersistentDataContainer newPersistentDataContainer() {
-        return new CraftPersistentDataContainer();
     }
     // Tsunami end
 
