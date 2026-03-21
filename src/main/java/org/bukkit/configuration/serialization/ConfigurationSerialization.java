@@ -10,13 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
 import org.bukkit.configuration.Configuration;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 
 /**
  * Utility class for storing and retrieving classes for {@link Configuration}.
@@ -27,10 +21,8 @@ public class ConfigurationSerialization {
     private static Map<String, Class<? extends ConfigurationSerializable>> aliases = new HashMap<String, Class<? extends ConfigurationSerializable>>();
 
     static {
-        registerClass(Vector.class);
-        registerClass(BlockVector.class);
-        registerClass(ItemStack.class);
-        // Color, PotionEffect, FireworkEffect removed - not supported in Beta 1.7.3
+        // Beta 1.7.3 doesn't have ConfigurationSerializable implementations for built-in classes
+        // Vector, BlockVector, ItemStack, Color, PotionEffect, FireworkEffect removed
     }
 
     protected ConfigurationSerialization(Class<? extends ConfigurationSerializable> clazz) {
