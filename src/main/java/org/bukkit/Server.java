@@ -7,8 +7,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.map.MapView;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.PluginMessageRecipient;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.List;
@@ -20,7 +23,7 @@ import java.util.logging.Logger;
 /**
  * Represents a server implementation
  */
-public interface Server {
+public interface Server extends PluginMessageRecipient { // Tsunami - extends PluginMessageRecipient
 
 
     /**
@@ -221,6 +224,15 @@ public interface Server {
      */
     public BukkitScheduler getScheduler();
 
+    // Tsunami start - backport plugin messaging
+    /**
+     * Gets the {@link Messenger} responsible for this server.
+     *
+     * @return Messenger responsible for this server.
+     */
+    public Messenger getMessenger();
+    // Tsunami end
+
     /**
      * Gets a services manager
      *
@@ -316,6 +328,15 @@ public interface Server {
      * @return World with the given Unique ID, or null if none exists.
      */
     public World getWorld(UUID uid);
+
+    // Tsunami start - PersistentDataContainer API
+    /**
+     * Creates a new empty {@link PersistentDataContainer}.
+     *
+     * @return a new {@link PersistentDataContainer}
+     */
+    public PersistentDataContainer createPersistentDataContainer();
+    // Tsunami end
     
     /**
      * Gets the map from the given item ID.
@@ -467,5 +488,16 @@ public interface Server {
      * @return Set containing banned players
      */
     public Set<OfflinePlayer> getBannedPlayers();
+
+    // Tsunami start
+    /**
+     * Checks the current thread against the expected primary thread for the
+     * server.
+     *
+     * @return true if the current thread matches the expected primary thread,
+     *     false otherwise
+     */
+    public boolean isPrimaryThread();
+    // Tsunami end
 
 }

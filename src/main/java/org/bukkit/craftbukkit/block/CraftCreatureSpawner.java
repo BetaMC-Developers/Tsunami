@@ -7,6 +7,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 
 public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpawner {
@@ -48,6 +49,12 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
     public void setDelay(int delay) {
         spawner.spawnDelay = delay;
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer getPersistentDataContainer() {
+        return this.spawner.container;
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

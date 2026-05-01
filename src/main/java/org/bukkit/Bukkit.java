@@ -8,8 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.map.MapView;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.List;
@@ -122,6 +124,12 @@ public final class Bukkit {
         return server.getScheduler();
     }
 
+    // Tsunami start - backport plugin messaging
+    public static Messenger getMessenger() {
+        return server.getMessenger();
+    }
+    // Tsunami end
+
     public static ServicesManager getServicesManager() {
         return server.getServicesManager();
     }
@@ -161,6 +169,12 @@ public final class Bukkit {
     public static World getWorld(UUID uid) {
         return server.getWorld(uid);
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public static PersistentDataContainer createPersistentDataContainer() {
+        return server.createPersistentDataContainer();
+    }
+    // Tsunami end
 
     public static MapView getMap(short id) {
         return server.getMap(id);
@@ -261,4 +275,11 @@ public final class Bukkit {
     public static void reloadWhitelist() {
         server.reloadWhitelist();
     }
+
+    // Tsunami start
+    public static boolean isPrimaryThread() {
+        return server.isPrimaryThread();
+    }
+    // Tsunami end
+
 }

@@ -4,7 +4,7 @@
 
     <groupId>org.betamc</groupId>
     <artifactId>tsunami</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -12,13 +12,6 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>Alpine Cloud</id>
-            <url>https://lib.alpn.cloud/alpine-public/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -66,9 +59,9 @@
             <version>1.7</version>
         </dependency>
         <dependency>
-            <groupId>dev.tomwmth.configlib</groupId>
-            <artifactId>configlib-yaml</artifactId>
-            <version>4.6.0</version>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-yaml</artifactId>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -108,12 +101,12 @@
     </dependencies>
 
     <build>
-        <defaultGoal>clean install</defaultGoal>
+        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -126,7 +119,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.5.0</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -164,7 +157,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -182,6 +175,7 @@
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                     </excludes>
                                 </filter>
@@ -193,7 +187,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.15.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

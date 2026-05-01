@@ -8,7 +8,7 @@ import java.util.List;
 
 public class NBTTagList extends NBTBase {
 
-    private List a = new ArrayList();
+    public List a = new ArrayList(); // Tsunami - private -> public
     private byte b;
 
     public NBTTagList() {}

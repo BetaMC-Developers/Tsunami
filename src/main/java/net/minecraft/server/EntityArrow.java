@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -161,48 +163,57 @@ public class EntityArrow extends Entity {
             float f2;
 
             if (movingobjectposition != null) {
-                // CraftBukkit start
-                ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
-                this.world.getServer().getPluginManager().callEvent(phe);
-                // CraftBukkit end
                 if (movingobjectposition.entity != null) {
-                    // CraftBukkit start
-                    boolean stick;
-                    if (entity instanceof EntityLiving) {
-                        org.bukkit.Server server = this.world.getServer();
+                    // Tsunami start - improve ProjectileHitEvent
+                    ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), movingobjectposition.entity.getBukkitEntity());
+                    this.world.getServer().getPluginManager().callEvent(phe);
+                    if (!phe.isCancelled()) {
+                        // Tsunami end
 
-                        // TODO decide if we should create DamageCause.ARROW, DamageCause.PROJECTILE
-                        // or leave as DamageCause.ENTITY_ATTACK
-                        org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
-                        Projectile projectile = (Projectile) this.getBukkitEntity();
-                        // TODO deal with arrows being fired from a non-entity
+                        // CraftBukkit start
+                        boolean stick;
+                        if (entity instanceof EntityLiving) {
+                            org.bukkit.Server server = this.world.getServer();
 
-                        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 4);
-                        server.getPluginManager().callEvent(event);
-                        this.shooter = (projectile.getShooter() == null) ? null : ((CraftLivingEntity) projectile.getShooter()).getHandle();
+                            // TODO decide if we should create DamageCause.ARROW, DamageCause.PROJECTILE
+                            // or leave as DamageCause.ENTITY_ATTACK
+                            org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
+                            Projectile projectile = (Projectile) this.getBukkitEntity();
+                            // TODO deal with arrows being fired from a non-entity
 
-                        if (event.isCancelled()) {
-                            stick = !projectile.doesBounce();
+                            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 4);
+                            server.getPluginManager().callEvent(event);
+                            this.shooter = (projectile.getShooter() == null) ? null : ((CraftLivingEntity) projectile.getShooter()).getHandle();
+
+                            if (event.isCancelled()) {
+                                stick = !projectile.doesBounce();
+                            } else {
+                                // this function returns if the arrow should stick in or not, i.e. !bounce
+                                stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
+                            }
                         } else {
-                            // this function returns if the arrow should stick in or not, i.e. !bounce
-                            stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
+                            stick = movingobjectposition.entity.damageEntity(this.shooter, 4);
                         }
-                    } else {
-                        stick = movingobjectposition.entity.damageEntity(this.shooter, 4);
-                    }
-                    if (stick) {
-                        // CraftBukkit end
-                        this.world.makeSound(this, "random.drr", 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-                        this.die();
-                    } else {
-                        this.motX *= -0.10000000149011612D;
-                        this.motY *= -0.10000000149011612D;
-                        this.motZ *= -0.10000000149011612D;
-                        this.yaw += 180.0F;
-                        this.lastYaw += 180.0F;
-                        this.k = 0;
+                        if (stick) {
+                            // CraftBukkit end
+                            this.world.makeSound(this, "random.drr", 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+                            this.die();
+                        } else {
+                            this.motX *= -0.10000000149011612D;
+                            this.motY *= -0.10000000149011612D;
+                            this.motZ *= -0.10000000149011612D;
+                            this.yaw += 180.0F;
+                            this.lastYaw += 180.0F;
+                            this.k = 0;
+                        }
                     }
                 } else {
+                    // Tsunami start - improve ProjectileHitEvent
+                    org.bukkit.block.Block block = this.world.getWorld().getBlockAt(movingobjectposition.b, movingobjectposition.c, movingobjectposition.d);
+                    BlockFace face = CraftBlock.notchToBlockFace(movingobjectposition.face);
+                    ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), block, face);
+                    this.world.getServer().getPluginManager().callEvent(phe);
+                    // Tsunami end
                     this.d = movingobjectposition.b;
                     this.e = movingobjectposition.c;
                     this.f = movingobjectposition.d;

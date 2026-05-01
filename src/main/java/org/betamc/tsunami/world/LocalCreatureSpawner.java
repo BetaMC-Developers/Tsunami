@@ -1,6 +1,6 @@
 package org.betamc.tsunami.world;
 
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.server.BiomeBase;
 import net.minecraft.server.BiomeMeta;
 import net.minecraft.server.Block;
@@ -22,13 +22,13 @@ import java.util.List;
 public class LocalCreatureSpawner {
 
     private static final LocalMobCapCalculator calculator = new LocalMobCapCalculator();
-    private static final LongOpenHashSet chunks = new LongOpenHashSet();
+    private static final IntOpenHashSet creatureTypePerChunk = new IntOpenHashSet();
 
     private LocalCreatureSpawner() {
     }
 
     public static void spawnCreatures(World world, boolean spawnMonsters, boolean spawnAnimals) {
-        chunks.clear();
+        creatureTypePerChunk.clear();
         calculator.prepare(world);
         calculator.forEachEntry((player, chunks) -> spawnForPlayer(world, player, chunks, spawnMonsters, spawnAnimals));
     }
@@ -43,7 +43,7 @@ public class LocalCreatureSpawner {
     }
 
     private static void spawnCreatureTypeForChunk(EnumCreatureType creatureType, World world, Chunk chunk) {
-        if (!chunks.add(LongHash.toLong(chunk.x, chunk.z))) return;
+        if (!creatureTypePerChunk.add(getKey(creatureType, chunk.x, chunk.z))) return;
         int x = (chunk.x << 4) + world.random.nextInt(16);
         int y = world.random.nextInt(128);
         int z = (chunk.z << 4) + world.random.nextInt(16);
@@ -86,6 +86,13 @@ public class LocalCreatureSpawner {
                 }
             }
         }
+    }
+
+    private static int getKey(EnumCreatureType creatureType, int x, int z) {
+        int key = creatureType.ordinal();
+        key = 31 * key + x;
+        key = 31 * key + z;
+        return key;
     }
 
     private static int getTypeId(Chunk chunk, int x, int y, int z) {

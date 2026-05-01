@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -146,41 +148,55 @@ public class EntitySnowball extends Entity {
         }
 
         if (movingobjectposition != null) {
+            ProjectileHitEvent phe;
+
             // CraftBukkit start
-            ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
-            this.world.getServer().getPluginManager().callEvent(phe);
-
             if (movingobjectposition.entity != null) {
-                boolean stick;
-                if (movingobjectposition.entity instanceof EntityLiving) {
-                    org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
-                    Projectile projectile = (Projectile) this.getBukkitEntity();
+                // Tsunami start - improve ProjectileHitEvent
+                phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), movingobjectposition.entity.getBukkitEntity());
+                this.world.getServer().getPluginManager().callEvent(phe);
+                if (!phe.isCancelled()) {
+                    // Tsunami end
 
-                    // TODO @see EntityArrow#162
-                    EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 0);
-                    this.world.getServer().getPluginManager().callEvent(event);
-                    this.shooter = (projectile.getShooter() == null) ? null : ((CraftLivingEntity) projectile.getShooter()).getHandle();
+                    boolean stick;
+                    if (movingobjectposition.entity instanceof EntityLiving) {
+                        org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
+                        Projectile projectile = (Projectile) this.getBukkitEntity();
 
-                    if (event.isCancelled()) {
-                        stick = !projectile.doesBounce();
+                        // TODO @see EntityArrow#162
+                        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 0);
+                        this.world.getServer().getPluginManager().callEvent(event);
+                        this.shooter = (projectile.getShooter() == null) ? null : ((CraftLivingEntity) projectile.getShooter()).getHandle();
+
+                        if (event.isCancelled()) {
+                            stick = !projectile.doesBounce();
+                        } else {
+                            // this function returns if the snowball should stick in or not, i.e. !bounce
+                            stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
+                        }
                     } else {
-                        // this function returns if the snowball should stick in or not, i.e. !bounce
-                        stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
+                        stick = movingobjectposition.entity.damageEntity(this.shooter, 0);
                     }
-                } else {
-                    stick = movingobjectposition.entity.damageEntity(this.shooter, 0);
+                    if (stick) {
+                        ;
+                    }
                 }
-                if (stick) {
-                    ;
+                // CraftBukkit end
+            } else {
+                // Tsunami start - improve ProjectileHitEvent
+                org.bukkit.block.Block block = this.world.getWorld().getBlockAt(movingobjectposition.b, movingobjectposition.c, movingobjectposition.d);
+                BlockFace face = CraftBlock.notchToBlockFace(movingobjectposition.face);
+                phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), block, face);
+                this.world.getServer().getPluginManager().callEvent(phe);
+                // Tsunami end
+            }
+
+            if (!phe.isCancelled() || phe.getHitEntity() == null) { // Tsunami
+                for (int k = 0; k < 8; ++k) {
+                    this.world.a("snowballpoof", this.locX, this.locY, this.locZ, 0.0D, 0.0D, 0.0D);
                 }
+                this.die();
             }
-            // CraftBukkit end
-
-            for (int k = 0; k < 8; ++k) {
-                this.world.a("snowballpoof", this.locX, this.locY, this.locZ, 0.0D, 0.0D, 0.0D);
-            }
-
-            this.die();
         }
 
         this.locX += this.motX;

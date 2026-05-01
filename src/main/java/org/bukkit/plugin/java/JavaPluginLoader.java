@@ -620,11 +620,31 @@ public class JavaPluginLoader implements PluginLoader
                     }
                 };
             case PLAYER_CHANGED_WORLD:
-                return new EventExecutor() {
-                    public void execute(Listener listener, Event event) {
+                return new EventExecutor()
+                {
+                    public void execute(Listener listener, Event event)
+                    {
                         ((PlayerListener) listener).onPlayerChangedWorld((PlayerChangedWorldEvent) event);
                     }
                 };
+            // Tsunami start - backport plugin messaging
+            case PLAYER_REGISTER_CHANNEL:
+                return new EventExecutor()
+                {
+                    public void execute(Listener listener, Event event)
+                    {
+                        ((PlayerListener) listener).onPlayerRegisterChannel((PlayerRegisterChannelEvent) event);
+                    }
+                };
+            case PLAYER_UNREGISTER_CHANNEL:
+                return new EventExecutor()
+                {
+                    public void execute(Listener listener, Event event)
+                    {
+                        ((PlayerListener) listener).onPlayerUnregisterChannel((PlayerUnregisterChannelEvent) event);
+                    }
+                };
+            // Tsunami end
 
             // Block Events
             case BLOCK_PHYSICS:

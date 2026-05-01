@@ -6,6 +6,7 @@ import com.legacyminecraft.poseidon.event.PlayerDeathEvent;
 import com.projectposeidon.api.PoseidonUUID;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import org.betamc.tsunami.Tsunami;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -248,7 +249,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         if (flag && !this.chunkCoordIntPairQueue.isEmpty()) {
             // Tsunami start - improve chunk sending
             WorldServer worldserver = this.getWorldServer();
-            while (!this.chunkCoordIntPairQueue.isEmpty()) {
+            for (int count = 0; !this.chunkCoordIntPairQueue.isEmpty() && count < Tsunami.config().networking().maxChunkPacketsPerTick(); count++) {
                 long coordPair = this.chunkCoordIntPairQueue.removeLong(0);
                 Chunk chunk = worldserver.chunkProviderServer.getChunkAt(LongHash.msw(coordPair), LongHash.lsw(coordPair));
 

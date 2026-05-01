@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.legacyminecraft.poseidon.event.PlayerReceivePacketEvent;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.network.PacketScheduledException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -14,6 +15,8 @@ import java.net.*;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 
 public class NetworkManager {
 
@@ -26,7 +29,9 @@ public class NetworkManager {
     public DataInputStream input; // Tsunami - private -> public
     public DataOutputStream output; // Tsunami - private -> public
     private boolean l = true;
-    private Queue<Packet> m = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
+    //private List m = Collections.synchronizedList(new ArrayList()); // Tsunami
+    private final AtomicLong readPackets = new AtomicLong(0L); // Tsunami
+    private long lastReadPackets = 0L; // Tsunami
     private Queue<Packet> highPriorityQueue = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
     private Queue<Packet> lowPriorityQueue = new ConcurrentLinkedQueue<>(); // Tsunami - ArrayList -> ConcurrentLinkedQueue
     private NetHandler p;
@@ -85,9 +90,14 @@ public class NetworkManager {
         // CraftBukkit end */
         this.s = new NetworkReaderThread(this, s + " read thread");
         this.r = new NetworkWriterThread(this, s + " write thread");
+    }
+
+    // Tsunami start - rewrite networking code
+    void startThreads() {
         this.s.start();
         this.r.start();
     }
+    // Tsunami end
 
     //Project Poseidon Start
     public void setSocketAddress(SocketAddress socketAddress) {
@@ -202,8 +212,9 @@ public class NetworkManager {
                 int i = packet.b();
 
                 aint[i] += packet.a() + 1;
-                this.m.add(packet);
                 flag = true;
+
+                handleReadPacket(packet); // Tsunami
             } else {
                 this.a("disconnect.endOfStream", new Object[0]);
             }
@@ -217,6 +228,29 @@ public class NetworkManager {
             return false;
         }
     }
+
+    // Tsunami start - rewrite networking code
+    private void handleReadPacket(Packet packet) {
+        this.readPackets.incrementAndGet();
+
+        NetHandler netHandler = this.p;
+        if (this.firePacketEvents && netHandler instanceof NetServerHandler) {
+            PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) netHandler).player.name, packet);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) return;
+            packet = event.getPacket();
+        }
+
+        if (packet == null) return;
+        try {
+            packet.a(netHandler);
+        } catch (PacketScheduledException e) {
+        } catch (Exception e) {
+            MinecraftServer.log.log(Level.WARNING, "Failed to handle packet: ", e);
+            netHandler.disconnect("Internal server error");
+        }
+    }
+    // Tsunami end
 
     private void a(Exception exception) {
         exception.printStackTrace();
@@ -255,12 +289,17 @@ public class NetworkManager {
     }
 
     public void b() {
-        boolean fast = PoseidonConfig.getInstance().getBoolean("settings.faster-packets.enabled", true);
-        if (this.x.get() > (fast ? 2097152 : 1048576)) {
+        // Tsunami start
+        long readPackets = this.readPackets.get();
+        long newPackets = readPackets - this.lastReadPackets;
+        this.lastReadPackets = readPackets;
+        // Tsunami end
+
+        if (this.x.get() > 2097152) { // Tsunami
             this.a("disconnect.overflow", new Object[0]);
         }
 
-        if (this.m.isEmpty()) {
+        if (newPackets == 0) { // Tsunami
             if (this.w++ == 1200) {
                 this.a("disconnect.timeout", new Object[0]);
             }
@@ -268,11 +307,9 @@ public class NetworkManager {
             this.w = 0;
         }
 
-        int i = (fast ? 1000 : 100);
-
-        //Poseidon - Packet spam detection
+        // Poseidon start - Packet spam detection
         if (spamDetection) {
-            if (this.m.size() > threshold) {
+            if (newPackets > threshold) { // Tsunami
                 String playerUsername = "Unknown";
                 if (this.p instanceof NetServerHandler) {
                     playerUsername = ((NetServerHandler) this.p).player.name;
@@ -280,39 +317,15 @@ public class NetworkManager {
                 } else {
                     this.a("disconnect.spam", new Object[0]);
                 }
-                System.out.println("[Poseidon] Player " + playerUsername + " has been kicked for packet spamming. The queue size was " + this.m.size() + " and the threshold was " + threshold + ".");
+                System.out.println("[Poseidon] Player " + playerUsername + " has been kicked for packet spamming. The queue size was " + newPackets + " and the threshold was " + threshold + ".");
             }
         }
+        // Poseidon end
 
-//        if(this.m.size() > 1000) {
-//            String playerUsername = "Unknown";
-//            if (this.p instanceof NetServerHandler) {
-//                System.out.println("The packet queue size is " + this.m.size() + " for player " + ((NetServerHandler) this.p).player.name + ".");
-//            }
-//        }
-
-        Packet packet;
-        while ((packet = this.m.poll()) != null && i-- >= 0) { // Tsunami - poll
-            //Poseidon Start - Packet Receive Event
-            if (firePacketEvents && this.p instanceof NetServerHandler) {
-                PlayerReceivePacketEvent event = new PlayerReceivePacketEvent(((NetServerHandler) this.p).player.name, packet);
-                Bukkit.getPluginManager().callEvent(event);
-                packet = event.getPacket();
-                if (!event.isCancelled()) {
-                    packet.a(this.p);
-                }
-
-            } else {
-                packet.a(this.p);
-            }
-
-            //Poseidon End
-
-//            packet.a(this.p);
-        }
+        // Tsunami - moved packet handling to handleReadPacket()
 
         this.a();
-        if (this.t && this.m.isEmpty()) {
+        if (this.t && newPackets == 0) { // Tsunami
             this.p.a(this.u, this.v);
         }
     }

@@ -2,6 +2,7 @@ package org.bukkit.block;
 
 import org.bukkit.entity.CreatureType;
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.persistence.PersistentDataHolder;
 
 /**
  * Represents a creature spawner.
@@ -9,7 +10,7 @@ import org.bukkit.metadata.Metadatable;
  * @author sk89q
  * @author Cogito
  */
-public interface CreatureSpawner extends BlockState, Metadatable { // Tsunami - extends Metadatable
+public interface CreatureSpawner extends BlockState, PersistentDataHolder, Metadatable { // Tsunami - extends PersistentDataHolder, Metadatable
 
     /**
      * Get the spawner's creature type.

@@ -1,13 +1,14 @@
 package org.bukkit.block;
 
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.persistence.PersistentDataHolder;
 
 /**
  * Represents a dispenser.
  *
  * @author sk89q
  */
-public interface Dispenser extends BlockState, ContainerBlock, Metadatable { // Tsunami - extends Metadatable
+public interface Dispenser extends BlockState, ContainerBlock, PersistentDataHolder, Metadatable { // Tsunami - extends PersistentDataHolder, Metadatable
 
     /**
      * Attempts to dispense the contents of this block<br />

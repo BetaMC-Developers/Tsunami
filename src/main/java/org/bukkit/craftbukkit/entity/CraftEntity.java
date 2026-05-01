@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
@@ -281,6 +282,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
         return result;
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer getPersistentDataContainer() {
+        return getHandle().container;
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

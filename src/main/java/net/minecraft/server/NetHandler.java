@@ -6,6 +6,16 @@ public abstract class NetHandler {
 
     public abstract boolean c();
 
+    // Tsunami start - rewrite networking code
+    public abstract void a();
+
+    public abstract boolean disconnected();
+
+    public abstract void disconnect(String s);
+
+    public abstract NetworkManager getNetManager();
+    // Tsunami end
+
     public void a(Packet51MapChunk packet51mapchunk) {}
 
     public void a(Packet packet) {}
@@ -211,4 +221,10 @@ public abstract class NetHandler {
     public void a(Packet61 packet61) {
         this.a((Packet) packet61);
     }
+
+    // Tsunami start - backport plugin messaging
+    public void a(Packet250PluginMessage packet250pluginmessage) {
+        this.a((Packet) packet250pluginmessage);
+    }
+    // Tsunami end
 }

@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -148,123 +150,138 @@ public class EntityEgg extends Entity {
         }
 
         if (movingobjectposition != null) {
+            ProjectileHitEvent phe;
+
             // CraftBukkit start
-            ProjectileHitEvent phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity());
-            this.world.getServer().getPluginManager().callEvent(phe);
-
             if (movingobjectposition.entity != null) {
-                boolean stick;
-                if (movingobjectposition.entity instanceof EntityLiving) {
-                    org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
-                    Projectile projectile = (Projectile) this.getBukkitEntity();
+                // Tsunami start - improve ProjectileHitEvent
+                phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), movingobjectposition.entity.getBukkitEntity());
+                this.world.getServer().getPluginManager().callEvent(phe);
+                if (!phe.isCancelled()) {
+                    // Tsunami end
 
-                    // TODO @see EntityArrow#162
-                    EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 0);
+                    boolean stick;
+                    if (movingobjectposition.entity instanceof EntityLiving) {
+                        org.bukkit.entity.Entity damagee = movingobjectposition.entity.getBukkitEntity();
+                        Projectile projectile = (Projectile) this.getBukkitEntity();
+
+                        // TODO @see EntityArrow#162
+                        EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(projectile, damagee, EntityDamageEvent.DamageCause.PROJECTILE, 0);
+                        this.world.getServer().getPluginManager().callEvent(event);
+
+                        if (event.isCancelled()) {
+                            stick = !projectile.doesBounce();
+                        } else {
+                            // this function returns if the egg should stick in or not, i.e. !bounce
+                            stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
+                        }
+                    } else {
+                        stick = movingobjectposition.entity.damageEntity(this.thrower, 0);
+                    }
+
+                    if (stick) {
+                        ; // Original code does nothing *yet*
+                    }
+                }
+            } else {
+                // Tsunami start - improve ProjectileHitEvent
+                org.bukkit.block.Block block = this.world.getWorld().getBlockAt(movingobjectposition.b, movingobjectposition.c, movingobjectposition.d);
+                BlockFace face = CraftBlock.notchToBlockFace(movingobjectposition.face);
+                phe = new ProjectileHitEvent((Projectile) this.getBukkitEntity(), block, face);
+                this.world.getServer().getPluginManager().callEvent(phe);
+                // Tsunami end
+            }
+
+            if (!phe.isCancelled() || phe.getHitEntity() == null) { // Tsunami
+                boolean hatching = !this.world.isStatic && this.random.nextInt(8) == 0;
+                int numHatching = (this.random.nextInt(32) == 0) ? 4 : 1;
+                if (!hatching) {
+                    numHatching = 0;
+                }
+
+                CreatureType hatchingType = CreatureType.CHICKEN;
+
+                if (this.thrower instanceof EntityPlayer) {
+                    org.bukkit.entity.Player player = (this.thrower == null) ? null : (org.bukkit.entity.Player) this.thrower.getBukkitEntity();
+
+                    PlayerEggThrowEvent event = new PlayerEggThrowEvent(player, (org.bukkit.entity.Egg) this.getBukkitEntity(), hatching, (byte) numHatching, hatchingType);
                     this.world.getServer().getPluginManager().callEvent(event);
 
-                    if (event.isCancelled()) {
-                        stick = !projectile.doesBounce();
-                    } else {
-                        // this function returns if the egg should stick in or not, i.e. !bounce
-                        stick = movingobjectposition.entity.damageEntity(this, event.getDamage());
-                    }
-                } else {
-                    stick = movingobjectposition.entity.damageEntity(this.thrower, 0);
+                    hatching = event.isHatching();
+                    numHatching = event.getNumHatches();
+                    hatchingType = event.getHatchType();
                 }
 
-                if (stick) {
-                    ; // Original code does nothing *yet*
-                }
-            }
+                if (hatching) {
+                    for (int k = 0; k < numHatching; k++) {
+                        Entity entity = null;
+                        switch (hatchingType) {
+                            case CHICKEN:
+                                entity = new EntityChicken(this.world);
+                                break;
+                            case COW:
+                                entity = new EntityCow(this.world);
+                                break;
+                            case CREEPER:
+                                entity = new EntityCreeper(this.world);
+                                break;
+                            case GHAST:
+                                entity = new EntityGhast(this.world);
+                                break;
+                            case GIANT:
+                                entity = new EntityGiantZombie(this.world);
+                                break;
+                            case PIG:
+                                entity = new EntityPig(this.world);
+                                break;
+                            case PIG_ZOMBIE:
+                                entity = new EntityPigZombie(this.world);
+                                break;
+                            case SHEEP:
+                                entity = new EntitySheep(this.world);
+                                break;
+                            case SKELETON:
+                                entity = new EntitySkeleton(this.world);
+                                break;
+                            case SPIDER:
+                                entity = new EntitySpider(this.world);
+                                break;
+                            case ZOMBIE:
+                                entity = new EntityZombie(this.world);
+                                break;
+                            case SQUID:
+                                entity = new EntitySquid(this.world);
+                                break;
+                            case SLIME:
+                                entity = new EntitySlime(this.world);
+                                break;
+                            case WOLF:
+                                entity = new EntityWolf(this.world);
+                                break;
+                            case MONSTER:
+                                entity = new EntityMonster(this.world);
+                                break;
+                            default:
+                                entity = new EntityChicken(this.world);
+                                break;
+                        }
 
-            boolean hatching = !this.world.isStatic && this.random.nextInt(8) == 0;
-            int numHatching = (this.random.nextInt(32) == 0) ? 4 : 1;
-            if (!hatching) {
-                numHatching = 0;
-            }
-
-            CreatureType hatchingType = CreatureType.CHICKEN;
-
-            if (this.thrower instanceof EntityPlayer) {
-                org.bukkit.entity.Player player = (this.thrower == null) ? null : (org.bukkit.entity.Player) this.thrower.getBukkitEntity();
-
-                PlayerEggThrowEvent event = new PlayerEggThrowEvent(player, (org.bukkit.entity.Egg) this.getBukkitEntity(), hatching, (byte) numHatching, hatchingType);
-                this.world.getServer().getPluginManager().callEvent(event);
-
-                hatching = event.isHatching();
-                numHatching = event.getNumHatches();
-                hatchingType = event.getHatchType();
-            }
-
-            if (hatching) {
-                for (int k = 0; k < numHatching; k++) {
-                    Entity entity = null;
-                    switch (hatchingType) {
-                        case CHICKEN:
-                            entity = new EntityChicken(this.world);
-                            break;
-                        case COW:
-                            entity = new EntityCow(this.world);
-                            break;
-                        case CREEPER:
-                            entity = new EntityCreeper(this.world);
-                            break;
-                        case GHAST:
-                            entity = new EntityGhast(this.world);
-                            break;
-                        case GIANT:
-                            entity = new EntityGiantZombie(this.world);
-                            break;
-                        case PIG:
-                            entity = new EntityPig(this.world);
-                            break;
-                        case PIG_ZOMBIE:
-                            entity = new EntityPigZombie(this.world);
-                            break;
-                        case SHEEP:
-                            entity = new EntitySheep(this.world);
-                            break;
-                        case SKELETON:
-                            entity = new EntitySkeleton(this.world);
-                            break;
-                        case SPIDER:
-                            entity = new EntitySpider(this.world);
-                            break;
-                        case ZOMBIE:
-                            entity = new EntityZombie(this.world);
-                            break;
-                        case SQUID:
-                            entity = new EntitySquid(this.world);
-                            break;
-                        case SLIME:
-                            entity = new EntitySlime(this.world);
-                            break;
-                        case WOLF:
-                            entity = new EntityWolf(this.world);
-                            break;
-                        case MONSTER:
-                            entity = new EntityMonster(this.world);
-                            break;
-                        default:
-                            entity = new EntityChicken(this.world);
-                            break;
+                        // The world we're spawning in accepts this creature
+                        boolean isAnimal = entity instanceof EntityAnimal || entity instanceof EntityWaterAnimal;
+                        if ((isAnimal && this.world.allowAnimals) || (!isAnimal && this.world.allowMonsters)) {
+                            entity.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, 0.0F);
+                            this.world.addEntity(entity, SpawnReason.EGG);
+                        }
+                        // CraftBukkit end
                     }
-
-                    // The world we're spawning in accepts this creature
-                    boolean isAnimal = entity instanceof EntityAnimal || entity instanceof EntityWaterAnimal;
-                    if ((isAnimal && this.world.allowAnimals) || (!isAnimal && this.world.allowMonsters)) {
-                        entity.setPositionRotation(this.locX, this.locY, this.locZ, this.yaw, 0.0F);
-                        this.world.addEntity(entity, SpawnReason.EGG);
-                    }
-                    // CraftBukkit end
                 }
-            }
 
-            for (int l = 0; l < 8; ++l) {
-                this.world.a("snowballpoof", this.locX, this.locY, this.locZ, 0.0D, 0.0D, 0.0D);
-            }
+                for (int l = 0; l < 8; ++l) {
+                    this.world.a("snowballpoof", this.locX, this.locY, this.locZ, 0.0D, 0.0D, 0.0D);
+                }
 
-            this.die();
+                this.die();
+            }
         }
 
         this.locX += this.motX;

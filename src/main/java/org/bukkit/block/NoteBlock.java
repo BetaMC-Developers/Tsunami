@@ -3,11 +3,12 @@ package org.bukkit.block;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.persistence.PersistentDataHolder;
 
 /**
  * Represents a note.
  */
-public interface NoteBlock extends BlockState, Metadatable { // Tsunami - extends Metadatable
+public interface NoteBlock extends BlockState, PersistentDataHolder, Metadatable { // Tsunami - extends PersistentDataHolder, Metadatable
 
     /**
      * Gets the note.

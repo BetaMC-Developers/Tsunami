@@ -20,6 +20,7 @@ import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
@@ -848,6 +849,12 @@ public class CraftWorld implements World {
             }
         }
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer getPersistentDataContainer() {
+        return getHandle().worldData.container;
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

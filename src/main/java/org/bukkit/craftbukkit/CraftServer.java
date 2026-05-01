@@ -21,6 +21,7 @@ import org.bukkit.craftbukkit.inventory.CraftRecipe;
 import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
 import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe;
 import org.bukkit.craftbukkit.map.CraftMapView;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.craftbukkit.scheduler.CraftScheduler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.world.WorldInitEvent;
@@ -33,8 +34,11 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.permissions.Permission;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.plugin.messaging.Messenger;
+import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitWorker;
 import org.bukkit.util.config.Configuration;
@@ -63,6 +67,7 @@ public final class CraftServer implements Server {
     private final String gameVersion = "b1.7.3";
     private final ServicesManager servicesManager = new SimpleServicesManager();
     private final BukkitScheduler scheduler;
+    private final Messenger messenger = new StandardMessenger(); // Tsunami
     private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
     private final PluginManager pluginManager;
     protected final MinecraftServer console;
@@ -71,7 +76,6 @@ public final class CraftServer implements Server {
     private final Configuration configuration;
     private final Yaml yaml = new Yaml(new SafeConstructor());
     private boolean shuttingdown = false;
-    private final List<String> hiddenCommands = new ArrayList<>(); //Project Poseidon - Create variable
 
     public CraftServer(MinecraftServer console, ServerConfigurationManager server) {
         this.console = console;
@@ -347,6 +351,12 @@ public final class CraftServer implements Server {
         return scheduler;
     }
 
+    // Tsunami start - backport plugin messaging
+    public Messenger getMessenger() {
+        return messenger;
+    }
+    // Tsunami end
+
     public ServicesManager getServicesManager() {
         return servicesManager;
     }
@@ -380,6 +390,23 @@ public final class CraftServer implements Server {
 
         return false;
     }
+
+    // Tsunami start - backport plugin messaging
+    public void sendPluginMessage(Plugin source, String channel, byte[] message) {
+        StandardMessenger.validatePluginMessage(getMessenger(), source, channel, message);
+        for (Player player : getOnlinePlayers()) {
+            player.sendPluginMessage(source, channel, message);
+        }
+    }
+
+    public Set<String> getListeningPluginChannels() {
+        Set<String> result = new HashSet<>();
+        for (Player player : getOnlinePlayers()) {
+            result.addAll(player.getListeningPluginChannels());
+        }
+        return result;
+    }
+    // Tsunami end
 
     public void reload() {
         loadConfig();
@@ -641,6 +668,12 @@ public final class CraftServer implements Server {
         worlds.put(world.getName().toLowerCase(), world);
     }
 
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer createPersistentDataContainer() {
+        return new CraftPersistentDataContainer();
+    }
+    // Tsunami end
+
     public Logger getLogger() {
         return MinecraftServer.log;
     }
@@ -861,6 +894,12 @@ public final class CraftServer implements Server {
     public boolean isShuttingdown() {
         return shuttingdown;
     }
+
+    // Tsunami start
+    public boolean isPrimaryThread() {
+        return console.isPrimaryThread();
+    }
+    // Tsunami end
 
     public void setShuttingdown(boolean shuttingdown) {
         this.shuttingdown = shuttingdown;

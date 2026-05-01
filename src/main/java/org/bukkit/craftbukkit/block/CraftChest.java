@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 
 public class CraftChest extends CraftBlockState implements Chest {
@@ -35,6 +36,12 @@ public class CraftChest extends CraftBlockState implements Chest {
 
         return result;
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer getPersistentDataContainer() {
+        return this.chest.container;
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

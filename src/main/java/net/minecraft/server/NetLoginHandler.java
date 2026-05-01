@@ -6,6 +6,7 @@ import com.projectposeidon.ConnectionType;
 import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.projectposeidon.johnymuffin.LoginProcessHandler;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.network.NetworkUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.CraftServer;
@@ -27,7 +28,7 @@ public class NetLoginHandler extends NetHandler {
 
     public static Logger a = Logger.getLogger("Minecraft");
     private static Random d = new Random();
-    public NetworkManager networkManager;
+    public final NetworkManager networkManager; // Tsunami - final
     public boolean c = false;
     private MinecraftServer server;
     private int f = 0;
@@ -51,8 +52,8 @@ public class NetLoginHandler extends NetHandler {
         this.server = minecraftserver;
         this.networkManager = new NetworkManager(socket, s, this);
         this.networkManager.f = 0;
-        
         this.msgKickShutdown = PoseidonConfig.getInstance().getConfigString("message.kick.shutdown");
+        this.networkManager.startThreads(); // Tsunami
     }
 
     // CraftBukkit start
@@ -74,16 +75,29 @@ public class NetLoginHandler extends NetHandler {
         }
     }
 
+    // Tsunami start
+    public boolean disconnected() {
+        return this.c;
+    }
+    // Tsunami end
+
     public void disconnect(String s) {
         try {
             a.info("Disconnecting " + this.b() + ": " + s);
-            this.networkManager.queue(new Packet255KickDisconnect(s));
+            String kickReason = s.substring(0, Math.min(s.length(), 100)); // Tsunami - truncate to 100 characters
+            this.networkManager.queue(new Packet255KickDisconnect(kickReason));
             this.networkManager.d();
             this.c = true;
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
+
+    // Tsunami start
+    public NetworkManager getNetManager() {
+        return this.networkManager;
+    }
+    // Tsunami end
 
     public void a(Packet2Handshake packet2handshake) {
         if (this.server.onlineMode) {
@@ -99,6 +113,8 @@ public class NetLoginHandler extends NetHandler {
     }
 
     public void a(Packet1Login packet1login) {
+        NetworkUtil.ensureOnMainThread(packet1login, this, this.server); // Tsunami
+
         if (receivedLoginPacket) {
             this.disconnect("Multiple login packets received.");
             return;
@@ -245,7 +261,6 @@ public class NetLoginHandler extends NetHandler {
 
         this.networkManager.d();
         this.networkManager.socket.close();
-        this.server.networkListenThread.b(this);
         this.c = true;
     }
     // Tsunami end
@@ -269,6 +284,7 @@ public class NetLoginHandler extends NetHandler {
             //Poseidon End
             netserverhandler.sendPacket(new Packet1Login("", entityplayer.id, worldserver.getSeed(), (byte) worldserver.worldProvider.dimension));
             netserverhandler.sendPacket(new Packet6SpawnPosition(chunkcoordinates.x, chunkcoordinates.y, chunkcoordinates.z));
+            netserverhandler.getPlayer().sendSupportedChannels(); // Tsunami
             this.server.serverConfigurationManager.a(entityplayer, worldserver);
             // this.server.serverConfigurationManager.sendAll(new Packet3Chat("\u00A7e" + entityplayer.name + " joined the game."));  // CraftBukkit - message moved to join event
             this.server.serverConfigurationManager.c(entityplayer);

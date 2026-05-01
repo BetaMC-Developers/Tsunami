@@ -10,6 +10,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Random;
@@ -54,6 +55,12 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
 
         return result;
     }
+
+    // Tsunami start - PersistentDataContainer API
+    public PersistentDataContainer getPersistentDataContainer() {
+        return this.dispenser.container;
+    }
+    // Tsunami end
 
     // Tsunami start
     public void setMetadata(Plugin owningPlugin, String key, MetadataValue value) {

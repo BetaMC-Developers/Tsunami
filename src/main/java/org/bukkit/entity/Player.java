@@ -5,6 +5,7 @@ import net.minecraft.server.Packet;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.map.MapView;
+import org.bukkit.plugin.messaging.PluginMessageRecipient;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -12,7 +13,7 @@ import java.util.UUID;
 /**
  * Represents a player, connected or not
  */
-public interface Player extends HumanEntity, CommandSender, OfflinePlayer {
+public interface Player extends HumanEntity, CommandSender, OfflinePlayer, PluginMessageRecipient { // Tsunami - extends PluginMessageRecipient
     /**
      * Gets the "friendly" name to display of this player. This may include color.
      * <p>

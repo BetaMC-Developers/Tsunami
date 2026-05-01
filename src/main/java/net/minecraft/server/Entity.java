@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.metadata.NBTMetadataConvert;
+import org.bukkit.craftbukkit.persistence.CraftPersistentDataContainer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -101,6 +102,7 @@ public abstract class Entity {
     public boolean bK;
     public boolean airBorne;
     public UUID uniqueId = UUID.randomUUID(); // CraftBukkit
+    public final CraftPersistentDataContainer container = new CraftPersistentDataContainer(); // Tsunami
     public final Map<String, MetadataValue> metadataStore = new HashMap<>(); // Tsunami
 
     public Entity(World world) {
@@ -928,6 +930,7 @@ public abstract class Entity {
         nbttagcompound.setLong("UUIDMost", this.uniqueId.getMostSignificantBits());
         // CraftBukkit end
         this.b(nbttagcompound);
+        nbttagcompound.a(CraftPersistentDataContainer.TAG_KEY, this.container.asCompound()); // Tsunami - PersistentDataContainer API
         nbttagcompound.a("CustomMetadata", NBTMetadataConvert.metadataToCompound(metadataStore)); // Tsunami
     }
 
@@ -1014,6 +1017,11 @@ public abstract class Entity {
             this.spawnIn(bworld == null ? null : ((org.bukkit.craftbukkit.CraftWorld) bworld).getHandle());
         }
         // CraftBukkit end
+
+        // Tsunami - PersistentDataContainer API
+        CraftPersistentDataContainer container = new CraftPersistentDataContainer(nbttagcompound.k(CraftPersistentDataContainer.TAG_KEY));
+        container.copyTo(this.container, true);
+        // Tsunami end
 
         // Tsunami start
         NBTTagCompound metadata = nbttagcompound.k("CustomMetadata");
