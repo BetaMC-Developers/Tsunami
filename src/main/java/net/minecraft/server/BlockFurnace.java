@@ -47,7 +47,11 @@ public class BlockFurnace extends BlockContainer {
                 b0 = 4;
             }
 
-            world.setData(i, j, k, b0);
+            // Tsunami start - fix recursive physics updates caused by furnaces
+            //world.setData(i, j, k, b0);
+            world.setRawData(i, j, k, b0);
+            world.notify(i, j, k);
+            // Tsunami end
         }
     }
 
@@ -79,7 +83,11 @@ public class BlockFurnace extends BlockContainer {
         }
 
         c = false;
-        world.setData(i, j, k, l);
+        // Tsunami start - fix recursive physics updates caused by furnaces
+        //world.setData(i, j, k, l);
+        world.setRawData(i, j, k, l);
+        world.notify(i, j, k);
+        // Tsunami end
         tileentity.j();
         world.setTileEntity(i, j, k, tileentity);
     }
