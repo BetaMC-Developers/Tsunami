@@ -241,18 +241,18 @@ public class Chunk {
 
             this.b[i << 11 | k << 7 | j] = (byte) (b0 & 255);
             sectionUpdate(j >> 4, k1, b0 & 255); // Tsunami
-            if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.transmutation-fix.enabled", true)) {
-                this.e.a(i, j, k, i1);
-                if (k1 != 0 && !this.world.isStatic) {
-                    Block.byId[k1].remove(this.world, l1, j, i2);
-                }
-            } else {
-                if (k1 != 0 && !this.world.isStatic) {
-                    Block.byId[k1].remove(this.world, l1, j, i2);
-                }
-                this.e.a(i, j, k, i1);
+            if (k1 != 0 && !this.world.isStatic) {
+                Block.byId[k1].remove(this.world, l1, j, i2);
             }
 
+            // Tsunami start - improve liquid piston transmutation fix
+            if (PoseidonConfig.getInstance().getConfigBoolean("world.settings.pistons.transmutation-fix.enabled", true)
+                    && getTypeId(i, j, k) != l) {
+                return false;
+            }
+            // Tsunami end
+
+            this.e.a(i, j, k, i1);
             if (!this.world.worldProvider.e) {
                 if (Block.q[b0 & 255] != 0) {
                     if (j >= j1) {
