@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.craftbukkit.block.CraftBlockState;
+import org.bukkit.event.block.BlockGrowEvent;
+
 import java.util.Random;
 
 public class BlockCrops extends BlockFlower {
@@ -26,8 +29,16 @@ public class BlockCrops extends BlockFlower {
                 float f = this.h(world, i, j, k);
 
                 if (random.nextInt((int) (100.0F / f)) == 0) {
-                    ++l;
-                    world.setData(i, j, k, l);
+                    // Poseidon start
+                    CraftBlockState newState = (CraftBlockState) world.getWorld().getBlockAt(i, j, k).getState();
+                    newState.setData((byte) ++l);
+
+                    BlockGrowEvent event = new BlockGrowEvent(newState.getBlock(), newState);
+                    world.getServer().getPluginManager().callEvent(event);
+                    if (!event.isCancelled()) {
+                        newState.update(true);
+                    }
+                    // Poseidon end
                 }
             }
         }

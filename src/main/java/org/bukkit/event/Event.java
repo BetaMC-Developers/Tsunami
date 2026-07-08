@@ -468,6 +468,12 @@ public abstract class Event implements Serializable {
          * @see org.bukkit.event.block.PistonRetractEvent
          */
         BLOCK_PISTON_RETRACT(Category.BLOCK),
+        // Tsunami start
+        /**
+         * Called when a block grows naturally in the world.
+         */
+        BLOCK_GROW(Category.BLOCK),
+        // Tsunami end
 
         /**
          * INVENTORY EVENTS
@@ -614,6 +620,12 @@ public abstract class Event implements Serializable {
          * @see org.bukkit.event.world.PortalCreateEvent
          */
         PORTAL_CREATE(Category.WORLD),
+        // Tsunami start
+        /**
+         * Called when a tree grows in the world, naturally or when using bonemeal.
+         */
+        TREE_GROW(Category.WORLD),
+        // Tsunami end
 
         /**
          * ENTITY EVENTS

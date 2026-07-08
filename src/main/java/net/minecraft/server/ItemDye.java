@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import org.bukkit.entity.Player;
+
 public class ItemDye extends Item {
 
     public static final String[] a = new String[] { "black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};
@@ -17,7 +19,8 @@ public class ItemDye extends Item {
 
             if (i1 == Block.SAPLING.id) {
                 if (!world.isStatic) {
-                    ((BlockSapling) Block.SAPLING).b(world, i, j, k, world.random);
+                    // Tsunami - pass player
+                    ((BlockSapling) Block.SAPLING).b(world, i, j, k, world.random, (Player) entityhuman.getBukkitEntity());
                     --itemstack.count;
                 }
 

@@ -1,5 +1,8 @@
 package net.minecraft.server;
 
+import org.bukkit.block.BlockState;
+import org.bukkit.event.block.BlockGrowEvent;
+
 import java.util.Random;
 
 public class BlockReed extends Block {
@@ -25,7 +28,16 @@ public class BlockReed extends Block {
                 int i1 = world.getData(i, j, k);
 
                 if (i1 == 15) {
-                    world.setTypeId(i, j + 1, k, this.id);
+                    // Tsunami start
+                    BlockState newState = world.getWorld().getBlockAt(i, j + 1, k).getState();
+                    newState.setTypeId(this.id);
+
+                    BlockGrowEvent event = new BlockGrowEvent(newState.getBlock(), newState);
+                    world.getServer().getPluginManager().callEvent(event);
+                    if (!event.isCancelled()) {
+                        newState.update(true);
+                    }
+                    // Tsunami end
                     world.setData(i, j, k, 0);
                 } else {
                     world.setData(i, j, k, i1 + 1);
