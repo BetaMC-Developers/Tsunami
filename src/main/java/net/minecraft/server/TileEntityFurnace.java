@@ -153,7 +153,11 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
                     if (this.items[1] != null) {
                         --this.items[1].count;
                         if (this.items[1].count == 0) {
-                            this.items[1] = null;
+                            // Convert Lava bucket to an empty bucket instead of straight deletion
+                            if (this.items[1].id == Item.LAVA_BUCKET.id)
+                                this.items[1] = new ItemStack(Item.BUCKET.id, 1, 0);
+                            else
+                                this.items[1] = null;
                         }
                     }
                 }
@@ -225,7 +229,11 @@ public class TileEntityFurnace extends TileEntity implements IInventory {
 
             --this.items[0].count;
             if (this.items[0].count <= 0) {
-                this.items[0] = null;
+                // Convert to empty bucket instead of emptying slot
+                if (this.items[0].id == Item.LAVA_BUCKET.id)
+                    this.items[0] = new ItemStack(Item.BUCKET.id, 1, 0);
+                else
+                    this.items[0] = null;
             }
         }
     }
