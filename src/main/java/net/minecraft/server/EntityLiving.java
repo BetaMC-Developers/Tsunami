@@ -80,24 +80,8 @@ public abstract class EntityLiving extends Entity {
     protected void b() {}
 
     public boolean e(Entity entity) {
-        Vec3D source = Vec3D.create(this.locX, this.locY + (double) this.t(), this.locZ);
-
-        Vec3D[] checks = new Vec3D[]{
-                Vec3D.create(entity.locX, entity.locY + (double) entity.t(), entity.locZ),
-                Vec3D.create(entity.locX, entity.locY + (double) entity.t()/2, entity.locZ),
-                Vec3D.create(entity.locX, entity.locY, entity.locZ)
-        };
-
-        AxisAlignedBB box = entity.boundingBox.a(entity.m(), entity.m(), entity.m());
-
-        for( Vec3D dest : checks) {
-            if ( box.a(source) || box.a(dest, source) != null)
-                return true;
-        }
-
-        return false;
+        return this.world.a(Vec3D.create(this.locX, this.locY + (double) this.t(), this.locZ), Vec3D.create(entity.locX, entity.locY + (double) entity.t(), entity.locZ)) == null;
     }
-
 
     public boolean l_() {
         return !this.dead;
