@@ -535,18 +535,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public boolean e(Entity entity) {
         Vec3D source = Vec3D.create(this.locX, this.locY + (double) this.t(), this.locZ);
 
-        Vec3D[] checks = new Vec3D[]{
-                Vec3D.create(entity.locX, entity.locY + (double) entity.t(), entity.locZ),
-                Vec3D.create(entity.locX, entity.locY + (double) entity.t()/2, entity.locZ),
-                Vec3D.create(entity.locX, entity.locY, entity.locZ),
-        };
-
-        for( Vec3D dest : checks) {
-            if ( RaycastBoundingBox.raycast(world, source, dest, entity) != null)// && box.a(dest, source) != null)
-                return true;
-        }
-
-        return false;
+        return RaycastBoundingBox.raycastDir(world, source, this.Z(), Math.max(5, this.f(entity)+1),  entity ) != null;
     }
     // Tsunami End
 
