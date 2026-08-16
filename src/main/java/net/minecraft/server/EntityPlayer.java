@@ -7,6 +7,7 @@ import com.projectposeidon.api.PoseidonUUID;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.betamc.tsunami.Tsunami;
+import org.betamc.tsunami.util.RaycastBoundingBox;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -527,6 +528,9 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         this.netServerHandler.sendPacket(new Packet3Chat(s1));
     }
 
+
+
+    // Tsunami start
     @Override
     public boolean e(Entity entity) {
         Vec3D source = Vec3D.create(this.locX, this.locY + (double) this.t(), this.locZ);
@@ -534,18 +538,17 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         Vec3D[] checks = new Vec3D[]{
                 Vec3D.create(entity.locX, entity.locY + (double) entity.t(), entity.locZ),
                 Vec3D.create(entity.locX, entity.locY + (double) entity.t()/2, entity.locZ),
-                Vec3D.create(entity.locX, entity.locY, entity.locZ)
+                Vec3D.create(entity.locX, entity.locY, entity.locZ),
         };
 
-        AxisAlignedBB box = entity.boundingBox.a(entity.m(), entity.m(), entity.m());
-
         for( Vec3D dest : checks) {
-            if ( box.a(source) || box.a(dest, source) != null)
+            if ( RaycastBoundingBox.raycast(world, source, dest, entity) != null)// && box.a(dest, source) != null)
                 return true;
         }
 
         return false;
     }
+    // Tsunami End
 
     // CraftBukkit start
     public long timeOffset = 0;
