@@ -22,7 +22,7 @@ public class RaycastBoundingBox {
 
             int data = world.getData((int)step.a, (int)step.b, (int)step.c);
 
-            if (block != null && block.a(data, true))
+            if (block != null && block.a(data, false))
                 return null;
 
             if (boundingBox.a(step))
